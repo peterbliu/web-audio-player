@@ -1,0 +1,39 @@
+# ================================
+# macOS System Files
+# ================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.DocumentRevisions-V100
+.fseventsd
+.VolumeIcon.icns
+
+# ================================
+# VS Code / Editors
+# ================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ================================
+# Logs & Temp Files
+# ================================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+tmp/
+temp/
+
+# ================================
+# Cloudflare / Build / Extra
+# ================================
+node_modules/
+.dist/
+.build/
+.env
+.env.local
