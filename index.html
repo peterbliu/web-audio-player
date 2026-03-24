@@ -285,7 +285,6 @@
     <div class="container">
       <div class="title">
         高质量变速音频播放器 | Audioplayer with hi-quality speed-control
-        0.5x-1.5x
       </div>
 
       <div class="upload-area" id="uploadArea">
@@ -388,7 +387,7 @@
 
       function addFiles(fileList) {
         const audioFiles = Array.from(fileList).filter((file) =>
-          file.type.startsWith("audio/")
+          file.type.startsWith("audio/"),
         );
         if (!audioFiles.length) return;
 
@@ -547,7 +546,7 @@
                   </button>
                 </span>
               </div>
-            `
+            `,
           )
           .join("");
 
@@ -563,12 +562,14 @@
           });
         });
 
-        trackList.querySelectorAll("[data-delete-track-id]").forEach((button) => {
-          button.addEventListener("click", (event) => {
-            event.stopPropagation();
-            deleteTrack(button.dataset.deleteTrackId);
+        trackList
+          .querySelectorAll("[data-delete-track-id]")
+          .forEach((button) => {
+            button.addEventListener("click", (event) => {
+              event.stopPropagation();
+              deleteTrack(button.dataset.deleteTrackId);
+            });
           });
-        });
 
         lucide.createIcons();
       }
@@ -636,7 +637,7 @@
               ">": "&gt;",
               '"': "&quot;",
               "'": "&#39;",
-            })[char]
+            })[char],
         );
       }
 
