@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>音频播放器</title>
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <style>
       * {
         box-sizing: border-box;
@@ -53,6 +54,11 @@
       .upload-area:hover {
         border-color: #0071e3;
         background: #f0f7ff;
+      }
+
+      .upload-area.dragover {
+        border-color: #0071e3;
+        background: #eaf4ff;
       }
 
       .upload-area input {
@@ -110,6 +116,12 @@
         justify-content: center;
       }
 
+      .ctrl-btn svg,
+      .play-btn svg {
+        width: 20px;
+        height: 20px;
+      }
+
       .play-btn {
         width: 50px;
         height: 50px;
@@ -152,6 +164,120 @@
         color: #666;
         text-align: center;
       }
+
+      .playlist {
+        margin-top: 24px;
+      }
+
+      .playlist-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #222;
+        margin-bottom: 12px;
+      }
+
+      .playlist-empty {
+        color: #777;
+        font-size: 14px;
+        padding: 14px 16px;
+        border: 1px dashed #d6dce5;
+        border-radius: 12px;
+        background: #fafbfc;
+      }
+
+      .track-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .track-item {
+        width: 100%;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        border-radius: 12px;
+        padding: 14px 16px;
+        cursor: pointer;
+        text-align: left;
+        transition:
+          border-color 0.2s,
+          background 0.2s,
+          transform 0.2s;
+      }
+
+      .track-item:hover {
+        border-color: #0071e3;
+        background: #f7fbff;
+      }
+
+      .track-item.active {
+        border-color: #0071e3;
+        background: #eef6ff;
+      }
+
+      .track-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .track-info {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .track-name {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #1f2937;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .track-meta {
+        display: block;
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 4px;
+      }
+
+      .delete-btn {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: transparent;
+        color: #dc2626;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        flex-shrink: 0;
+      }
+
+      .delete-btn:hover {
+        background: #fee2e2;
+      }
+
+      .delete-btn svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      @media (max-width: 640px) {
+        body {
+          margin: 20px auto;
+          padding: 12px;
+        }
+
+        .container {
+          width: 100%;
+          padding: 20px;
+        }
+      }
     </style>
   </head>
 
@@ -163,11 +289,11 @@
       </div>
 
       <div class="upload-area" id="uploadArea">
-        <p>点击或拖拽音频文件到这里 upload or drop audio file here</p>
+        <p>点击或拖拽音频文件到这里 upload or drop audio files here</p>
         <p style="font-size: 12px; color: #888; margin-top: 8px">
-          支持 mp3 / wav / m4a / ogg
+          支持一次添加多个文件 mp3 / wav / m4a / ogg
         </p>
-        <input type="file" id="fileInput" accept="audio/*" />
+        <input type="file" id="fileInput" accept="audio/*" multiple />
       </div>
 
       <div class="player" id="player">
@@ -182,9 +308,15 @@
         </div>
 
         <div class="controls">
-          <button class="ctrl-btn" id="toBeginBtn">◄◄</button>
-          <button class="play-btn" id="playBtn">▶</button>
-          <button class="ctrl-btn" id="toEndBtn">►►</button>
+          <button class="ctrl-btn" id="toBeginBtn" aria-label="回到开头">
+            <i data-lucide="skip-back"></i>
+          </button>
+          <button class="play-btn" id="playBtn" aria-label="播放">
+            <i data-lucide="play"></i>
+          </button>
+          <button class="ctrl-btn" id="toEndBtn" aria-label="跳到结尾">
+            <i data-lucide="skip-forward"></i>
+          </button>
         </div>
 
         <div class="speed-group">
@@ -201,12 +333,23 @@
           <button class="speed-btn" data-speed="1.5">1.5x</button>
         </div>
       </div>
+
+      <div class="playlist">
+        <div class="playlist-title">播放列表</div>
+        <div class="playlist-empty" id="playlistEmpty">
+          还没有音频文件，拖拽或上传多个文件后会自动加入列表。
+        </div>
+        <div class="track-list" id="trackList"></div>
+      </div>
     </div>
 
     <script>
       let sound = null;
       let isPlaying = false;
       let currentSpeed = 1.0;
+      let tracks = [];
+      let currentTrackId = null;
+      let progressFrame = null;
 
       const uploadArea = document.getElementById("uploadArea");
       const fileInput = document.getElementById("fileInput");
@@ -220,56 +363,107 @@
       const currentTimeEl = document.getElementById("current");
       const durationEl = document.getElementById("duration");
       const speedBtns = document.querySelectorAll(".speed-btn");
+      const trackList = document.getElementById("trackList");
+      const playlistEmpty = document.getElementById("playlistEmpty");
 
       uploadArea.addEventListener("click", () => fileInput.click());
 
-      uploadArea.addEventListener("dragover", (e) => e.preventDefault());
+      uploadArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadArea.classList.add("dragover");
+      });
+      uploadArea.addEventListener("dragleave", () => {
+        uploadArea.classList.remove("dragover");
+      });
       uploadArea.addEventListener("drop", (e) => {
         e.preventDefault();
-        const file = e.dataTransfer.files[0];
-        if (file?.type.startsWith("audio/")) loadAudio(file);
+        uploadArea.classList.remove("dragover");
+        addFiles(e.dataTransfer.files);
       });
 
       fileInput.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (file) loadAudio(file);
+        addFiles(e.target.files);
+        fileInput.value = "";
       });
 
-      function loadAudio(file) {
-        const url = URL.createObjectURL(file);
-        fileName.textContent = file.name;
-        uploadArea.style.display = "none";
+      function addFiles(fileList) {
+        const audioFiles = Array.from(fileList).filter((file) =>
+          file.type.startsWith("audio/")
+        );
+        if (!audioFiles.length) return;
+
+        const newTracks = audioFiles.map((file) => ({
+          id: `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`,
+          name: file.name,
+          size: formatFileSize(file.size),
+          url: URL.createObjectURL(file),
+        }));
+
+        tracks = [...tracks, ...newTracks];
+        renderPlaylist();
+
+        if (!currentTrackId && newTracks[0]) {
+          selectTrack(newTracks[0].id, false);
+        }
+      }
+
+      function selectTrack(trackId, autoPlay = true) {
+        const track = tracks.find((item) => item.id === trackId);
+        if (!track) return;
+
+        currentTrackId = track.id;
+        fileName.textContent = track.name;
         player.style.display = "block";
+        progress.style.width = "0%";
+        currentTimeEl.textContent = "0:00";
+        durationEl.textContent = "0:00";
 
-        if (sound) sound.unload();
+        const previousSound = sound;
+        if (previousSound) previousSound.unload();
+        isPlaying = false;
+        stopProgressLoop();
+        setPlayButton(false);
 
-        sound = new Howl({
-          src: [url],
+        const nextSound = new Howl({
+          src: [track.url],
           html5: true,
           rate: currentSpeed,
           onplay: () => {
+            if (sound !== nextSound) return;
             isPlaying = true;
-            playBtn.textContent = "❚❚";
-            requestAnimationFrame(updateProgress);
+            setPlayButton(true);
+            startProgressLoop();
           },
           onpause: () => {
+            if (sound !== nextSound) return;
             isPlaying = false;
-            playBtn.textContent = "▶";
+            stopProgressLoop();
+            setPlayButton(false);
           },
           onend: () => {
+            if (sound !== nextSound) return;
             isPlaying = false;
-            playBtn.textContent = "▶";
+            stopProgressLoop();
+            progress.style.width = "100%";
+            currentTimeEl.textContent = formatTime(nextSound.duration());
+            setPlayButton(false);
           },
           onload: () => {
-            durationEl.textContent = formatTime(sound.duration());
+            if (sound !== nextSound) return;
+            durationEl.textContent = formatTime(nextSound.duration());
+            if (autoPlay && !nextSound.playing()) nextSound.play();
           },
         });
+
+        sound = nextSound;
+
+        renderPlaylist();
       }
 
       playBtn.addEventListener("click", () => {
         if (!sound) return;
         if (isPlaying) sound.pause();
-        else sound.play();
+        else if (!sound.playing()) sound.play();
       });
 
       toBeginBtn.addEventListener("click", () => {
@@ -300,9 +494,22 @@
         if (!sound || !isPlaying) return;
         const dur = sound.duration();
         const cur = sound.seek();
+        if (!dur) return;
         progress.style.width = (cur / dur) * 100 + "%";
         currentTimeEl.textContent = formatTime(cur);
-        requestAnimationFrame(updateProgress);
+        progressFrame = requestAnimationFrame(updateProgress);
+      }
+
+      function startProgressLoop() {
+        stopProgressLoop();
+        progressFrame = requestAnimationFrame(updateProgress);
+      }
+
+      function stopProgressLoop() {
+        if (progressFrame !== null) {
+          cancelAnimationFrame(progressFrame);
+          progressFrame = null;
+        }
       }
 
       speedBtns.forEach((btn) => {
@@ -314,11 +521,126 @@
         });
       });
 
+      function renderPlaylist() {
+        playlistEmpty.style.display = tracks.length ? "none" : "block";
+        trackList.innerHTML = tracks
+          .map(
+            (track) => `
+              <div
+                class="track-item ${track.id === currentTrackId ? "active" : ""}"
+                data-track-id="${track.id}"
+                role="button"
+                tabindex="0"
+              >
+                <span class="track-row">
+                  <span class="track-info">
+                    <span class="track-name">${escapeHtml(track.name)}</span>
+                    <span class="track-meta">${track.size}</span>
+                  </span>
+                  <button
+                    class="delete-btn"
+                    data-delete-track-id="${track.id}"
+                    aria-label="删除 ${escapeHtml(track.name)}"
+                    type="button"
+                  >
+                    <i data-lucide="trash-2"></i>
+                  </button>
+                </span>
+              </div>
+            `
+          )
+          .join("");
+
+        trackList.querySelectorAll(".track-item").forEach((button) => {
+          button.addEventListener("click", () => {
+            selectTrack(button.dataset.trackId, true);
+          });
+          button.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              selectTrack(button.dataset.trackId, true);
+            }
+          });
+        });
+
+        trackList.querySelectorAll("[data-delete-track-id]").forEach((button) => {
+          button.addEventListener("click", (event) => {
+            event.stopPropagation();
+            deleteTrack(button.dataset.deleteTrackId);
+          });
+        });
+
+        lucide.createIcons();
+      }
+
+      function deleteTrack(trackId) {
+        const trackIndex = tracks.findIndex((track) => track.id === trackId);
+        if (trackIndex === -1) return;
+
+        const [removedTrack] = tracks.splice(trackIndex, 1);
+        URL.revokeObjectURL(removedTrack.url);
+
+        if (currentTrackId === trackId) {
+          if (sound) {
+            sound.unload();
+            sound = null;
+          }
+          isPlaying = false;
+          currentTrackId = null;
+          stopProgressLoop();
+          setPlayButton(false);
+          progress.style.width = "0%";
+          currentTimeEl.textContent = "0:00";
+          durationEl.textContent = "0:00";
+          fileName.textContent = "";
+          player.style.display = tracks.length ? "block" : "none";
+
+          const fallbackTrack = tracks[trackIndex] || tracks[trackIndex - 1];
+          if (fallbackTrack) {
+            selectTrack(fallbackTrack.id, false);
+            return;
+          }
+        }
+
+        renderPlaylist();
+      }
+
+      function setPlayButton(playing) {
+        playBtn.setAttribute("aria-label", playing ? "暂停" : "播放");
+        playBtn.innerHTML = playing
+          ? '<i data-lucide="pause"></i>'
+          : '<i data-lucide="play"></i>';
+        lucide.createIcons();
+      }
+
       function formatTime(seconds) {
         const min = Math.floor(seconds / 60);
         const sec = Math.floor(seconds % 60);
         return `${min}:${sec.toString().padStart(2, "0")}`;
       }
+
+      function formatFileSize(size) {
+        if (size < 1024 * 1024) {
+          return `${(size / 1024).toFixed(1)} KB`;
+        }
+        return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+      }
+
+      function escapeHtml(text) {
+        return text.replace(
+          /[&<>"']/g,
+          (char) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[char]
+        );
+      }
+
+      lucide.createIcons();
     </script>
   </body>
 </html>
