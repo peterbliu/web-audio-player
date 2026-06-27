@@ -938,9 +938,10 @@
           });
         } else {
           const baseUrl = new URL("vendor/ffmpeg/", window.location.href).href;
+          const coreBaseUrl = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd";
           await ffmpeg.load({
             coreURL: `${baseUrl}ffmpeg-core.js`,
-            wasmURL: `${baseUrl}ffmpeg-core.wasm`,
+            wasmURL: `${coreBaseUrl}/ffmpeg-core.wasm`,
             workerURL: `${baseUrl}ffmpeg-core.worker.js`,
           });
         }
