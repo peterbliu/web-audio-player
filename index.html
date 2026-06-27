@@ -139,18 +139,19 @@
       .speed-group {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 6px;
         justify-content: center;
         margin-top: 16px;
       }
 
       .speed-btn {
-        padding: 6px 10px;
+        min-width: 48px;
+        padding: 5px 8px;
         border-radius: 8px;
         border: 1px solid #ddd;
         background: white;
         cursor: pointer;
-        font-size: 14px;
+        font-size: 12px;
       }
 
       .speed-btn.active {
@@ -428,10 +429,15 @@
 
         <div class="speed-group">
           <button class="speed-btn" data-speed="0.5">0.5x</button>
+          <button class="speed-btn" data-speed="0.55">0.55x</button>
           <button class="speed-btn" data-speed="0.6">0.6x</button>
+          <button class="speed-btn" data-speed="0.65">0.65x</button>
           <button class="speed-btn" data-speed="0.7">0.7x</button>
+          <button class="speed-btn" data-speed="0.75">0.75x</button>
           <button class="speed-btn" data-speed="0.8">0.8x</button>
+          <button class="speed-btn" data-speed="0.85">0.85x</button>
           <button class="speed-btn" data-speed="0.9">0.9x</button>
+          <button class="speed-btn" data-speed="0.95">0.95x</button>
           <button class="speed-btn active" data-speed="1.0">1.0x</button>
           <button class="speed-btn" data-speed="1.1">1.1x</button>
           <button class="speed-btn" data-speed="1.2">1.2x</button>
@@ -458,6 +464,8 @@
                 <label for="exportFormat">格式 Format</label>
                 <select id="exportFormat">
                   <option value="wav">WAV</option>
+                  <option value="mp3-128">MP3 128k</option>
+                  <option value="mp3-192">MP3 192k</option>
                 </select>
               </div>
             </div>
@@ -490,7 +498,7 @@
         <div class="track-list" id="trackList"></div>
       </div>
 
-      <div class="version-label">v0.011</div>
+      <div class="version-label">v0.013</div>
     </div>
 
     <script>
@@ -518,6 +526,7 @@
       const trackList = document.getElementById("trackList");
       const playlistEmpty = document.getElementById("playlistEmpty");
       const exportMode = document.getElementById("exportMode");
+      const exportFormat = document.getElementById("exportFormat");
       const downloadBtn = document.getElementById("downloadBtn");
       const exportProgressBar = document.getElementById("exportProgressBar");
       const exportProgress = document.getElementById("exportProgress");
@@ -702,6 +711,9 @@
         });
       });
 
+      exportMode.addEventListener("change", updateExportHint);
+      exportFormat.addEventListener("change", updateExportHint);
+
       downloadBtn.addEventListener("click", async () => {
         const track = getCurrentTrack();
         if (!track || isExporting) return;
@@ -710,7 +722,7 @@
         setExportProgress(0);
 
         try {
-          if (exportMode.value === "live") {
+          if (exportMode.value === "live" && exportFormat.value === "wav") {
             await exportWithLivePlayback(track);
           } else {
             await exportWithFfmpegAtempo(track);
@@ -722,6 +734,20 @@
           setExportBusy(false);
         }
       });
+
+      function updateExportHint() {
+        if (exportFormat.value.startsWith("mp3")) {
+          setExportStatus("MP3 导出会自动使用 FFmpeg atempo，并应用当前选择的播放速度。");
+          return;
+        }
+
+        if (exportMode.value === "live") {
+          setExportStatus("默认使用浏览器实时 PCM 捕获导出 WAV，使用当前选择的播放速度。");
+          return;
+        }
+
+        setExportStatus("FFmpeg atempo 导出 WAV，可靠保留音高并应用当前速度。");
+      }
 
       async function exportWithLivePlayback(track) {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -834,8 +860,9 @@
       async function exportWithFfmpegAtempo(track) {
         setExportStatus("正在加载 FFmpeg WASM，首次使用会比较慢...");
         const ffmpeg = await getFfmpeg();
+        const settings = selectedExportSettings();
         const inputName = `input-${Date.now()}-${safeFileName(track.name)}`;
-        const outputName = `output-${Date.now()}.wav`;
+        const outputName = `output-${Date.now()}.${settings.extension}`;
 
         ffmpeg.on("progress", ({ progress }) => {
           const percent = Math.max(0, Math.min(100, Math.round(progress * 100)));
@@ -844,14 +871,15 @@
         });
 
         await ffmpeg.writeFile(inputName, await fetchFile(track.file));
-        setExportStatus(`FFmpeg atempo=${currentSpeed.toFixed(1)} 正在导出 WAV...`);
+        setExportStatus(
+          `FFmpeg atempo=${currentSpeed.toFixed(1)} 正在导出 ${settings.label}...`,
+        );
         await ffmpeg.exec([
           "-i",
           inputName,
           "-af",
           `atempo=${currentSpeed}`,
-          "-c:a",
-          "pcm_s16le",
+          ...settings.ffmpegArgs,
           outputName,
         ]);
 
@@ -859,10 +887,20 @@
         await ffmpeg.deleteFile(inputName);
         await ffmpeg.deleteFile(outputName);
 
-        const wavBlob = new Blob([data.buffer], { type: "audio/wav" });
-        downloadBlob(wavBlob, buildOutputName(track.name, currentSpeed, "wav", "atempo"));
+        const outputBlob = new Blob([data.buffer], { type: settings.mimeType });
+        downloadBlob(
+          outputBlob,
+          buildOutputName(
+            track.name,
+            currentSpeed,
+            settings.extension,
+            settings.nameSuffix,
+          ),
+        );
         setExportProgress(100);
-        setExportStatus(`完成 FFmpeg atempo export: ${currentSpeed.toFixed(1)}x WAV`);
+        setExportStatus(
+          `完成 FFmpeg atempo export: ${currentSpeed.toFixed(1)}x ${settings.label}`,
+        );
       }
 
       async function exportWithOfflinePlaybackRate(track) {
@@ -1049,6 +1087,36 @@
 
       function setExportStatus(text) {
         exportStatus.textContent = text;
+      }
+
+      function selectedExportSettings() {
+        if (exportFormat.value === "mp3-128") {
+          return {
+            extension: "mp3",
+            ffmpegArgs: ["-c:a", "libmp3lame", "-b:a", "128k"],
+            label: "MP3 128k",
+            mimeType: "audio/mpeg",
+            nameSuffix: "atempo_128k",
+          };
+        }
+
+        if (exportFormat.value === "mp3-192") {
+          return {
+            extension: "mp3",
+            ffmpegArgs: ["-c:a", "libmp3lame", "-b:a", "192k"],
+            label: "MP3 192k",
+            mimeType: "audio/mpeg",
+            nameSuffix: "atempo_192k",
+          };
+        }
+
+        return {
+          extension: "wav",
+          ffmpegArgs: ["-c:a", "pcm_s16le"],
+          label: "WAV",
+          mimeType: "audio/wav",
+          nameSuffix: "atempo",
+        };
       }
 
       function buildOutputName(name, speed, extension, mode) {
