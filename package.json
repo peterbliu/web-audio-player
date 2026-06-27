@@ -1,6 +1,6 @@
 {
   "name": "vario-speed-audio-tools",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "private": true,
   "scripts": {
     "dev": "python3 -m http.server 4111",

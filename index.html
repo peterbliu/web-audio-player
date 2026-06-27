@@ -66,14 +66,19 @@
       }
 
       .app-header {
-        display: grid;
-        grid-template-columns: 1fr auto;
+        position: relative;
+        display: flex;
         align-items: center;
-        gap: 12px;
+        justify-content: center;
+        min-height: 36px;
         margin-bottom: 20px;
       }
 
       .language-switcher {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
         display: inline-flex;
         align-items: center;
         white-space: nowrap;
@@ -571,11 +576,14 @@
         }
 
         .app-header {
-          grid-template-columns: 1fr;
+          min-height: 70px;
+          align-items: flex-start;
         }
 
         .language-switcher {
-          justify-content: flex-end;
+          top: auto;
+          bottom: 0;
+          transform: none;
         }
 
         .export-toolbar {
@@ -732,7 +740,7 @@
         <div class="track-list" id="trackList"></div>
       </div>
 
-      <div class="version-label">v0.023</div>
+      <div class="version-label">v0.024</div>
     </div>
 
     <script>
