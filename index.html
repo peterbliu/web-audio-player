@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>变速音频播放器</title>
+    <title>变速音频工具 | Vario-Speed Audio Tools</title>
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <style>
@@ -159,6 +159,100 @@
         border-color: #0071e3;
       }
 
+      .export-panel {
+        margin: 18px auto 0;
+        padding: 14px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #fafbfc;
+      }
+
+      .export-toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: end;
+      }
+
+      .export-fields {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        min-width: 160px;
+      }
+
+      .field label {
+        font-size: 12px;
+        color: #4b5563;
+      }
+
+      .field select {
+        min-height: 36px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #fff;
+        color: #111827;
+        padding: 6px 10px;
+        font-size: 14px;
+      }
+
+      .download-btn {
+        min-height: 36px;
+        border: none;
+        border-radius: 8px;
+        background: #0071e3;
+        color: #fff;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 8px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .download-btn:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+      }
+
+      .download-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .export-progress-bar {
+        width: 100%;
+        height: 8px;
+        margin-top: 12px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #e5e7eb;
+      }
+
+      .export-progress {
+        width: 0%;
+        height: 100%;
+        border-radius: inherit;
+        background: #10b981;
+        transition: width 0.2s ease;
+      }
+
+      .export-status {
+        min-height: 18px;
+        margin-top: 7px;
+        color: #4b5563;
+        font-size: 12px;
+      }
+
       .time {
         font-size: 12px;
         color: #666;
@@ -277,15 +371,22 @@
           width: 100%;
           padding: 20px;
         }
+
+        .export-toolbar {
+          grid-template-columns: 1fr;
+        }
+
+        .download-btn,
+        .field {
+          width: 100%;
+        }
       }
     </style>
   </head>
 
   <body>
     <div class="container">
-      <div class="title">
-        变速音频播放器 | Vario-Speed Audioplayer
-      </div>
+      <div class="title">变速音频工具 | Vario-Speed Audio Tools</div>
 
       <div class="upload-area" id="uploadArea">
         <p>点击或拖拽音频文件到这里 upload or drop audio files here</p>
@@ -331,6 +432,47 @@
           <button class="speed-btn" data-speed="1.4">1.4x</button>
           <button class="speed-btn" data-speed="1.5">1.5x</button>
         </div>
+
+        <div class="export-panel" id="exportPanel">
+          <div class="export-toolbar">
+            <div class="export-fields">
+              <div class="field">
+                <label for="exportMode">导出模式 Export mode</label>
+                <select id="exportMode">
+                  <option value="live" selected>
+                    Browser PCM capture - live speed WAV
+                  </option>
+                  <option value="ffmpeg">
+                    FFmpeg atempo export - clean WAV, local cached WASM
+                  </option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="exportFormat">格式 Format</label>
+                <select id="exportFormat">
+                  <option value="wav">WAV</option>
+                </select>
+              </div>
+            </div>
+            <button class="download-btn" id="downloadBtn" type="button">
+              <i data-lucide="download"></i>
+              下载当前速度音频
+            </button>
+          </div>
+          <div
+            class="export-progress-bar"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            id="exportProgressBar"
+          >
+            <div class="export-progress" id="exportProgress"></div>
+          </div>
+          <div class="export-status" id="exportStatus">
+            默认使用浏览器实时 PCM 捕获导出 WAV，使用当前选择的播放速度。
+          </div>
+        </div>
       </div>
 
       <div class="playlist">
@@ -349,6 +491,8 @@
       let tracks = [];
       let currentTrackId = null;
       let progressFrame = null;
+      let isExporting = false;
+      let ffmpegInstance = null;
 
       const uploadArea = document.getElementById("uploadArea");
       const fileInput = document.getElementById("fileInput");
@@ -364,6 +508,11 @@
       const speedBtns = document.querySelectorAll(".speed-btn");
       const trackList = document.getElementById("trackList");
       const playlistEmpty = document.getElementById("playlistEmpty");
+      const exportMode = document.getElementById("exportMode");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const exportProgressBar = document.getElementById("exportProgressBar");
+      const exportProgress = document.getElementById("exportProgress");
+      const exportStatus = document.getElementById("exportStatus");
 
       uploadArea.addEventListener("click", () => fileInput.click());
 
@@ -395,6 +544,7 @@
           id: `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`,
           name: file.name,
           size: formatFileSize(file.size),
+          file,
           url: URL.createObjectURL(file),
         }));
 
@@ -460,10 +610,33 @@
       }
 
       playBtn.addEventListener("click", () => {
+        togglePlayback();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.code !== "Space" || event.repeat || shouldIgnoreShortcut(event)) {
+          return;
+        }
+
+        event.preventDefault();
+        togglePlayback();
+      });
+
+      function togglePlayback() {
         if (!sound) return;
         if (isPlaying) sound.pause();
         else if (!sound.playing()) sound.play();
-      });
+      }
+
+      function shouldIgnoreShortcut(event) {
+        const target = event.target;
+        if (!(target instanceof Element)) return false;
+        return Boolean(
+          target.closest(
+            "button, input, select, textarea, [contenteditable='true']",
+          ),
+        );
+      }
 
       toBeginBtn.addEventListener("click", () => {
         if (!sound) return;
@@ -519,6 +692,423 @@
           if (sound) sound.rate(currentSpeed);
         });
       });
+
+      downloadBtn.addEventListener("click", async () => {
+        const track = getCurrentTrack();
+        if (!track || isExporting) return;
+
+        setExportBusy(true);
+        setExportProgress(0);
+
+        try {
+          if (exportMode.value === "live") {
+            await exportWithLivePlayback(track);
+          } else {
+            await exportWithFfmpegAtempo(track);
+          }
+        } catch (error) {
+          console.error(error);
+          setExportStatus(`导出失败 Export failed: ${error.message || error}`);
+        } finally {
+          setExportBusy(false);
+        }
+      });
+
+      async function exportWithLivePlayback(track) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) {
+          throw new Error("This browser does not support Web Audio.");
+        }
+
+        setExportStatus("Browser PCM capture 正在按当前速度实时渲染 WAV...");
+
+        const audio = new Audio(track.url);
+        audio.crossOrigin = "anonymous";
+        audio.playbackRate = currentSpeed;
+        audio.defaultPlaybackRate = currentSpeed;
+        audio.preservesPitch = true;
+        audio.mozPreservesPitch = true;
+        audio.webkitPreservesPitch = true;
+        audio.volume = 0;
+
+        await waitForMediaCanPlay(audio);
+
+        const capture =
+          audio.captureStream ||
+          audio.mozCaptureStream ||
+          audio.webkitCaptureStream;
+        if (!capture) {
+          return exportWithOfflinePlaybackRate(track);
+        }
+
+        const context = new AudioContextClass();
+        const stream = capture.call(audio);
+        if (!stream.getAudioTracks().length) {
+          await audio.play();
+          await waitForAudioTrack(stream);
+          audio.pause();
+          audio.currentTime = 0;
+          await waitForSeek(audio);
+        }
+
+        const source = context.createMediaStreamSource(stream);
+        const processor = context.createScriptProcessor(4096, 2, 2);
+        const silence = context.createGain();
+        silence.gain.value = 0;
+        const channelChunks = [];
+        let sampleCount = 0;
+        const expectedSeconds = Math.max(0.1, audio.duration || 0) / currentSpeed;
+
+        processor.onaudioprocess = (event) => {
+          const input = event.inputBuffer;
+          const channelCount = Math.max(1, input.numberOfChannels);
+          while (channelChunks.length < channelCount) channelChunks.push([]);
+
+          for (let channel = 0; channel < channelCount; channel += 1) {
+            channelChunks[channel].push(
+              new Float32Array(input.getChannelData(channel)),
+            );
+          }
+          sampleCount += input.length;
+        };
+
+        source.connect(processor);
+        processor.connect(silence);
+        silence.connect(context.destination);
+
+        await context.resume();
+        await audio.play();
+
+        const progressTimer = window.setInterval(() => {
+          const percent = Math.min(
+            95,
+            ((audio.currentTime / Math.max(audio.duration, 0.1)) * 100) || 0,
+          );
+          setExportProgress(percent);
+          setExportStatus(
+            `Browser PCM capture ${Math.round(percent)}% - real-time render, no sound`,
+          );
+        }, 250);
+
+        await new Promise((resolve) => {
+          audio.addEventListener("ended", resolve, { once: true });
+        });
+
+        window.clearInterval(progressTimer);
+        processor.disconnect();
+        silence.disconnect();
+        source.disconnect();
+        stream.getTracks().forEach((streamTrack) => streamTrack.stop());
+
+        setExportProgress(96);
+        setExportStatus("正在写入 WAV...");
+
+        const samples = channelChunks.map((chunks) => {
+          const channel = new Float32Array(sampleCount);
+          let offset = 0;
+          for (const chunk of chunks) {
+            channel.set(chunk, offset);
+            offset += chunk.length;
+          }
+          return channel;
+        });
+        const wavBlob = encodeWavSamples(samples, context.sampleRate);
+
+        await context.close();
+        downloadBlob(wavBlob, buildOutputName(track.name, currentSpeed, "wav", "live"));
+        setExportProgress(100);
+        setExportStatus(
+          `完成 Browser PCM capture: ${formatTime(expectedSeconds)} at ${currentSpeed.toFixed(1)}x`,
+        );
+      }
+
+      async function exportWithFfmpegAtempo(track) {
+        setExportStatus("正在加载 FFmpeg WASM，首次使用会比较慢...");
+        const ffmpeg = await getFfmpeg();
+        const inputName = `input-${Date.now()}-${safeFileName(track.name)}`;
+        const outputName = `output-${Date.now()}.wav`;
+
+        ffmpeg.on("progress", ({ progress }) => {
+          const percent = Math.max(0, Math.min(100, Math.round(progress * 100)));
+          setExportProgress(percent);
+          setExportStatus(`FFmpeg atempo export ${percent}%`);
+        });
+
+        await ffmpeg.writeFile(inputName, await fetchFile(track.file));
+        setExportStatus(`FFmpeg atempo=${currentSpeed.toFixed(1)} 正在导出 WAV...`);
+        await ffmpeg.exec([
+          "-i",
+          inputName,
+          "-af",
+          `atempo=${currentSpeed}`,
+          "-c:a",
+          "pcm_s16le",
+          outputName,
+        ]);
+
+        const data = await ffmpeg.readFile(outputName);
+        await ffmpeg.deleteFile(inputName);
+        await ffmpeg.deleteFile(outputName);
+
+        const wavBlob = new Blob([data.buffer], { type: "audio/wav" });
+        downloadBlob(wavBlob, buildOutputName(track.name, currentSpeed, "wav", "atempo"));
+        setExportProgress(100);
+        setExportStatus(`完成 FFmpeg atempo export: ${currentSpeed.toFixed(1)}x WAV`);
+      }
+
+      async function exportWithOfflinePlaybackRate(track) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        const OfflineAudioContextClass =
+          window.OfflineAudioContext || window.webkitOfflineAudioContext;
+        if (!AudioContextClass || !OfflineAudioContextClass) {
+          throw new Error("This browser cannot render audio for export.");
+        }
+
+        setExportStatus("浏览器不支持实时捕获，正在使用 OfflineAudioContext 导出...");
+        const audioContext = new AudioContextClass();
+        const sourceBuffer = await audioContext.decodeAudioData(
+          await track.file.arrayBuffer(),
+        );
+        await audioContext.close();
+
+        const frameCount = Math.ceil(sourceBuffer.length / currentSpeed);
+        const offlineContext = new OfflineAudioContextClass(
+          sourceBuffer.numberOfChannels,
+          frameCount,
+          sourceBuffer.sampleRate,
+        );
+        const source = offlineContext.createBufferSource();
+        source.buffer = sourceBuffer;
+        source.playbackRate.value = currentSpeed;
+        source.connect(offlineContext.destination);
+        source.start();
+        const rendered = await offlineContext.startRendering();
+        const wavBlob = encodeWav(rendered);
+        downloadBlob(wavBlob, buildOutputName(track.name, currentSpeed, "wav", "offline"));
+        setExportProgress(100);
+        setExportStatus(
+          "完成 OfflineAudioContext export；注意此备用模式可能不会保留音高。",
+        );
+      }
+
+      async function getFfmpeg() {
+        if (ffmpegInstance) return ffmpegInstance;
+        const isFilePage = window.location.protocol === "file:";
+
+        await loadScript(
+          isFilePage
+            ? "https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"
+            : "vendor/ffmpeg/ffmpeg.js",
+        );
+        await loadScript(
+          isFilePage
+            ? "https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"
+            : "vendor/ffmpeg/ffmpeg-util.js",
+        );
+
+        const { FFmpeg } = FFmpegWASM;
+        const { toBlobURL } = FFmpegUtil;
+        const ffmpeg = new FFmpeg();
+
+        if (isFilePage) {
+          const ffmpegBaseUrl = "https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd";
+          const coreBaseUrl = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd";
+          await ffmpeg.load({
+            classWorkerURL: await toBlobURL(
+              `${ffmpegBaseUrl}/814.ffmpeg.js`,
+              "text/javascript",
+            ),
+            coreURL: await toBlobURL(
+              `${coreBaseUrl}/ffmpeg-core.js`,
+              "text/javascript",
+            ),
+            wasmURL: await toBlobURL(
+              `${coreBaseUrl}/ffmpeg-core.wasm`,
+              "application/wasm",
+            ),
+          });
+        } else {
+          const baseUrl = new URL("vendor/ffmpeg/", window.location.href).href;
+          await ffmpeg.load({
+            coreURL: `${baseUrl}ffmpeg-core.js`,
+            wasmURL: `${baseUrl}ffmpeg-core.wasm`,
+            workerURL: `${baseUrl}ffmpeg-core.worker.js`,
+          });
+        }
+
+        ffmpegInstance = ffmpeg;
+        return ffmpegInstance;
+      }
+
+      async function loadScript(src) {
+        if (document.querySelector(`script[src="${src}"]`)) return;
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.onload = resolve;
+          script.onerror = () => reject(new Error(`Cannot load ${src}`));
+          document.head.appendChild(script);
+        });
+      }
+
+      async function fetchFile(file) {
+        return new Uint8Array(await file.arrayBuffer());
+      }
+
+      function getCurrentTrack() {
+        return tracks.find((track) => track.id === currentTrackId) || null;
+      }
+
+      function getRecorderMimeType() {
+        const candidates = [
+          "audio/webm;codecs=opus",
+          "audio/webm",
+          "audio/mp4",
+        ];
+        return candidates.find((type) => MediaRecorder.isTypeSupported(type)) || "";
+      }
+
+      function waitForMediaReady(audio) {
+        if (audio.readyState >= 2) return Promise.resolve();
+        audio.load();
+        return new Promise((resolve, reject) => {
+          audio.addEventListener("loadedmetadata", resolve, { once: true });
+          audio.addEventListener("error", () => {
+            reject(new Error("Cannot load audio for export."));
+          }, { once: true });
+        });
+      }
+
+      function waitForMediaCanPlay(audio) {
+        if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+          return Promise.resolve();
+        }
+        audio.load();
+        return new Promise((resolve, reject) => {
+          audio.addEventListener("canplaythrough", resolve, { once: true });
+          audio.addEventListener(
+            "error",
+            () => reject(new Error("Could not load audio for speed-adjusted export.")),
+            { once: true },
+          );
+        });
+      }
+
+      function waitForSeek(audio) {
+        if (!audio.seeking) return Promise.resolve();
+        return new Promise((resolve) => {
+          audio.addEventListener("seeked", resolve, { once: true });
+        });
+      }
+
+      function waitForAudioTrack(stream) {
+        if (stream.getAudioTracks().length) return Promise.resolve();
+
+        return new Promise((resolve, reject) => {
+          const timeout = window.setTimeout(() => {
+            stream.removeEventListener("addtrack", onAddTrack);
+            reject(new Error("No audio track was captured from playback."));
+          }, 3000);
+
+          function onAddTrack() {
+            if (!stream.getAudioTracks().length) return;
+            window.clearTimeout(timeout);
+            stream.removeEventListener("addtrack", onAddTrack);
+            resolve();
+          }
+
+          stream.addEventListener("addtrack", onAddTrack);
+        });
+      }
+
+      function setExportBusy(busy) {
+        isExporting = busy;
+        downloadBtn.disabled = busy || !getCurrentTrack();
+        exportMode.disabled = busy;
+        downloadBtn.innerHTML = busy
+          ? '<i data-lucide="loader"></i> 导出中...'
+          : '<i data-lucide="download"></i> 下载当前速度音频';
+        lucide.createIcons();
+      }
+
+      function setExportProgress(percent) {
+        const value = Math.max(0, Math.min(100, percent));
+        exportProgress.style.width = `${value}%`;
+        exportProgressBar.setAttribute("aria-valuenow", Math.round(value));
+      }
+
+      function setExportStatus(text) {
+        exportStatus.textContent = text;
+      }
+
+      function buildOutputName(name, speed, extension, mode) {
+        const baseName = name.replace(/\.[^/.]+$/, "");
+        return `${baseName}_${speed.toFixed(1)}x_${mode}.${extension}`;
+      }
+
+      function safeFileName(name) {
+        return name.replace(/[^a-z0-9._-]/gi, "_");
+      }
+
+      function downloadBlob(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      function encodeWav(audioBuffer) {
+        const numChannels = audioBuffer.numberOfChannels;
+        const sampleRate = audioBuffer.sampleRate;
+        const bytesPerSample = 2;
+        const blockAlign = numChannels * bytesPerSample;
+        const samples = audioBuffer.length;
+        const dataSize = samples * blockAlign;
+        const buffer = new ArrayBuffer(44 + dataSize);
+        const view = new DataView(buffer);
+
+        writeString(view, 0, "RIFF");
+        view.setUint32(4, 36 + dataSize, true);
+        writeString(view, 8, "WAVE");
+        writeString(view, 12, "fmt ");
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, numChannels, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * blockAlign, true);
+        view.setUint16(32, blockAlign, true);
+        view.setUint16(34, bytesPerSample * 8, true);
+        writeString(view, 36, "data");
+        view.setUint32(40, dataSize, true);
+
+        let offset = 44;
+        const channels = Array.from({ length: numChannels }, (_, index) =>
+          audioBuffer.getChannelData(index),
+        );
+        for (let i = 0; i < samples; i += 1) {
+          for (let channel = 0; channel < numChannels; channel += 1) {
+            const sample = Math.max(-1, Math.min(1, channels[channel][i]));
+            view.setInt16(
+              offset,
+              sample < 0 ? sample * 0x8000 : sample * 0x7fff,
+              true,
+            );
+            offset += bytesPerSample;
+          }
+        }
+
+        return new Blob([buffer], { type: "audio/wav" });
+      }
+
+      function writeString(view, offset, string) {
+        for (let i = 0; i < string.length; i += 1) {
+          view.setUint8(offset + i, string.charCodeAt(i));
+        }
+      }
 
       function renderPlaylist() {
         playlistEmpty.style.display = tracks.length ? "none" : "block";
@@ -595,6 +1185,7 @@
           durationEl.textContent = "0:00";
           fileName.textContent = "";
           player.style.display = tracks.length ? "block" : "none";
+          downloadBtn.disabled = !tracks.length;
 
           const fallbackTrack = tracks[trackIndex] || tracks[trackIndex - 1];
           if (fallbackTrack) {
@@ -604,6 +1195,7 @@
         }
 
         renderPlaylist();
+        downloadBtn.disabled = !getCurrentTrack();
       }
 
       function setPlayButton(playing) {
