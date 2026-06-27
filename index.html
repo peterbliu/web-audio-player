@@ -255,7 +255,7 @@
 
       .export-toolbar {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto auto auto;
+        grid-template-columns: minmax(0, 1fr) auto auto;
         gap: 12px;
         align-items: end;
       }
@@ -685,11 +685,11 @@
                   <option value="mp3-256">MP3 256k</option>
                 </select>
               </div>
+              <label class="batch-export-control" title="使用当前速度导出所有已选播放列表项目" data-i18n-title="batchExportTitle">
+                <input type="checkbox" id="batchExportSelected" />
+                <span data-i18n="batchExportLabel">导出已选</span>
+              </label>
             </div>
-            <label class="batch-export-control" title="使用当前速度导出所有已选播放列表项目" data-i18n-title="batchExportTitle">
-              <input type="checkbox" id="batchExportSelected" />
-              <span data-i18n="batchExportLabel">导出已选</span>
-            </label>
             <button class="download-btn" id="downloadBtn" type="button">
               <i data-lucide="download"></i>
               <span data-i18n="downloadCurrent">下载当前速度音频</span>
@@ -740,7 +740,7 @@
         <div class="track-list" id="trackList"></div>
       </div>
 
-      <div class="version-label">v0.024</div>
+      <div class="version-label">v0.025</div>
     </div>
 
     <script>
