@@ -698,8 +698,8 @@
 
       /* ===== Karaoke display styles ===== */
       .karaoke-container {
-        margin: 10px 0 10px 0;
-        padding: 6px 8px 6px 8px;  /* left/right 8px, top/bottom 6px */
+        margin: 10px 0px 10px 0px;
+        padding: 6px 4px 6px 4px;  /* left/right 4px, top/bottom 6px */
         border-radius: 8px;
         min-height: auto;
         background: var(--panel);
@@ -714,8 +714,18 @@
         display: block;
       }
 
+      .karaoke-timestamp {
+        font-size: 12px;
+        min-width: 12px;
+        color: var(--text-faint);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        text-align: right;
+        opacity: 0.6;
+        flex-shrink: 0;
+      }
       .karaoke-sentence {
-        padding: 2px 0px;          /* only 2px top/bottom, 4px left/right */
+        padding: 2px 0px;          /* only 2px top/bottom, 1px left/right */
         margin: 1px 0;
         line-height: 1.5;
         font-size: 16px;           /* slightly smaller for compactness */
@@ -762,21 +772,12 @@
         border-bottom-color: transparent;
       }
 
-      .karaoke-timestamp {
-        font-size: 10px;
-        min-width: 11px;
-        color: var(--text-faint);
-        font-variant-numeric: tabular-nums;
-        white-space: nowrap;
-        text-align: right;
-        opacity: 0.6;
-        flex-shrink: 0;
-      }
+
 
       /* Mobile-specific fine‑tuning */
       @media (max-width: 640px) {
         .karaoke-container {
-          padding: 4px 0px 4px 0px;
+          padding: 4px 2px 4px 2px;
           margin: 6px 0 2px 0;
         }
         .karaoke-sentence {
@@ -784,11 +785,11 @@
           padding: 1px 0px 1px 0px;
           line-height: 1.4;
           min-height: 1.6em;
-          gap: 3px;
+          gap: 4px;
         }
         .karaoke-timestamp {
-          font-size: 9px;
-          min-width: 28px;
+          font-size: 11px;
+          min-width: 11px;
         }
       }
 
@@ -1657,8 +1658,6 @@
         }
       }
 
-      // ===== 6. Add karaoke sync to the progress update loop =====
-      // Modify the existing updateProgress function to include karaoke sync
 
       // Find the updateProgress function and add:
       function updateProgress() {
@@ -1679,6 +1678,27 @@
         progressFrame = requestAnimationFrame(updateProgress);
       }
 
+
+      document.addEventListener('pointermove', (e) => {
+        if (!isDraggingKnob || !sound) return;
+        const rect = progressBar.getBoundingClientRect();
+        const deltaX = e.clientX - knobDragStartX;
+        const deltaPercent = (deltaX / rect.width) * 100;
+        let newPercent = Math.max(0, Math.min(100, knobDragStartPercent + deltaPercent));
+        const duration = sound.duration();
+        if (duration > 0) {
+          const seek = (newPercent / 100) * duration;
+          sound.seek(seek);
+          progress.style.width = newPercent + '%';
+          currentTimeEl.textContent = formatTime(seek);
+          updateKnobPosition(newPercent);
+
+          // 👇 Update karaoke even if paused
+          if (alignmentData && alignmentData.sentences.length > 0) {
+            updateKaraokeDisplay(seek);
+          }
+        }
+      });
 
       uploadArea.addEventListener("click", () => fileInput.click());
 
@@ -1892,6 +1912,11 @@
         progress.style.width = percent * 100 + "%";
         updateKnobPosition(percent * 100);
         currentTimeEl.textContent = formatTime(seek);
+
+        // 👇 Update karaoke on click
+        if (alignmentData && alignmentData.sentences.length > 0) {
+          updateKaraokeDisplay(seek);
+        }
       });
 
       // === Draggable knob ===
