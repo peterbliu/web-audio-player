@@ -148,12 +148,12 @@
       }
 
       .progress-bar {
+        position: relative;
         width: 100%;
         height: 4px;
         background: #2b2d31;
         border-radius: 999px;
         cursor: pointer;
-        position: relative;
         margin: 16px 0;
       }
 
@@ -162,7 +162,43 @@
         background: var(--emerald);
         border-radius: inherit;
         width: 0%;
-        transition: width 0.1s linear;
+        transition: width 0.05s linear;
+      }
+
+      .progress-knob {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--emerald);
+        cursor: grab;
+        pointer-events: auto;
+        z-index: 2;
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.35), 0 0 0 2px rgba(16, 185, 129, 0.08);
+        transition: box-shadow 0.2s, transform 0.15s;
+        left: 0%;
+        will-change: transform;
+      }
+
+      .progress-knob:hover {
+        box-shadow: 0 0 14px rgba(16, 185, 129, 0.55), 0 0 0 3px rgba(16, 185, 129, 0.12);
+        transform: translate(-50%, -50%) scale(1.12);
+      }
+
+      .progress-knob:active {
+        cursor: grabbing;
+        transform: translate(-50%, -50%) scale(1.0);
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.7);
+      }
+
+      /* Mobile touch: slightly larger touch target */
+      @media (max-width: 640px) {
+        .progress-knob {
+          width: 18px;
+          height: 18px;
+        }
       }
 
       .controls {
@@ -958,6 +994,7 @@
 
           <div class="progress-bar" id="progressBar">
             <div class="progress" id="progress"></div>
+            <div class="progress-knob" id="progressKnob"></div>
           </div>
         </div>
 
@@ -1140,6 +1177,16 @@
       let activeFfmpeg = null;
       let ffmpegInstance = null;
       let currentLanguage = "zh";
+      // progress knob
+      let isDraggingKnob = false;
+      let knobDragStartX = 0;
+      let knobDragStartPercent = 0;
+      function updateKnobPosition(percent) {
+        const knob = document.getElementById('progressKnob');
+        if (knob) {
+          knob.style.left = `${Math.max(0, Math.min(100, percent))}%`;
+        }
+      }
 
       const translations = {
         zh: {
@@ -1605,8 +1652,10 @@
         const dur = sound.duration();
         const cur = sound.seek();
         if (!dur) return;
-        progress.style.width = (cur / dur) * 100 + '%';
+        const percent = (cur / dur) * 100;
+        progress.style.width = percent + '%';
         currentTimeEl.textContent = formatTime(cur);
+        updateKnobPosition(percent);
 
         // Karaoke sync
         if (alignmentData && alignmentData.sentences.length > 0) {
@@ -1735,6 +1784,8 @@
           clearKaraokeData();
         }
 
+        updateKnobPosition(0);
+
       }
 
 
@@ -1817,21 +1868,75 @@
       });
 
       progressBar.addEventListener("click", (e) => {
+        // Ignore if the click started on the knob (handled by drag)
+        if (e.target.closest('.progress-knob')) return;
         if (!sound) return;
         const rect = progressBar.getBoundingClientRect();
-        const percent = (e.clientX - rect.left) / rect.width;
+        const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
         const seek = sound.duration() * percent;
         sound.seek(seek);
         progress.style.width = percent * 100 + "%";
+        updateKnobPosition(percent * 100);
+        currentTimeEl.textContent = formatTime(seek);
       });
+
+      // === Draggable knob ===
+      const knob = document.getElementById('progressKnob');
+
+      knob.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!sound) return;
+        isDraggingKnob = true;
+        knob.setPointerCapture(e.pointerId);
+        const rect = progressBar.getBoundingClientRect();
+        knobDragStartX = e.clientX;
+        const currentPercent = parseFloat(progress.style.width) || 0;
+        knobDragStartPercent = currentPercent;
+        document.body.style.userSelect = 'none';
+      });
+
+      document.addEventListener('pointermove', (e) => {
+        if (!isDraggingKnob || !sound) return;
+        const rect = progressBar.getBoundingClientRect();
+        const deltaX = e.clientX - knobDragStartX;
+        const deltaPercent = (deltaX / rect.width) * 100;
+        let newPercent = Math.max(0, Math.min(100, knobDragStartPercent + deltaPercent));
+        const duration = sound.duration();
+        if (duration > 0) {
+          const seek = (newPercent / 100) * duration;
+          sound.seek(seek);
+          progress.style.width = newPercent + '%';
+          currentTimeEl.textContent = formatTime(seek);
+          updateKnobPosition(newPercent);
+        }
+      });
+
+      document.addEventListener('pointerup', (e) => {
+        if (isDraggingKnob) {
+          isDraggingKnob = false;
+          document.body.style.userSelect = '';
+          // Resume progress loop if playing
+          if (isPlaying) {
+            stopProgressLoop();
+            startProgressLoop();
+          }
+        }
+      });
+
+
 
       function updateProgress() {
         if (!sound || !isPlaying) return;
         const dur = sound.duration();
         const cur = sound.seek();
         if (!dur) return;
-        progress.style.width = (cur / dur) * 100 + '%';
+        const percent = (cur / dur) * 100;
+        progress.style.width = percent + '%';
         currentTimeEl.textContent = formatTime(cur);
+        
+        // 👇 THIS LINE UPDATES THE KNOB POSITION
+        updateKnobPosition(percent);
 
         // Karaoke sync
         if (alignmentData && alignmentData.sentences.length > 0) {
