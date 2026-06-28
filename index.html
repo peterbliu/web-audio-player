@@ -1406,6 +1406,44 @@
       const selectAllTracks = document.getElementById("selectAllTracks");
       const selectAllLabel = document.getElementById("selectAllLabel");
 
+      let pendingSeek = null;
+
+      function updateSeekUI(time) {
+        if (!sound) return;
+        const duration = sound.duration();
+        if (!duration) return;
+        const percent = (time / duration) * 100;
+        progress.style.width = percent + '%';
+        updateKnobPosition(percent);
+        currentTimeEl.textContent = formatTime(time);
+        syncWaveformProgress(percent);
+        if (alignmentData && alignmentData.sentences.length > 0) {
+          updateKaraokeDisplay(time);
+        }
+      }
+
+
+      function safeSeek(time) {
+          if (!sound) return;
+          const state = sound.state();
+          if (state === 'loaded') {
+              setAudioPosition(time);
+              pendingSeek = null;
+          } else {
+              pendingSeek = time;
+              sound.off('load', applyPendingSeek);
+              sound.once('load', applyPendingSeek);
+          }
+      }
+
+
+      function applyPendingSeek() {
+          if (pendingSeek !== null) {
+              setAudioPosition(pendingSeek);
+              pendingSeek = null;
+          }
+      }
+
       // === WaveSurfer instance ===
       let wavesurfer = null;
       let isWaveformLoading = false;
@@ -1807,6 +1845,9 @@
           if (newTracks[0]) {
             selectTrack(newTracks[0].id, false);
           }
+
+          // dirty fix with auto-play to force playback engine to init
+          togglePlayback()
         }
 
         // If no audio files but we have JSON, and there's a current track, attach to it
@@ -1817,6 +1858,7 @@
             currentTrack.alignmentData = alignmentData;
           }
         }
+
       }
 
 
@@ -1967,6 +2009,8 @@
           onload: () => {
             if (sound !== nextSound) return;
             durationEl.textContent = formatTime(nextSound.duration());
+            // Apply any pending seek that was set before loading finished
+            applyPendingSeek();
             if (autoPlay && !nextSound.playing()) nextSound.play();
           },
         });
@@ -2027,11 +2071,17 @@
         const newTime = Math.max(0, currentTime - 5);
         sound.seek(newTime);
         const dur = sound.duration();
-        if (dur > 0) {
-          progress.style.width = (newTime / dur) * 100 + '%';
-        }
+        const percent = dur > 0 ? (newTime / dur) * 100 : 0;
+        progress.style.width = percent + '%';
+        updateKnobPosition(percent);
         currentTimeEl.textContent = formatTime(newTime);
-        // 如果正在播放，继续更新；否则停止循环
+
+        // Sync waveform and karaoke
+        syncWaveformProgress(percent);
+        if (alignmentData && alignmentData.sentences.length > 0) {
+          updateKaraokeDisplay(newTime);
+        }
+
         if (isPlaying) {
           stopProgressLoop();
           startProgressLoop();
@@ -2044,10 +2094,16 @@
         const duration = sound.duration();
         const newTime = Math.min(duration, currentTime + 5);
         sound.seek(newTime);
-        if (duration > 0) {
-          progress.style.width = (newTime / duration) * 100 + '%';
-        }
+        const percent = duration > 0 ? (newTime / duration) * 100 : 0;
+        progress.style.width = percent + '%';
+        updateKnobPosition(percent);
         currentTimeEl.textContent = formatTime(newTime);
+
+        syncWaveformProgress(percent);
+        if (alignmentData && alignmentData.sentences.length > 0) {
+          updateKaraokeDisplay(newTime);
+        }
+
         if (isPlaying) {
           stopProgressLoop();
           startProgressLoop();
@@ -2059,7 +2115,18 @@
         if (!sound) return;
         sound.seek(0);
         progress.style.width = "0%";
+        updateKnobPosition(0);
         currentTimeEl.textContent = "0:00";
+
+        syncWaveformProgress(0);
+        if (alignmentData && alignmentData.sentences.length > 0) {
+          updateKaraokeDisplay(0);
+        }
+
+        if (isPlaying) {
+          stopProgressLoop();
+          startProgressLoop();
+        }
       });
 
       toEndBtn.addEventListener("click", () => {
@@ -2067,27 +2134,35 @@
         const dur = sound.duration();
         sound.seek(dur);
         progress.style.width = "100%";
+        updateKnobPosition(100);
         currentTimeEl.textContent = formatTime(dur);
-      });
 
-      progressBar.addEventListener("click", (e) => {
-        if (e.target.closest('.progress-knob')) return;
-        if (!sound) return;
-        const rect = progressBar.getBoundingClientRect();
-        const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-        const seek = sound.duration() * percent;
-        sound.seek(seek);
-        progress.style.width = percent * 100 + "%";
-        updateKnobPosition(percent * 100);
-        currentTimeEl.textContent = formatTime(seek);
-        
-        // Sync waveform
-        syncWaveformProgress(percent * 100);
-
+        syncWaveformProgress(100);
         if (alignmentData && alignmentData.sentences.length > 0) {
-          updateKaraokeDisplay(seek);
+          updateKaraokeDisplay(dur);
+        }
+
+        if (isPlaying) {
+          stopProgressLoop();
+          startProgressLoop();
         }
       });
+
+    progressBar.addEventListener("click", (e) => {
+      if (e.target.closest('.progress-knob')) return;
+      if (!sound) return;
+      const rect = progressBar.getBoundingClientRect();
+      const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const seek = sound.duration() * percent;
+      sound.seek(seek);
+      progress.style.width = percent * 100 + "%";
+      updateKnobPosition(percent * 100);
+      currentTimeEl.textContent = formatTime(seek);
+      syncWaveformProgress(percent * 100);
+      if (alignmentData && alignmentData.sentences.length > 0) {
+        updateKaraokeDisplay(seek);
+      }
+    });
 
       // === Draggable knob ===
       const knob = document.getElementById('progressKnob');
