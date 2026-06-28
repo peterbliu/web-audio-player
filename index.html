@@ -6,6 +6,7 @@
     <title>变速音频工具 | Vario-Speed Audio Tools</title>
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7.12.6/dist/wavesurfer.min.js"></script>
     <style>
       * {
         box-sizing: border-box;
@@ -974,6 +975,46 @@
         color: var(--emerald);
       }
 
+      /* ===== Waveform display styles ===== */
+      .waveform-container {
+        width: 100%;
+        height: 60px;
+        margin: 8px 0 12px 0;
+        border-radius: 6px;
+        overflow: hidden;
+        background: var(--panel);
+        position: relative;
+      }
+
+      .waveform-container #waveform {
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Override wavesurfer default cursor */
+      .waveform-container wave {
+        cursor: default !important;
+      }
+
+      /* Hide the default progress cursor/line */
+      .waveform-container wave .cursor {
+        display: none !important;
+      }
+
+      /* Make waveform non-interactive */
+      .waveform-container wave {
+        pointer-events: none !important;
+      }
+
+      /* Mobile adjustment */
+      @media (max-width: 640px) {
+        .waveform-container {
+          height: 44px;
+          margin: 4px 0 8px 0;
+        }
+      }
+
+
     </style>
   </head>
 
@@ -995,20 +1036,26 @@
           <input type="file" id="fileInput" accept="audio/*,.json,application/json" multiple />
         </div>
 
+
         <div class="player" id="player">
+          
           <div class="filename" id="fileName">
             <span id="fileNameText"></span>
-            <span class="alignment-badge" id="alignmentBadge">📝 Aligned</span>
           </div>
-
-          <div class="time">
-            <span id="current">0:00</span> / <span id="duration">0:00</span>
+          
+          <div class="waveform-container" id="waveformContainer">
+            <div id="waveform"></div>
           </div>
 
           <div class="progress-bar" id="progressBar">
             <div class="progress" id="progress"></div>
             <div class="progress-knob" id="progressKnob"></div>
           </div>
+
+          <div class="time">
+            <span id="current">0:00</span> / <span id="duration">0:00</span>
+          </div>
+
         </div>
 
         <div class="controls">
@@ -1358,6 +1405,120 @@
       const selectAllControl = document.getElementById("selectAllControl");
       const selectAllTracks = document.getElementById("selectAllTracks");
       const selectAllLabel = document.getElementById("selectAllLabel");
+
+      // === WaveSurfer instance ===
+      let wavesurfer = null;
+      let isWaveformLoading = false;
+
+      function initWaveSurfer() {
+        const container = document.getElementById('waveform');
+        if (!container) return;
+        
+        if (wavesurfer) {
+          try { wavesurfer.destroy(); } catch(e) { /* ignore */ }
+          wavesurfer = null;
+        }
+        
+        try {
+          wavesurfer = WaveSurfer.create({
+            container: container,
+            barWidth: 3,
+            barGap: 2,
+            waveColor: '#4a5568',
+            progressColor: '#10b981',
+            cursorColor: 'transparent',
+            cursorWidth: 0,
+            height: container.parentElement?.clientHeight || 60,
+            width: container.parentElement?.clientWidth || '100%',
+            interact: false,
+            dragToSeek: false,
+            autoScroll: false,
+            normalize: true,
+            backend: 'MediaElement'  // 👈 avoids AudioContext conflicts with Howler
+          });
+          
+          const canvas = container.querySelector('canvas');
+          if (canvas) canvas.style.pointerEvents = 'none';
+          
+          const cursorEl = container.querySelector('.cursor');
+          if (cursorEl) cursorEl.style.display = 'none';
+          
+        } catch (e) {
+          console.warn('WaveSurfer init failed:', e);
+          wavesurfer = null;
+        }
+      }
+
+      function loadWaveform(url) {
+        // Ensure wavesurfer is initialized
+        if (!wavesurfer) {
+          initWaveSurfer();
+          if (!wavesurfer) return; // still null? abort
+        }
+        
+        // Prevent multiple rapid loads
+        if (isWaveformLoading) return;
+        
+        const container = document.getElementById('waveform');
+        if (!container) return;
+        
+        // Ensure container is visible
+        container.style.display = 'block';
+        
+        requestAnimationFrame(() => {
+          // Safely update height only if wavesurfer and params exist
+          const parentHeight = container.parentElement?.clientHeight || 60;
+          if (wavesurfer && wavesurfer.params) {
+            if (wavesurfer.params.height !== parentHeight) {
+              wavesurfer.setHeight(parentHeight);
+            }
+          }
+          
+          isWaveformLoading = true;
+          
+          try {
+            wavesurfer.load(url);
+            
+            wavesurfer.once('ready', () => {
+              isWaveformLoading = false;
+              const cursorEl = container.querySelector('.cursor');
+              if (cursorEl) cursorEl.style.display = 'none';
+              const canvas = container.querySelector('canvas');
+              if (canvas) canvas.style.pointerEvents = 'none';
+              syncWaveformProgress(0);
+            });
+            
+            wavesurfer.once('error', (err) => {
+              console.warn('Waveform load error:', err);
+              isWaveformLoading = false;
+            });
+            
+          } catch (e) {
+            console.warn('Waveform load failed:', e);
+            isWaveformLoading = false;
+          }
+        });
+      }
+
+      function syncWaveformProgress(percent) {
+        if (!wavesurfer || isWaveformLoading) return;
+        try {
+          const duration = wavesurfer.getDuration();
+          if (duration > 0) {
+            const clamped = Math.max(0, Math.min(1, (percent / 100)));
+            wavesurfer.seekTo(clamped);
+          }
+        } catch (e) { /* ignore */ }
+      }
+
+      // Show/hide waveform container based on player visibility
+      function updateWaveformVisibility(show) {
+        const container = document.getElementById('waveformContainer');
+        if (container) {
+          container.style.display = show ? 'block' : 'none';
+        }
+      }
+
 
 
       // === New state variables ===
@@ -1765,6 +1926,15 @@
         currentTimeEl.textContent = "0:00";
         durationEl.textContent = "0:00";
 
+        // Show waveform container
+        updateWaveformVisibility(true);
+
+        // Use requestAnimationFrame to ensure container is rendered before loading
+        requestAnimationFrame(() => {
+          if (!wavesurfer) initWaveSurfer();
+          loadWaveform(track.url);
+        });
+
         const previousSound = sound;
         if (previousSound) previousSound.unload();
         isPlaying = false;
@@ -1902,7 +2072,6 @@
       });
 
       progressBar.addEventListener("click", (e) => {
-        // Ignore if the click started on the knob (handled by drag)
         if (e.target.closest('.progress-knob')) return;
         if (!sound) return;
         const rect = progressBar.getBoundingClientRect();
@@ -1912,8 +2081,10 @@
         progress.style.width = percent * 100 + "%";
         updateKnobPosition(percent * 100);
         currentTimeEl.textContent = formatTime(seek);
+        
+        // Sync waveform
+        syncWaveformProgress(percent * 100);
 
-        // 👇 Update karaoke on click
         if (alignmentData && alignmentData.sentences.length > 0) {
           updateKaraokeDisplay(seek);
         }
@@ -1935,6 +2106,7 @@
         document.body.style.userSelect = 'none';
       });
 
+      // In pointermove handler:
       document.addEventListener('pointermove', (e) => {
         if (!isDraggingKnob || !sound) return;
         const rect = progressBar.getBoundingClientRect();
@@ -1948,6 +2120,13 @@
           progress.style.width = newPercent + '%';
           currentTimeEl.textContent = formatTime(seek);
           updateKnobPosition(newPercent);
+          
+          // Sync waveform
+          syncWaveformProgress(newPercent);
+
+          if (alignmentData && alignmentData.sentences.length > 0) {
+            updateKaraokeDisplay(seek);
+          }
         }
       });
 
@@ -1973,9 +2152,10 @@
         const percent = (cur / dur) * 100;
         progress.style.width = percent + '%';
         currentTimeEl.textContent = formatTime(cur);
-        
-        // 👇 THIS LINE UPDATES THE KNOB POSITION
         updateKnobPosition(percent);
+        
+        // Sync waveform progress
+        syncWaveformProgress(percent);
 
         // Karaoke sync
         if (alignmentData && alignmentData.sentences.length > 0) {
@@ -2874,6 +3054,13 @@
             sound.unload();
             sound = null;
           }
+          // Hide waveform when no track
+          updateWaveformVisibility(false);
+          if (wavesurfer) {
+            try { wavesurfer.destroy(); } catch(e) {}
+            wavesurfer = null;
+          }
+
           isPlaying = false;
           currentTrackId = null;
           stopProgressLoop();
@@ -3125,6 +3312,8 @@
         });
       }
 
+      // Initially hide waveform container
+      updateWaveformVisibility(false);
     </script>
   </body>
 </html>
