@@ -823,9 +823,9 @@
         <p data-i18n="uploadMain">点击或拖拽音频文件到这里</p>
         <p class="upload-hint">
           <span data-i18n="uploadHint">支持一次添加多个文件</span>
-          mp3 / wav / m4a / ogg
+          mp3 / wav / m4a / ogg / json
         </p>
-        <input type="file" id="fileInput" accept="audio/*" multiple />
+        <input type="file" id="fileInput" accept="audio/*,.json,application/json" multiple />
       </div>
 
       <!-- ===== sentence timestamps segments display ===== -->
@@ -1003,7 +1003,7 @@
         zh: {
           appTitle: "变速音频工具",
           documentTitle: "变速音频工具",
-          uploadMain: "点击或拖拽音频文件到这里",
+          uploadMain: "点击或拖拽音频/json文件到这里",
           uploadHint: "支持一次添加多个文件",
           toBegin: "回到开头",
           play: "播放",
@@ -1066,7 +1066,7 @@
         en: {
           appTitle: "Vario-Speed Audio Tools",
           documentTitle: "Vario-Speed Audio Tools",
-          uploadMain: "Upload or drop audio files here",
+          uploadMain: "Upload or drop audio/json files here",
           uploadHint: "Add multiple files at once",
           toBegin: "Back to start",
           play: "Play",
