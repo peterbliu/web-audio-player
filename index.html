@@ -141,9 +141,9 @@
       }
 
       .filename {
-        font-size: 14px;
-        color: var(--text-muted);
-        margin-bottom: 12px;
+        font-size: 10px;
+        color: var(--text-faint);
+        margin-bottom: 10px;
         text-align: center;
       }
 
@@ -664,6 +664,146 @@
           width: 100%;
         }
       }
+
+      
+
+      /* ===== Karaoke display styles ===== */
+      .karaoke-container {
+        margin: 16px 0 8px 0;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        min-height: 80px;
+        display: none;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .karaoke-container.visible {
+        display: block;
+      }
+
+      .karaoke-sentence {
+        padding: 6px 8px;
+        line-height: 1.6;
+        font-size: 15px;
+        font-weight: 400;
+        color: var(--text-muted);
+        border-radius: 4px;
+        border: 1px solid transparent;
+        transition: border-color 0.2s ease, color 0.2s ease;
+        margin: 2px 0;
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        min-height: 2.2em; /* keeps row height stable */
+      }
+
+      .karaoke-sentence.prev {
+        opacity: 0.55;
+      }
+
+      .karaoke-sentence.next {
+        opacity: 0.55;
+      }
+
+      .karaoke-sentence.current {
+        opacity: 1;
+        color: var(--text);
+        border: none;
+        background: transparent;
+      }
+
+      .karaoke-word {
+        display: inline;
+        transition: all 0.08s linear;
+        border-bottom: 1px solid transparent;
+        padding-bottom: 2px; /* a bit extra space, underline touches text */
+        margin: 0;
+      }
+
+      .karaoke-word.active {
+        border-bottom-color: var(--emerald);
+        color: #fff;
+      }
+
+      .karaoke-word.inactive {
+        border-bottom-color: transparent;
+      }
+
+      .karaoke-timestamp {
+        font-size: 11px;
+        color: var(--text-faint);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        min-width: 38px;
+        text-align: right;
+        opacity: 0.6;
+        flex-shrink: 0;
+      }
+
+      .karaoke-sentence.current .karaoke-timestamp {
+        color: var(--emerald);
+        opacity: 0.8;
+      }
+
+      .karaoke-sentence-line {
+        display: inline;
+        word-break: break-word;
+      }
+
+      .karaoke-empty {
+        color: var(--text-faint);
+        font-size: 13px;
+        text-align: center;
+        padding: 16px 0;
+      }
+
+      .karaoke-upload-hint {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 8px 0;
+        color: var(--text-faint);
+        font-size: 12px;
+        flex-wrap: wrap;
+      }
+
+      .karaoke-upload-hint button {
+        background: var(--emerald-soft);
+        border: 1px dashed var(--emerald);
+        color: var(--emerald);
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .karaoke-upload-hint button:hover {
+        background: var(--emerald);
+        color: #fff;
+      }
+
+      .alignment-badge {
+        display: none;
+        background: var(--emerald-soft);
+        color: var(--emerald);
+        font-size: 10px;
+        padding: 2px 10px;
+        border-radius: 12px;
+        border: 1px solid var(--emerald);
+        margin-left: 8px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+      }
+
+      .alignment-badge.visible {
+        display: inline-block;
+      }
+
     </style>
   </head>
 
@@ -688,8 +828,28 @@
         <input type="file" id="fileInput" accept="audio/*" multiple />
       </div>
 
+      <!-- ===== sentence timestamps segments display ===== -->
+      <div class="karaoke-container" id="karaokeContainer">
+        <div class="karaoke-upload-hint" id="karaokeUploadHint">
+          <span data-i18n="karaokeHint">Drop a JSON alignment file here or</span>
+          <button id="karaokeUploadBtn" data-i18n="karaokeUploadBtn">Browse JSON</button>
+          <span data-i18n="karaokeFormat">(format: sentence segments with word timings)</span>
+        </div>
+        <div id="karaokeDisplay" style="display: none;">
+          <div id="karaokePrev" class="karaoke-sentence prev"></div>
+          <div id="karaokeCurrent" class="karaoke-sentence current"></div>
+          <div id="karaokeNext" class="karaoke-sentence next"></div>
+        </div>
+        <div class="karaoke-empty" id="karaokeEmpty" data-i18n="karaokeEmpty">
+          No alignment data loaded. Upload a JSON file with sentence and word timings.
+        </div>
+      </div>
+
       <div class="player" id="player">
-        <div class="filename" id="fileName"></div>
+        <div class="filename" id="fileName">
+          <span id="fileNameText"></span>
+          <span class="alignment-badge" id="alignmentBadge">📝 Aligned</span>
+        </div>
 
         <div class="time">
           <span id="current">0:00</span> / <span id="duration">0:00</span>
@@ -698,6 +858,7 @@
         <div class="progress-bar" id="progressBar">
           <div class="progress" id="progress"></div>
         </div>
+      </div>
 
       <div class="controls">
         <button class="ctrl-btn" id="toBeginBtn" aria-label="回到开头" data-i18n-aria-label="toBegin">
@@ -895,6 +1056,12 @@
           skipBack: "后退5秒",
           skipForward: "前进5秒",
           exportToggleLabel: "导出",
+          karaokeHint: "拖拽 JSON 对齐文件到这里，或",
+          karaokeUploadBtn: "选择文件",
+          karaokeFormat: "(格式：带单词时间戳的句子段)",
+          karaokeEmpty: "未加载对齐数据。请上传包含句子和单词时间戳的 JSON 文件。",
+          karaokeClear: "清除对齐",
+          karaokeLoaded: "已加载对齐数据：{sentences} 个句子",
         },
         en: {
           appTitle: "Vario-Speed Audio Tools",
@@ -952,6 +1119,12 @@
           skipBack: "Skip back 5s",
           skipForward: "Skip forward 5s",
           exportToggleLabel: "Export",
+          karaokeHint: "Drop a JSON alignment file here or",
+          karaokeUploadBtn: "Browse JSON",
+          karaokeFormat: "(format: sentence segments with word timings)",
+          karaokeEmpty: "No alignment data loaded. Upload a JSON file with sentence and word timings.",
+          karaokeClear: "Clear alignment",
+          karaokeLoaded: "Alignment loaded: {sentences} sentences",
         },
       };
 
@@ -981,6 +1154,343 @@
       const selectAllControl = document.getElementById("selectAllControl");
       const selectAllTracks = document.getElementById("selectAllTracks");
       const selectAllLabel = document.getElementById("selectAllLabel");
+
+
+      // === New state variables ===
+      let alignmentData = null; // { sentences: [{text, start, end, words: [{word, start, end}]}] }
+      let karaokeActive = false;
+      let karaokeJsonInput = null;
+
+      // === DOM refs ===
+      const karaokeContainer = document.getElementById('karaokeContainer');
+      const karaokeDisplay = document.getElementById('karaokeDisplay');
+      const karaokeUploadHint = document.getElementById('karaokeUploadHint');
+      const karaokeEmpty = document.getElementById('karaokeEmpty');
+      const karaokePrev = document.getElementById('karaokePrev');
+      const karaokeCurrent = document.getElementById('karaokeCurrent');
+      const karaokeNext = document.getElementById('karaokeNext');
+      const karaokeUploadBtn = document.getElementById('karaokeUploadBtn');
+
+      // === Create hidden file input for JSON ===
+      const karaokeFileInput = document.createElement('input');
+      karaokeFileInput.type = 'file';
+      karaokeFileInput.accept = '.json,application/json';
+      karaokeFileInput.style.display = 'none';
+      karaokeFileInput.id = 'karaokeFileInput';
+      document.body.appendChild(karaokeFileInput);
+
+      // === Load alignment data from JSON ===
+      function loadAlignmentData(jsonData) {
+        try {
+          let segments = Array.isArray(jsonData) ? jsonData : (jsonData.segments || jsonData.sentences || []);
+          if (!Array.isArray(segments) || segments.length === 0) {
+            throw new Error('Invalid alignment format: expected array of segments.');
+          }
+
+          // Validate and normalize
+          const sentences = segments
+            .filter(s => s.text && typeof s.start === 'number' && typeof s.end === 'number')
+            .map(s => ({
+              text: s.text.trim(),
+              start: s.start,
+              end: s.end,
+              words: Array.isArray(s.words) ? s.words
+                .filter(w => w.word && typeof w.start === 'number' && typeof w.end === 'number')
+                .map(w => ({ word: w.word.trim(), start: w.start, end: w.end }))
+                : []
+            }))
+            .filter(s => s.text.length > 0);
+
+          if (sentences.length === 0) {
+            throw new Error('No valid sentences found in the JSON data.');
+          }
+
+          alignmentData = { sentences };
+          karaokeActive = true;
+
+          // Update UI
+          updateKaraokeDisplay(0);
+          showKaraokeUI(true);
+          setExportStatus(t('karaokeLoaded', { sentences: sentences.length }));
+
+          // Store alignment on the current track
+          const currentTrack = getCurrentTrack();
+          if (currentTrack) {
+            currentTrack.alignmentData = alignmentData;
+          }
+
+          return true;
+        } catch (error) {
+          console.error('Alignment load error:', error);
+          window.alert(`Failed to load alignment data:\n${error.message}`);
+          return false;
+        }
+      }
+
+      // === Show/hide karaoke UI ===
+      function showKaraokeUI(show) {
+        if (show && alignmentData && alignmentData.sentences.length > 0) {
+          karaokeContainer.classList.add('visible');
+          karaokeUploadHint.style.display = 'none';
+          karaokeDisplay.style.display = 'block';
+          karaokeEmpty.style.display = 'none';
+          // Also show alignment badge on the filename
+          const badge = document.querySelector('.alignment-badge');
+          if (badge) badge.classList.add('visible');
+        } else if (alignmentData && alignmentData.sentences.length === 0) {
+          karaokeContainer.classList.add('visible');
+          karaokeUploadHint.style.display = 'none';
+          karaokeDisplay.style.display = 'none';
+          karaokeEmpty.style.display = 'block';
+        } else {
+          karaokeContainer.classList.remove('visible');
+          karaokeUploadHint.style.display = 'flex';
+          karaokeDisplay.style.display = 'none';
+          karaokeEmpty.style.display = 'none';
+          const badge = document.querySelector('.alignment-badge');
+          if (badge) badge.classList.remove('visible');
+        }
+      }
+
+      // === Update karaoke display – always shows three rows (prev, current, next) with stable height ===
+      function updateKaraokeDisplay(currentTime) {
+        if (!alignmentData || !alignmentData.sentences.length) {
+          showKaraokeUI(false);
+          return;
+        }
+
+        const sentences = alignmentData.sentences;
+        let currentIndex = -1;
+
+        // Find which sentence is currently playing
+        for (let i = 0; i < sentences.length; i++) {
+          const s = sentences[i];
+          if (currentTime >= s.start && currentTime <= s.end) {
+            currentIndex = i;
+            break;
+          }
+        }
+
+        // Fallback: if none found, pick the closest
+        if (currentIndex === -1 && sentences.length > 0) {
+          let closest = 0;
+          let closestDist = Infinity;
+          for (let i = 0; i < sentences.length; i++) {
+            const mid = (sentences[i].start + sentences[i].end) / 2;
+            const dist = Math.abs(currentTime - mid);
+            if (dist < closestDist) {
+              closestDist = dist;
+              closest = i;
+            }
+          }
+          currentIndex = closest;
+        }
+
+        if (currentIndex === -1) currentIndex = 0;
+        currentIndex = Math.max(0, Math.min(sentences.length - 1, currentIndex));
+
+        // Determine indices for prev, current, next
+        const prevIndex = currentIndex - 1;
+        const nextIndex = currentIndex + 1;
+
+        // Previous sentence (or empty placeholder)
+        if (prevIndex >= 0) {
+          const prev = sentences[prevIndex];
+          karaokePrev.innerHTML = renderSentencePlain(prev, 'prev');
+          karaokePrev.style.display = 'flex';
+        } else {
+          // Empty row – keep height stable
+          karaokePrev.innerHTML = `<span class="karaoke-timestamp">&nbsp;</span><span class="karaoke-sentence-line">&nbsp;</span>`;
+          karaokePrev.style.display = 'flex';
+        }
+
+        // Current sentence with word highlights
+        const current = sentences[currentIndex];
+        const activeWordIndex = findActiveWord(current, currentTime);
+        karaokeCurrent.innerHTML = renderSentenceWithWords(current, activeWordIndex, 'current');
+        karaokeCurrent.style.display = 'flex';
+
+        // Next sentence (or empty placeholder)
+        if (nextIndex < sentences.length) {
+          const next = sentences[nextIndex];
+          karaokeNext.innerHTML = renderSentencePlain(next, 'next');
+          karaokeNext.style.display = 'flex';
+        } else {
+          karaokeNext.innerHTML = `<span class="karaoke-timestamp">&nbsp;</span><span class="karaoke-sentence-line">&nbsp;</span>`;
+          karaokeNext.style.display = 'flex';
+        }
+
+        showKaraokeUI(true);
+      }
+
+
+      // === Find which word is active at the current time ===
+      function findActiveWord(sentence, currentTime) {
+        const words = sentence.words || [];
+        for (let i = 0; i < words.length; i++) {
+          const w = words[i];
+          if (currentTime >= w.start && currentTime <= w.end) {
+            return i;
+          }
+        }
+        // Check if we're past the last word
+        if (words.length > 0 && currentTime > words[words.length - 1].end) {
+          return words.length - 1;
+        }
+        return -1;
+      }
+
+      // === Render a sentence without word highlights (for prev/next) – includes timestamp ===
+      function renderSentencePlain(sentence, className) {
+        const timeStr = formatTime(sentence.start);
+        return `<span class="karaoke-timestamp">${timeStr}</span><span class="karaoke-sentence-line">${escapeHtml(sentence.text)}</span>`;
+      }
+
+      // === Render a sentence with word-by-word highlighting – includes timestamp and proper spacing ===
+      function renderSentenceWithWords(sentence, activeWordIndex, className) {
+        const words = sentence.words || [];
+        const timeStr = formatTime(sentence.start);
+
+        // Build word-by-word display with spaces between words
+        let html = `<span class="karaoke-timestamp">${timeStr}</span><span class="karaoke-sentence-line">`;
+        for (let i = 0; i < words.length; i++) {
+          const w = words[i];
+          const isActive = (i === activeWordIndex);
+          const wordClass = isActive ? 'karaoke-word active' : 'karaoke-word inactive';
+          const wordText = escapeHtml(w.word);
+          // Insert a space after every word except the last
+          const space = (i < words.length - 1) ? ' ' : '';
+          html += `<span class="${wordClass}">${wordText}</span>${space}`;
+        }
+        html += '</span>';
+        return html;
+      }
+
+      // === Reset karaoke state ===
+      function clearKaraokeData() {
+        alignmentData = null;
+        karaokeActive = false;
+        showKaraokeUI(false);
+        const currentTrack = getCurrentTrack();
+        if (currentTrack) {
+          currentTrack.alignmentData = null;
+        }
+      }
+
+      // === Handle JSON file upload ===
+      function handleKaraokeFileUpload(file) {
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const json = JSON.parse(e.target.result);
+            loadAlignmentData(json);
+          } catch (error) {
+            console.error('JSON parse error:', error);
+            window.alert(`Failed to parse JSON file:\n${error.message}`);
+          }
+        };
+        reader.onerror = () => {
+          window.alert('Failed to read the JSON file.');
+        };
+        reader.readAsText(file);
+      }
+
+      // === Extend the file input handler to detect JSON ===
+      // Modify the existing addFiles function - we'll override it
+
+      // Store original addFiles
+      // const originalAddFiles = window.addFiles;
+
+      // Override addFiles with enhanced version
+      // We'll replace the addFiles function entirely
+
+      // But we need to be careful - let me provide the complete replacement
+
+      // ===== 5. Replace the addFiles function with this enhanced version =====
+      // Find the existing addFiles function and replace it with:
+
+      function addFiles(fileList) {
+        const files = Array.from(fileList);
+        const audioFiles = files.filter((file) => file.type.startsWith('audio/'));
+        const jsonFiles = files.filter((file) => file.type === 'application/json' || file.name.endsWith('.json'));
+
+        // Handle JSON files first - attach to current track
+        if (jsonFiles.length > 0) {
+          // If there are multiple JSON files, use the first one
+          const jsonFile = jsonFiles[0];
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const json = JSON.parse(e.target.result);
+              loadAlignmentData(json);
+            } catch (error) {
+              console.error('JSON parse error:', error);
+              window.alert(`Failed to parse JSON file:\n${error.message}`);
+            }
+          };
+          reader.onerror = () => {
+            window.alert('Failed to read the JSON file.');
+          };
+          reader.readAsText(jsonFile);
+        }
+
+        // Handle audio files
+        if (audioFiles.length) {
+          const newTracks = audioFiles.map((file) => ({
+            id: `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`,
+            name: file.name,
+            size: formatFileSize(file.size),
+            file,
+            url: URL.createObjectURL(file),
+            alignmentData: null,
+          }));
+
+          tracks = [...tracks, ...newTracks];
+          renderPlaylist();
+          updateSelectionUi();
+
+          // Select the first new track
+          if (newTracks[0]) {
+            selectTrack(newTracks[0].id, false);
+          }
+        }
+
+        // If no audio files but we have JSON, and there's a current track, attach to it
+        if (jsonFiles.length > 0 && audioFiles.length === 0) {
+          // JSON already handled above, but we should make sure it's attached to the current track
+          const currentTrack = getCurrentTrack();
+          if (currentTrack && alignmentData) {
+            currentTrack.alignmentData = alignmentData;
+          }
+        }
+      }
+
+      // ===== 6. Add karaoke sync to the progress update loop =====
+      // Modify the existing updateProgress function to include karaoke sync
+
+      // Find the updateProgress function and add:
+      function updateProgress() {
+        if (!sound || !isPlaying) return;
+        const dur = sound.duration();
+        const cur = sound.seek();
+        if (!dur) return;
+        progress.style.width = (cur / dur) * 100 + '%';
+        currentTimeEl.textContent = formatTime(cur);
+
+        // Karaoke sync
+        if (alignmentData && alignmentData.sentences.length > 0) {
+          updateKaraokeDisplay(cur);
+        }
+
+        progressFrame = requestAnimationFrame(updateProgress);
+      }
+
+
+
+
+
 
       uploadArea.addEventListener("click", () => fileInput.click());
 
@@ -1035,29 +1545,6 @@
         );
       }
 
-      function addFiles(fileList) {
-        const audioFiles = Array.from(fileList).filter((file) =>
-          file.type.startsWith("audio/"),
-        );
-        if (!audioFiles.length) return;
-
-        const newTracks = audioFiles.map((file) => ({
-          id: `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`,
-          name: file.name,
-          size: formatFileSize(file.size),
-          file,
-          url: URL.createObjectURL(file),
-        }));
-
-        tracks = [...tracks, ...newTracks];
-        renderPlaylist();
-        updateSelectionUi();
-
-        // 始终选中新上传的第一个文件（如果有）
-        if (newTracks[0]) {
-          selectTrack(newTracks[0].id, false); // false = 不自动播放
-        }
-      }
 
       function selectTrack(trackId, autoPlay = true) {
         const track = tracks.find((item) => item.id === trackId);
@@ -1110,7 +1597,22 @@
         sound = nextSound;
 
         renderPlaylist();
+        
+        // ===== Add karaoke reset when track changes =====
+        // In the selectTrack function, add:
+        // Reset karaoke when track changes
+        if (track.alignmentData) {
+          alignmentData = track.alignmentData;
+          karaokeActive = true;
+          updateKaraokeDisplay(0);
+          showKaraokeUI(true);
+        } else {
+          clearKaraokeData();
+        }
+
       }
+
+
 
       playBtn.addEventListener("click", () => {
         togglePlayback();
@@ -1198,13 +1700,28 @@
         progress.style.width = percent * 100 + "%";
       });
 
+      // function updateProgress() {
+      //   if (!sound || !isPlaying) return;
+      //   const dur = sound.duration();
+      //   const cur = sound.seek();
+      //   if (!dur) return;
+      //   progress.style.width = (cur / dur) * 100 + "%";
+      //   currentTimeEl.textContent = formatTime(cur);
+      //   progressFrame = requestAnimationFrame(updateProgress);
+      // }
       function updateProgress() {
         if (!sound || !isPlaying) return;
         const dur = sound.duration();
         const cur = sound.seek();
         if (!dur) return;
-        progress.style.width = (cur / dur) * 100 + "%";
+        progress.style.width = (cur / dur) * 100 + '%';
         currentTimeEl.textContent = formatTime(cur);
+
+        // Karaoke sync
+        if (alignmentData && alignmentData.sentences.length > 0) {
+          updateKaraokeDisplay(cur);
+        }
+
         progressFrame = requestAnimationFrame(updateProgress);
       }
 
@@ -2201,6 +2718,134 @@
         // 更新图标（由 lucide 重新渲染）
         lucide.createIcons();
       });
+
+
+      // ===== 9. Final initialization and event binding =====
+      // Add these to the script at the end
+
+      // === Wire up the karaoke upload button ===
+      karaokeUploadBtn.addEventListener('click', () => {
+        karaokeFileInput.click();
+      });
+
+      karaokeFileInput.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          handleKaraokeFileUpload(file);
+        }
+        karaokeFileInput.value = '';
+      });
+
+      // === Add drag-and-drop for JSON on the karaoke container ===
+      karaokeContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        karaokeContainer.style.borderColor = 'var(--emerald)';
+        karaokeContainer.style.background = 'var(--emerald-soft)';
+      });
+
+      karaokeContainer.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        karaokeContainer.style.borderColor = 'var(--border)';
+        karaokeContainer.style.background = 'var(--panel)';
+      });
+
+      karaokeContainer.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        karaokeContainer.style.borderColor = 'var(--border)';
+        karaokeContainer.style.background = 'var(--panel)';
+
+        const files = e.dataTransfer.files;
+        for (const file of files) {
+          if (file.type === 'application/json' || file.name.endsWith('.json')) {
+            handleKaraokeFileUpload(file);
+            break;
+          }
+        }
+      });
+
+      // === Also accept JSON drops on the main upload area ===
+      // We'll extend the upload area drop handler
+
+      // Store the original drop handler logic and augment it
+      const originalDropHandler = uploadArea._dropHandler || null;
+
+      // Replace the drop handler on uploadArea
+      // We'll override the existing 'drop' listener with a new one
+
+      // Remove existing drop listener (we'll use a new one)
+      // Since we can't easily remove an anonymous listener, we'll add a new one
+      // that also handles JSON files
+
+      // Add a separate drop handler for JSON files on the upload area
+      uploadArea.addEventListener('drop', (e) => {
+        // This runs in addition to the existing handler via bubbling
+        // But we need to handle JSON files specially
+        const files = e.dataTransfer.files;
+        let hasJson = false;
+        for (const file of files) {
+          if (file.type === 'application/json' || file.name.endsWith('.json')) {
+            hasJson = true;
+            handleKaraokeFileUpload(file);
+            break;
+          }
+        }
+        // If there's JSON and no audio, prevent the default audio handler from
+        // trying to process JSON as audio
+        if (hasJson) {
+          // The audio handler will also run, but it will filter out non-audio files
+          // so this is safe
+        }
+      }, true); // Use capture phase to run before the existing handler
+
+      // ===== 10. Initialize karaoke state =====
+      showKaraokeUI(false);
+
+      // ===== 11. Add clear alignment button to the karaoke UI =====
+      // Add a small clear button in the karaoke header
+      const clearBtn = document.createElement('button');
+      clearBtn.className = 'ctrl-btn';
+      clearBtn.style.width = 'auto';
+      clearBtn.style.padding = '4px 12px';
+      clearBtn.style.borderRadius = '20px';
+      clearBtn.style.fontSize = '11px';
+      clearBtn.style.marginLeft = '12px';
+      clearBtn.textContent = '✕ Clear';
+      clearBtn.title = 'Clear alignment data';
+      clearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearKaraokeData();
+        const currentTrack = getCurrentTrack();
+        if (currentTrack) {
+          currentTrack.alignmentData = null;
+        }
+      });
+
+      // Add it to the karaoke container header area
+      const headerArea = document.createElement('div');
+      headerArea.style.display = 'flex';
+      headerArea.style.alignItems = 'center';
+      headerArea.style.justifyContent = 'space-between';
+      headerArea.style.marginBottom = '4px';
+      headerArea.style.width = '100%';
+
+      const titleSpan = document.createElement('span');
+      titleSpan.style.fontSize = '10px';
+      titleSpan.style.fontWeight = '600';
+      titleSpan.style.color = 'var(--text-muted)';
+      titleSpan.style.letterSpacing = '0.12em';
+      titleSpan.textContent = 'TRANSCRIPT';
+
+      headerArea.appendChild(titleSpan);
+      headerArea.appendChild(clearBtn);
+
+      // Insert at the top of the karaoke container
+      karaokeContainer.insertBefore(headerArea, karaokeContainer.firstChild);
+
+      console.log('Karaoke feature initialized!');
+
 
 
     </script>
