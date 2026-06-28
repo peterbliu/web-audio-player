@@ -978,7 +978,7 @@
       /* ===== Waveform display styles ===== */
       .waveform-container {
         width: 100%;
-        height: 60px;
+        height: 50px;
         margin: 8px 0 12px 0;
         border-radius: 6px;
         overflow: hidden;
@@ -1009,7 +1009,7 @@
       /* Mobile adjustment */
       @media (max-width: 640px) {
         .waveform-container {
-          height: 44px;
+          height: 50px;
           margin: 4px 0 8px 0;
         }
       }
@@ -1428,7 +1428,7 @@
             progressColor: '#10b981',
             cursorColor: 'transparent',
             cursorWidth: 0,
-            height: 60,
+            height: container.parentElement?.clientHeight || 50,
             width: '100%',
             interact: false,
             dragToSeek: false,
