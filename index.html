@@ -1043,8 +1043,8 @@
             <span id="fileNameText"></span>
           </div>
           
-          <div class="waveform-container" id="waveformContainer">
-            <div id="waveform"></div>
+          <div class="waveform-container" id='waveformContainer'>
+            <div id='waveform'></div>
           </div>
 
           <div class="progress-bar" id="progressBar">
@@ -1422,14 +1422,14 @@
         try {
           wavesurfer = WaveSurfer.create({
             container: container,
-            barWidth: 3,
-            barGap: 2,
+            barWidth:2,
+            barGap: 1,
             waveColor: '#4a5568',
             progressColor: '#10b981',
             cursorColor: 'transparent',
             cursorWidth: 0,
-            height: container.parentElement?.clientHeight || 60,
-            width: container.parentElement?.clientWidth || '100%',
+            height: 60,
+            width: '100%',
             interact: false,
             dragToSeek: false,
             autoScroll: false,
@@ -1929,7 +1929,6 @@
         // Show waveform container
         updateWaveformVisibility(true);
 
-        // Use requestAnimationFrame to ensure container is rendered before loading
         requestAnimationFrame(() => {
           if (!wavesurfer) initWaveSurfer();
           loadWaveform(track.url);
@@ -3314,6 +3313,7 @@
 
       // Initially hide waveform container
       updateWaveformVisibility(false);
+
     </script>
   </body>
 </html>
