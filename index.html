@@ -632,17 +632,23 @@
           <div class="progress" id="progress"></div>
         </div>
 
-        <div class="controls">
-          <button class="ctrl-btn" id="toBeginBtn" aria-label="回到开头" data-i18n-aria-label="toBegin">
-            <i data-lucide="skip-back"></i>
-          </button>
-          <button class="play-btn" id="playBtn" aria-label="播放" data-i18n-aria-label="play">
-            <i data-lucide="play"></i>
-          </button>
-          <button class="ctrl-btn" id="toEndBtn" aria-label="跳到结尾" data-i18n-aria-label="toEnd">
-            <i data-lucide="skip-forward"></i>
-          </button>
-        </div>
+      <div class="controls">
+        <button class="ctrl-btn" id="toBeginBtn" aria-label="回到开头" data-i18n-aria-label="toBegin">
+          <i data-lucide="skip-back"></i>
+        </button>
+        <button class="ctrl-btn" id="skipBackBtn" aria-label="后退5秒" data-i18n-aria-label="skipBack">
+          <i data-lucide="rewind"></i>
+        </button>
+        <button class="play-btn" id="playBtn" aria-label="播放" data-i18n-aria-label="play">
+          <i data-lucide="play"></i>
+        </button>
+        <button class="ctrl-btn" id="skipForwardBtn" aria-label="前进5秒" data-i18n-aria-label="skipForward">
+          <i data-lucide="fast-forward"></i>
+        </button>
+        <button class="ctrl-btn" id="toEndBtn" aria-label="跳到结尾" data-i18n-aria-label="toEnd">
+          <i data-lucide="skip-forward"></i>
+        </button>
+      </div>
 
         <div class="speed-group">
           <button class="speed-btn" data-speed="0.5">0.5x</button>
@@ -811,6 +817,8 @@
           ffmpegDone: "完成 FFmpeg atempo 导出：速度 {speed}x，格式 {format}",
           offlineRendering: "浏览器不支持实时捕获，正在使用 OfflineAudioContext 导出...",
           offlineDone: "完成 OfflineAudioContext 导出；注意此备用模式可能不会保留音高。",
+          skipBack: "后退5秒",
+          skipForward: "前进5秒",
         },
         en: {
           appTitle: "Vario-Speed Audio Tools",
@@ -865,6 +873,8 @@
           ffmpegDone: "Finished FFmpeg atempo export: {speed}x {format}",
           offlineRendering: "Real-time capture is not supported. Exporting with OfflineAudioContext...",
           offlineDone: "Finished OfflineAudioContext export. This fallback may not preserve pitch.",
+          skipBack: "Skip back 5s",
+          skipForward: "Skip forward 5s",
         },
       };
 
@@ -1052,6 +1062,40 @@
           ),
         );
       }
+
+      document.getElementById('skipBackBtn').addEventListener('click', () => {
+        if (!sound) return;
+        const currentTime = sound.seek() || 0;
+        const newTime = Math.max(0, currentTime - 5);
+        sound.seek(newTime);
+        const dur = sound.duration();
+        if (dur > 0) {
+          progress.style.width = (newTime / dur) * 100 + '%';
+        }
+        currentTimeEl.textContent = formatTime(newTime);
+        // 如果正在播放，继续更新；否则停止循环
+        if (isPlaying) {
+          stopProgressLoop();
+          startProgressLoop();
+        }
+      });
+
+      document.getElementById('skipForwardBtn').addEventListener('click', () => {
+        if (!sound) return;
+        const currentTime = sound.seek() || 0;
+        const duration = sound.duration();
+        const newTime = Math.min(duration, currentTime + 5);
+        sound.seek(newTime);
+        if (duration > 0) {
+          progress.style.width = (newTime / duration) * 100 + '%';
+        }
+        currentTimeEl.textContent = formatTime(newTime);
+        if (isPlaying) {
+          stopProgressLoop();
+          startProgressLoop();
+        }
+      });
+
 
       toBeginBtn.addEventListener("click", () => {
         if (!sound) return;
