@@ -597,13 +597,6 @@
         margin-top: 4px;
       }
 
-      .version-label {
-        margin-top: 18px;
-        text-align: center;
-        color: var(--text-faint);
-        font-size: 11px;
-      }
-
       .delete-btn {
         width: 28px;
         height: 28px;
@@ -669,13 +662,13 @@
 
       /* ===== Karaoke display styles ===== */
       .karaoke-container {
-        margin: 8px 0 4px 0;
+        margin: 10px 0 10px 0;
         padding: 6px 8px 6px 8px;  /* left/right 8px, top/bottom 6px */
         border-radius: 8px;
         min-height: auto;
         background: var(--panel);
         border: 1px solid var(--border);
-        min-height: 80px;
+        min-height: 300px;
         display: none;
         position: relative;
         overflow: hidden;
@@ -686,10 +679,10 @@
       }
 
       .karaoke-sentence {
-        padding: 2px 4px;          /* only 2px top/bottom, 4px left/right */
+        padding: 2px 0px;          /* only 2px top/bottom, 4px left/right */
         margin: 1px 0;
         line-height: 1.5;
-        font-size: 14px;           /* slightly smaller for compactness */
+        font-size: 16px;           /* slightly smaller for compactness */
         min-height: 1.8em;
         gap: 4px;
         font-weight: 400;
@@ -699,7 +692,6 @@
         transition: border-color 0.2s ease, color 0.2s ease;
         display: flex;
         align-items: baseline;
-        gap: 8px;
       }
 
       .karaoke-sentence.prev {
@@ -736,7 +728,7 @@
 
       .karaoke-timestamp {
         font-size: 10px;
-        min-width: 32px;
+        min-width: 11px;
         color: var(--text-faint);
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
@@ -748,12 +740,12 @@
       /* Mobile-specific fine‑tuning */
       @media (max-width: 640px) {
         .karaoke-container {
-          padding: 4px 6px 4px 6px;
+          padding: 4px 0px 4px 0px;
           margin: 6px 0 2px 0;
         }
         .karaoke-sentence {
-          font-size: 13px;
-          padding: 1px 2px;
+          font-size: 14px;
+          padding: 1px 0px 1px 0px;
           line-height: 1.4;
           min-height: 1.6em;
           gap: 3px;
@@ -825,62 +817,167 @@
         display: inline-block;
       }
 
+
+      /* Header controls - settings button + language switcher */
+      .header-controls {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Settings container - hidden by default */
+      .settings-container {
+        display: none;
+        margin-top: 16px;
+        border-top: 1px solid var(--border);
+        padding-top: 16px;
+      }
+
+      .settings-container.visible {
+        display: block;
+      }
+
+      /* Re-organize settings items vertically */
+      .settings-container .language-switcher-wrapper {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .settings-container .language-switcher-wrapper:last-child {
+        border-bottom: none;
+      }
+
+      .settings-container .language-switcher-wrapper label {
+        font-size: 12px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .settings-container .language-switcher-wrapper select {
+        min-height: 32px;
+        border: 1px solid var(--border-strong);
+        border-radius: 8px;
+        background: #191919;
+        color: var(--text);
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      /* Mobile adjustments */
+      @media (max-width: 640px) {
+        .header-controls {
+          top: auto;
+          bottom: 0;
+          transform: none;
+        }
+      }
+
+
+      /* Footer area – flex row with version and settings */
+      .footer-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 12px;
+        padding: 0 4px;
+      }
+
+      .version-label {
+        margin: 0;
+        font-size: 11px;
+        color: var(--text-faint);
+        text-align: left;
+      }
+
+      .settings-toggle-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 2px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s, background 0.2s;
+        flex-shrink: 0;
+      }
+
+      .settings-toggle-btn:hover {
+        color: var(--text);
+        background: var(--panel-raised);
+      }
+
+      .settings-toggle-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .settings-toggle-btn.active {
+        color: var(--emerald);
+      }
+
     </style>
   </head>
 
   <body>
     <div class="container">
-      <div class="app-header">
-        <div class="title" data-i18n="appTitle">变速音频工具</div>
-        <label class="language-switcher" for="languageSelect">
-          <select id="languageSelect" aria-label="语言 / Language">
-            <option value="zh">CN</option>
-            <option value="en">EN</option>
-          </select>
-        </label>
-      </div>
+        <!-- <div class="app-header">
+          <div class="title" data-i18n="appTitle">变速音频工具</div>
+          <button class="settings-toggle-btn" id="settingsToggleBtn" aria-label="切换设置" data-i18n-aria-label="settingsToggle">
+            <i data-lucide="settings"></i>
+          </button>
+        </div> -->
 
-      <div class="upload-area" id="uploadArea">
-        <p data-i18n="uploadMain">点击或拖拽音频文件到这里</p>
-        <p class="upload-hint">
-          <span data-i18n="uploadHint">支持一次添加多个文件</span>
-          mp3 / wav / m4a / ogg / json
-        </p>
-        <input type="file" id="fileInput" accept="audio/*,.json,application/json" multiple />
-      </div>
-
-      <div class="player" id="player">
-        <div class="filename" id="fileName">
-          <span id="fileNameText"></span>
-          <span class="alignment-badge" id="alignmentBadge">📝 Aligned</span>
+        <div class="upload-area" id="uploadArea">
+          <p data-i18n="uploadMain">点击或拖拽音频文件到这里</p>
+          <p class="upload-hint">
+            <span data-i18n="uploadHint">支持一次添加多个文件</span>
+            mp3 / wav / m4a / ogg / json
+          </p>
+          <input type="file" id="fileInput" accept="audio/*,.json,application/json" multiple />
         </div>
 
-        <div class="time">
-          <span id="current">0:00</span> / <span id="duration">0:00</span>
+        <div class="player" id="player">
+          <div class="filename" id="fileName">
+            <span id="fileNameText"></span>
+            <span class="alignment-badge" id="alignmentBadge">📝 Aligned</span>
+          </div>
+
+          <div class="time">
+            <span id="current">0:00</span> / <span id="duration">0:00</span>
+          </div>
+
+          <div class="progress-bar" id="progressBar">
+            <div class="progress" id="progress"></div>
+          </div>
         </div>
 
-        <div class="progress-bar" id="progressBar">
-          <div class="progress" id="progress"></div>
+        <div class="controls">
+          <button class="ctrl-btn" id="toBeginBtn" aria-label="回到开头" data-i18n-aria-label="toBegin">
+            <i data-lucide="skip-back"></i>
+          </button>
+          <button class="ctrl-btn" id="skipBackBtn" aria-label="后退5秒" data-i18n-aria-label="skipBack">
+            <i data-lucide="rewind"></i>
+          </button>
+          <button class="play-btn" id="playBtn" aria-label="播放" data-i18n-aria-label="play">
+            <i data-lucide="play"></i>
+          </button>
+          <button class="ctrl-btn" id="skipForwardBtn" aria-label="前进5秒" data-i18n-aria-label="skipForward">
+            <i data-lucide="fast-forward"></i>
+          </button>
+          <button class="ctrl-btn" id="toEndBtn" aria-label="跳到结尾" data-i18n-aria-label="toEnd">
+            <i data-lucide="skip-forward"></i>
+          </button>
         </div>
-      </div>
-
-      <div class="controls">
-        <button class="ctrl-btn" id="toBeginBtn" aria-label="回到开头" data-i18n-aria-label="toBegin">
-          <i data-lucide="skip-back"></i>
-        </button>
-        <button class="ctrl-btn" id="skipBackBtn" aria-label="后退5秒" data-i18n-aria-label="skipBack">
-          <i data-lucide="rewind"></i>
-        </button>
-        <button class="play-btn" id="playBtn" aria-label="播放" data-i18n-aria-label="play">
-          <i data-lucide="play"></i>
-        </button>
-        <button class="ctrl-btn" id="skipForwardBtn" aria-label="前进5秒" data-i18n-aria-label="skipForward">
-          <i data-lucide="fast-forward"></i>
-        </button>
-        <button class="ctrl-btn" id="toEndBtn" aria-label="跳到结尾" data-i18n-aria-label="toEnd">
-          <i data-lucide="skip-forward"></i>
-        </button>
-      </div>
 
         <div class="speed-group">
           <button class="speed-btn" data-speed="0.5">0.5x</button>
@@ -918,94 +1015,117 @@
           </div>
         </div>
 
+        <!-- footer area Settings button -->
+        <div class="footer-container" >
+          <div class="version-label">v0.026</div>
+          <button class="settings-toggle-btn" id="settingsToggleBtn" aria-label="切换设置" data-i18n-aria-label="settingsToggle">
+            <i data-lucide="settings"></i>
+          </button>
+        </div>
 
-        <div class="export-panel" id="exportPanel">
-          <div class="export-header">
-            <button class="export-toggle-btn" id="exportToggleBtn" aria-expanded="false">
-              <i data-lucide="chevron-right"></i>
-              <span data-i18n="exportToggleLabel">导出</span>
-            </button>
+        <!-- Settings container – hidden by default -->
+        <div class="settings-container" id="settingsContainer">
+          <!-- Row 1: Language switcher -->
+          <div class="settings-row">
+            <label for="languageSelect">
+              <!-- <span data-i18n="languageLabel">语言 / Language</span> -->
+              <select id="languageSelect" aria-label="语言 / Language">
+                <option value="zh">CN</option>
+                <option value="en">EN</option>
+              </select>
+            </label>
           </div>
-          <div class="export-body" id="exportBody" style="display: none;">
-            <div class="export-toolbar">
-              <div class="export-fields">
-                <div class="field">
-                  <label for="exportMode" data-i18n="exportModeLabel">导出模式</label>
-                  <select id="exportMode">
-                    <option value="live" selected data-i18n="exportModeLive">
-                      浏览器 PCM 捕获 - 实时速度
-                    </option>
-                    <option value="ffmpeg" data-i18n="exportModeFfmpeg">
-                      FFmpeg atempo 导出 - 直接渲染
-                    </option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label for="exportFormat" data-i18n="formatLabel">格式</label>
-                  <select id="exportFormat">
-                    <option value="wav">WAV</option>
-                    <option value="mp3-192">MP3 192k</option>
-                    <option value="mp3-256">MP3 256k</option>
-                  </select>
-                </div>
-                <label class="batch-export-control" title="使用当前速度导出所有已选播放列表项目" data-i18n-title="batchExportTitle">
-                  <input type="checkbox" id="batchExportSelected" />
-                  <span data-i18n="batchExportLabel">导出已选</span>
-                </label>
+
+          <div class="export-panel" id="exportPanel">
+              <div class="export-header">
+                <button class="export-toggle-btn" id="exportToggleBtn" aria-expanded="false">
+                  <i data-lucide="chevron-right"></i>
+                  <span data-i18n="exportToggleLabel">导出</span>
+                </button>
               </div>
-              <button class="download-btn" id="downloadBtn" type="button">
-                <i data-lucide="download"></i>
-                <span data-i18n="downloadCurrent">下载当前速度音频</span>
-              </button>
-              <button
-                class="cancel-export-btn"
-                id="cancelExportBtn"
-                type="button"
-                aria-label="取消导出"
-                data-i18n-aria-label="cancelExport"
-              >
-                <i data-lucide="x"></i>
-                <span data-i18n="cancel">取消</span>
-              </button>
-            </div>
-            <div
-              class="export-progress-bar"
-              role="progressbar"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              aria-valuenow="0"
-              id="exportProgressBar"
-            >
-              <div class="export-progress" id="exportProgress"></div>
-            </div>
-            <div class="export-status" id="exportStatus">
-              默认使用浏览器实时 PCM 捕获导出 WAV，使用当前选择的播放速度。
-            </div>
+                  <div class="export-body" id="exportBody" style="display: none;">
+                    <div class="export-toolbar">
+                      <div class="export-fields">
+                        <div class="field">
+                          <label for="exportMode" data-i18n="exportModeLabel">导出模式</label>
+                          <select id="exportMode">
+                            <option value="live" selected data-i18n="exportModeLive">
+                              浏览器 PCM 捕获 - 实时速度
+                            </option>
+                            <option value="ffmpeg" data-i18n="exportModeFfmpeg">
+                              FFmpeg atempo 导出 - 直接渲染
+                            </option>
+                          </select>
+                        </div>
+                        <div class="field">
+                          <label for="exportFormat" data-i18n="formatLabel">格式</label>
+                          <select id="exportFormat">
+                            <option value="wav">WAV</option>
+                            <option value="mp3-192">MP3 192k</option>
+                            <option value="mp3-256">MP3 256k</option>
+                          </select>
+                        </div>
+                        <label class="batch-export-control" title="使用当前速度导出所有已选播放列表项目" data-i18n-title="batchExportTitle">
+                          <input type="checkbox" id="batchExportSelected" />
+                          <span data-i18n="batchExportLabel">导出已选</span>
+                        </label>
+                      </div>
+                      <button class="download-btn" id="downloadBtn" type="button">
+                        <i data-lucide="download"></i>
+                        <span data-i18n="downloadCurrent">下载当前速度音频</span>
+                      </button>
+                      <button
+                        class="cancel-export-btn"
+                        id="cancelExportBtn"
+                        type="button"
+                        aria-label="取消导出"
+                        data-i18n-aria-label="cancelExport"
+                      >
+                        <i data-lucide="x"></i>
+                        <span data-i18n="cancel">取消</span>
+                      </button>
+                    </div>
+                    <div
+                      class="export-progress-bar"
+                      role="progressbar"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      aria-valuenow="0"
+                      id="exportProgressBar"
+                    >
+                      <div class="export-progress" id="exportProgress"></div>
+                    </div>
+                    <div class="export-status" id="exportStatus">
+                      默认使用浏览器实时 PCM 捕获导出 WAV，使用当前选择的播放速度。
+                    </div>
+                  </div>
           </div>
-        </div>
-      </div>
+              
+          <div class="playlist">
+            <div class="playlist-header">
+              <div class="playlist-title" data-i18n="playlistTitle">播放列表</div>
+              <label
+                class="select-all-control"
+                id="selectAllControl"
+                title="Click to select all. Shift-click to clear all."
+                data-i18n-title="selectAllTitle"
+              >
+                <input type="checkbox" id="selectAllTracks" />
+                <span id="selectAllLabel">全选</span>
+              </label>
+            </div>
+            <div class="playlist-empty" id="playlistEmpty" data-i18n="playlistEmpty">
+              还没有音频文件，拖拽或上传多个文件后会自动加入列表。
+            </div>
+            <div class="track-list" id="trackList"></div>
+          </div>
 
-      <div class="playlist">
-        <div class="playlist-header">
-          <div class="playlist-title" data-i18n="playlistTitle">播放列表</div>
-          <label
-            class="select-all-control"
-            id="selectAllControl"
-            title="Click to select all. Shift-click to clear all."
-            data-i18n-title="selectAllTitle"
-          >
-            <input type="checkbox" id="selectAllTracks" />
-            <span id="selectAllLabel">全选</span>
-          </label>
         </div>
-        <div class="playlist-empty" id="playlistEmpty" data-i18n="playlistEmpty">
-          还没有音频文件，拖拽或上传多个文件后会自动加入列表。
-        </div>
-        <div class="track-list" id="trackList"></div>
-      </div>
+      
 
-      <div class="version-label">v0.026</div>
-    </div>
+
+    </div> <!-- body -->
+      
 
     <script>
       let sound = null;
@@ -1420,19 +1540,6 @@
       }
 
       // === Extend the file input handler to detect JSON ===
-      // Modify the existing addFiles function - we'll override it
-
-      // Store original addFiles
-      // const originalAddFiles = window.addFiles;
-
-      // Override addFiles with enhanced version
-      // We'll replace the addFiles function entirely
-
-      // But we need to be careful - let me provide the complete replacement
-
-      // ===== 5. Replace the addFiles function with this enhanced version =====
-      // Find the existing addFiles function and replace it with:
-
       function addFiles(fileList) {
         const files = Array.from(fileList);
         const audioFiles = files.filter((file) => file.type.startsWith('audio/'));
@@ -1508,10 +1615,6 @@
 
         progressFrame = requestAnimationFrame(updateProgress);
       }
-
-
-
-
 
 
       uploadArea.addEventListener("click", () => fileInput.click());
@@ -1722,15 +1825,6 @@
         progress.style.width = percent * 100 + "%";
       });
 
-      // function updateProgress() {
-      //   if (!sound || !isPlaying) return;
-      //   const dur = sound.duration();
-      //   const cur = sound.seek();
-      //   if (!dur) return;
-      //   progress.style.width = (cur / dur) * 100 + "%";
-      //   currentTimeEl.textContent = formatTime(cur);
-      //   progressFrame = requestAnimationFrame(updateProgress);
-      // }
       function updateProgress() {
         if (!sound || !isPlaying) return;
         const dur = sound.duration();
@@ -2859,9 +2953,8 @@
       // titleSpan.style.color = 'var(--text-muted)';
       // titleSpan.style.letterSpacing = '0.12em';
       // titleSpan.textContent = 'TRANSCRIPT';
-
-      headerArea.appendChild(titleSpan);
-      headerArea.appendChild(clearBtn);
+      // headerArea.appendChild(titleSpan);
+      // headerArea.appendChild(clearBtn);
 
       // Insert at the top of the karaoke container
       karaokeContainer.insertBefore(headerArea, karaokeContainer.firstChild);
@@ -2869,6 +2962,24 @@
       console.log('Karaoke feature initialized!');
 
 
+      const settingsToggleBtn = document.getElementById('settingsToggleBtn');
+      const settingsContainer = document.getElementById('settingsContainer');
+      let settingsVisible = false;
+
+      settingsToggleBtn.addEventListener('click', () => {
+        settingsVisible = !settingsVisible;
+        settingsContainer.classList.toggle('visible', settingsVisible);
+        settingsToggleBtn.classList.toggle('active', settingsVisible);
+        lucide.createIcons();
+      });
+
+      // 同步语言切换（如果使用移动端下拉菜单）
+      const languageSelectMobile = document.getElementById('languageSelectMobile');
+      if (languageSelectMobile) {
+        languageSelectMobile.addEventListener('change', () => {
+          setLanguage(languageSelectMobile.value);
+        });
+      }
 
     </script>
   </body>
