@@ -228,14 +228,14 @@
       }
 
       .speed-btn {
-        min-width: 48px;
-        padding: 5px 8px;
+        min-width: 36px;
+        padding: 3px 6px;
         border-radius: 8px;
         border: 1px solid var(--border);
         background: var(--panel);
         color: var(--text);
         cursor: pointer;
-        font-size: 12px;
+        font-size: 10px;
       }
 
       .speed-btn.active {
@@ -1053,8 +1053,9 @@
         renderPlaylist();
         updateSelectionUi();
 
-        if (!currentTrackId && newTracks[0]) {
-          selectTrack(newTracks[0].id, false);
+        // 始终选中新上传的第一个文件（如果有）
+        if (newTracks[0]) {
+          selectTrack(newTracks[0].id, false); // false = 不自动播放
         }
       }
 
@@ -1133,10 +1134,9 @@
       function shouldIgnoreShortcut(event) {
         const target = event.target;
         if (!(target instanceof Element)) return false;
+        // Only ignore if the target is a form field or contenteditable (not buttons)
         return Boolean(
-          target.closest(
-            "button, input, select, textarea, [contenteditable='true']",
-          ),
+          target.closest("input, select, textarea, [contenteditable='true']"),
         );
       }
 
