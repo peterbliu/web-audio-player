@@ -246,12 +246,79 @@
       }
 
       .export-panel {
-        margin: 18px auto 0;
-        padding: 14px;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        background: var(--panel);
-      }
+          margin: 18px auto 0;
+          padding: 0;
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          background: var(--panel);
+          overflow: hidden;
+        }
+
+        .export-header {
+          display: flex;
+          align-items: center;
+          padding: 6px 14px;
+          cursor: pointer;
+          user-select: none;
+          border-bottom: 1px solid transparent;
+          transition: border-color 0.2s;
+        }
+
+        .export-header:hover {
+          border-bottom-color: var(--border-strong);
+        }
+
+        .export-toggle-btn {
+          background: none;
+          border: none;
+          color: var(--text-muted);
+          font-size: 12px;
+          font-weight: 500;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 6px;
+          cursor: pointer;
+          border-radius: 4px;
+          transition: background 0.2s, color 0.2s;
+        }
+
+        .export-toggle-btn:hover {
+          background: var(--panel-raised);
+          color: var(--text);
+        }
+
+        .export-toggle-btn:focus-visible {
+          outline: 2px solid var(--emerald);
+          outline-offset: 1px;
+        }
+
+        .export-toggle-btn svg {
+          width: 14px;
+          height: 14px;
+          transition: transform 0.25s ease;
+        }
+
+        .export-toggle-btn[aria-expanded="true"] svg {
+          transform: rotate(90deg);
+        }
+
+        .export-body {
+          padding: 14px;
+          border-top: 1px solid var(--border);
+          animation: fadeSlide 0.2s ease;
+        }
+
+        @keyframes fadeSlide {
+          from {
+            opacity: 0;
+            transform: translateY(-6px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
 
       .export-toolbar {
         display: grid;
@@ -670,59 +737,67 @@
         </div>
 
         <div class="export-panel" id="exportPanel">
-          <div class="export-toolbar">
-            <div class="export-fields">
-              <div class="field">
-                <label for="exportMode" data-i18n="exportModeLabel">导出模式</label>
-                <select id="exportMode">
-                  <option value="live" selected data-i18n="exportModeLive">
-                    浏览器 PCM 捕获 - 实时速度
-                  </option>
-                  <option value="ffmpeg" data-i18n="exportModeFfmpeg">
-                    FFmpeg atempo 导出 - 直接渲染
-                  </option>
-                </select>
+          <div class="export-header">
+            <button class="export-toggle-btn" id="exportToggleBtn" aria-expanded="false">
+              <i data-lucide="chevron-right"></i>
+              <span data-i18n="exportToggleLabel">导出</span>
+            </button>
+          </div>
+          <div class="export-body" id="exportBody" style="display: none;">
+            <div class="export-toolbar">
+              <div class="export-fields">
+                <div class="field">
+                  <label for="exportMode" data-i18n="exportModeLabel">导出模式</label>
+                  <select id="exportMode">
+                    <option value="live" selected data-i18n="exportModeLive">
+                      浏览器 PCM 捕获 - 实时速度
+                    </option>
+                    <option value="ffmpeg" data-i18n="exportModeFfmpeg">
+                      FFmpeg atempo 导出 - 直接渲染
+                    </option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="exportFormat" data-i18n="formatLabel">格式</label>
+                  <select id="exportFormat">
+                    <option value="wav">WAV</option>
+                    <option value="mp3-192">MP3 192k</option>
+                    <option value="mp3-256">MP3 256k</option>
+                  </select>
+                </div>
+                <label class="batch-export-control" title="使用当前速度导出所有已选播放列表项目" data-i18n-title="batchExportTitle">
+                  <input type="checkbox" id="batchExportSelected" />
+                  <span data-i18n="batchExportLabel">导出已选</span>
+                </label>
               </div>
-              <div class="field">
-                <label for="exportFormat" data-i18n="formatLabel">格式</label>
-                <select id="exportFormat">
-                  <option value="wav">WAV</option>
-                  <option value="mp3-192">MP3 192k</option>
-                  <option value="mp3-256">MP3 256k</option>
-                </select>
-              </div>
-              <label class="batch-export-control" title="使用当前速度导出所有已选播放列表项目" data-i18n-title="batchExportTitle">
-                <input type="checkbox" id="batchExportSelected" />
-                <span data-i18n="batchExportLabel">导出已选</span>
-              </label>
+              <button class="download-btn" id="downloadBtn" type="button">
+                <i data-lucide="download"></i>
+                <span data-i18n="downloadCurrent">下载当前速度音频</span>
+              </button>
+              <button
+                class="cancel-export-btn"
+                id="cancelExportBtn"
+                type="button"
+                aria-label="取消导出"
+                data-i18n-aria-label="cancelExport"
+              >
+                <i data-lucide="x"></i>
+                <span data-i18n="cancel">取消</span>
+              </button>
             </div>
-            <button class="download-btn" id="downloadBtn" type="button">
-              <i data-lucide="download"></i>
-              <span data-i18n="downloadCurrent">下载当前速度音频</span>
-            </button>
-            <button
-              class="cancel-export-btn"
-              id="cancelExportBtn"
-              type="button"
-              aria-label="取消导出"
-              data-i18n-aria-label="cancelExport"
+            <div
+              class="export-progress-bar"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              id="exportProgressBar"
             >
-              <i data-lucide="x"></i>
-              <span data-i18n="cancel">取消</span>
-            </button>
-          </div>
-          <div
-            class="export-progress-bar"
-            role="progressbar"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-valuenow="0"
-            id="exportProgressBar"
-          >
-            <div class="export-progress" id="exportProgress"></div>
-          </div>
-          <div class="export-status" id="exportStatus">
-            默认使用浏览器实时 PCM 捕获导出 WAV，使用当前选择的播放速度。
+              <div class="export-progress" id="exportProgress"></div>
+            </div>
+            <div class="export-status" id="exportStatus">
+              默认使用浏览器实时 PCM 捕获导出 WAV，使用当前选择的播放速度。
+            </div>
           </div>
         </div>
       </div>
@@ -819,6 +894,7 @@
           offlineDone: "完成 OfflineAudioContext 导出；注意此备用模式可能不会保留音高。",
           skipBack: "后退5秒",
           skipForward: "前进5秒",
+          exportToggleLabel: "导出",
         },
         en: {
           appTitle: "Vario-Speed Audio Tools",
@@ -875,6 +951,7 @@
           offlineDone: "Finished OfflineAudioContext export. This fallback may not preserve pitch.",
           skipBack: "Skip back 5s",
           skipForward: "Skip forward 5s",
+          exportToggleLabel: "Export",
         },
       };
 
@@ -2112,6 +2189,20 @@
 
       setLanguage("zh");
       lucide.createIcons();
+
+      const exportToggleBtn = document.getElementById('exportToggleBtn');
+      const exportBody = document.getElementById('exportBody');
+
+      exportToggleBtn.addEventListener('click', () => {
+        const isExpanded = exportToggleBtn.getAttribute('aria-expanded') === 'true';
+        const newState = !isExpanded;
+        exportToggleBtn.setAttribute('aria-expanded', newState);
+        exportBody.style.display = newState ? 'block' : 'none';
+        // 更新图标（由 lucide 重新渲染）
+        lucide.createIcons();
+      });
+
+
     </script>
   </body>
 </html>
