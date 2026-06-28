@@ -669,9 +669,10 @@
 
       /* ===== Karaoke display styles ===== */
       .karaoke-container {
-        margin: 16px 0 8px 0;
-        padding: 12px 16px;
-        border-radius: 12px;
+        margin: 8px 0 4px 0;
+        padding: 6px 8px 6px 8px;  /* left/right 8px, top/bottom 6px */
+        border-radius: 8px;
+        min-height: auto;
         background: var(--panel);
         border: 1px solid var(--border);
         min-height: 80px;
@@ -685,19 +686,20 @@
       }
 
       .karaoke-sentence {
-        padding: 6px 8px;
-        line-height: 1.6;
-        font-size: 15px;
+        padding: 2px 4px;          /* only 2px top/bottom, 4px left/right */
+        margin: 1px 0;
+        line-height: 1.5;
+        font-size: 14px;           /* slightly smaller for compactness */
+        min-height: 1.8em;
+        gap: 4px;
         font-weight: 400;
         color: var(--text-muted);
         border-radius: 4px;
         border: 1px solid transparent;
         transition: border-color 0.2s ease, color 0.2s ease;
-        margin: 2px 0;
         display: flex;
         align-items: baseline;
         gap: 8px;
-        min-height: 2.2em; /* keeps row height stable */
       }
 
       .karaoke-sentence.prev {
@@ -733,14 +735,33 @@
       }
 
       .karaoke-timestamp {
-        font-size: 11px;
+        font-size: 10px;
+        min-width: 32px;
         color: var(--text-faint);
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
-        min-width: 38px;
         text-align: right;
         opacity: 0.6;
         flex-shrink: 0;
+      }
+
+      /* Mobile-specific fine‑tuning */
+      @media (max-width: 640px) {
+        .karaoke-container {
+          padding: 4px 6px 4px 6px;
+          margin: 6px 0 2px 0;
+        }
+        .karaoke-sentence {
+          font-size: 13px;
+          padding: 1px 2px;
+          line-height: 1.4;
+          min-height: 1.6em;
+          gap: 3px;
+        }
+        .karaoke-timestamp {
+          font-size: 9px;
+          min-width: 28px;
+        }
       }
 
       .karaoke-sentence.current .karaoke-timestamp {
@@ -828,23 +849,6 @@
         <input type="file" id="fileInput" accept="audio/*,.json,application/json" multiple />
       </div>
 
-      <!-- ===== sentence timestamps segments display ===== -->
-      <div class="karaoke-container" id="karaokeContainer">
-        <div class="karaoke-upload-hint" id="karaokeUploadHint">
-          <span data-i18n="karaokeHint">Drop a JSON alignment file here or</span>
-          <button id="karaokeUploadBtn" data-i18n="karaokeUploadBtn">Browse JSON</button>
-          <span data-i18n="karaokeFormat">(format: sentence segments with word timings)</span>
-        </div>
-        <div id="karaokeDisplay" style="display: none;">
-          <div id="karaokePrev" class="karaoke-sentence prev"></div>
-          <div id="karaokeCurrent" class="karaoke-sentence current"></div>
-          <div id="karaokeNext" class="karaoke-sentence next"></div>
-        </div>
-        <div class="karaoke-empty" id="karaokeEmpty" data-i18n="karaokeEmpty">
-          No alignment data loaded. Upload a JSON file with sentence and word timings.
-        </div>
-      </div>
-
       <div class="player" id="player">
         <div class="filename" id="fileName">
           <span id="fileNameText"></span>
@@ -896,6 +900,24 @@
           <button class="speed-btn" data-speed="1.4">1.4x</button>
           <button class="speed-btn" data-speed="1.5">1.5x</button>
         </div>
+
+        <!-- ===== karaoke timestamps segments display ===== -->
+        <div class="karaoke-container" id="karaokeContainer">
+          <div class="karaoke-upload-hint" id="karaokeUploadHint">
+            <span data-i18n="karaokeHint">Drop a JSON alignment file here or</span>
+            <button id="karaokeUploadBtn" data-i18n="karaokeUploadBtn">Browse JSON</button>
+            <span data-i18n="karaokeFormat">(format: sentence segments with word timings)</span>
+          </div>
+          <div id="karaokeDisplay" style="display: none;">
+            <div id="karaokePrev" class="karaoke-sentence prev"></div>
+            <div id="karaokeCurrent" class="karaoke-sentence current"></div>
+            <div id="karaokeNext" class="karaoke-sentence next"></div>
+          </div>
+          <div class="karaoke-empty" id="karaokeEmpty" data-i18n="karaokeEmpty">
+            No alignment data loaded. Upload a JSON file with sentence and word timings.
+          </div>
+        </div>
+
 
         <div class="export-panel" id="exportPanel">
           <div class="export-header">
@@ -2831,12 +2853,12 @@
       headerArea.style.marginBottom = '4px';
       headerArea.style.width = '100%';
 
-      const titleSpan = document.createElement('span');
-      titleSpan.style.fontSize = '10px';
-      titleSpan.style.fontWeight = '600';
-      titleSpan.style.color = 'var(--text-muted)';
-      titleSpan.style.letterSpacing = '0.12em';
-      titleSpan.textContent = 'TRANSCRIPT';
+      // const titleSpan = document.createElement('span');
+      // titleSpan.style.fontSize = '10px';
+      // titleSpan.style.fontWeight = '600';
+      // titleSpan.style.color = 'var(--text-muted)';
+      // titleSpan.style.letterSpacing = '0.12em';
+      // titleSpan.textContent = 'TRANSCRIPT';
 
       headerArea.appendChild(titleSpan);
       headerArea.appendChild(clearBtn);
