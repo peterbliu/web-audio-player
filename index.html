@@ -1523,7 +1523,97 @@
       const selectAllTracks = document.getElementById("selectAllTracks");
       const selectAllLabel = document.getElementById("selectAllLabel");
 
+      //helper for finding ASR aligned result word in the original text
+      function normalizeToken(text) {
+          return text
+              .normalize("NFKC")
+              .replace(/[’'`´]/g, "")
+              .replace(/[-‐-‒–—―]/g, "")
+              .replace(/[.,!?;:()[\]{}"]/g, "")
+              .toLowerCase();
+      }
+
+      function tokenizeSentence(sentenceText) {
+
+          const tokens = [];
+
+          const regex = /[\p{L}\p{N}’'`´-]+/gu;
+
+          let match;
+
+          while ((match = regex.exec(sentenceText)) !== null) {
+
+              tokens.push({
+
+                  text: match[0],
+
+                  normalized: normalizeToken(match[0]),
+
+                  startChar: match.index,
+
+                  endChar: match.index + match[0].length
+
+              });
+
+          }
+
+          return tokens;
+      }
       
+
+
+      function buildSentenceRenderMaps(transcript) {
+
+        if (!transcript.sentenceAlignment)
+            return;
+
+        if (!transcript.wordAlignment)
+            return;
+
+        const EPS = 0.03;
+
+        for (const sentence of transcript.sentenceAlignment) {
+
+            const sentenceWords = transcript.wordAlignment.filter(w =>
+                w.start >= sentence.start - EPS &&
+                w.end <= sentence.end + EPS
+            );
+
+            const tokens = tokenizeSentence(sentence.text);
+
+            const renderMap = [];
+
+            let tokenIndex = 0;
+
+            for (const word of sentenceWords) {
+
+                const normalizedWord = normalizeToken(word.word);
+
+                while (tokenIndex < tokens.length) {
+
+                    const token = tokens[tokenIndex++];
+
+                    if (token.normalized === normalizedWord) {
+
+                        renderMap.push({
+
+                            startChar: token.startChar,
+
+                            endChar: token.endChar,
+
+                            word: word
+
+                        });
+
+                        break;
+                    }
+                }
+            }
+
+            sentence.renderMap = renderMap;
+        }
+      }
+
 
       let pendingSeek = null;
 
@@ -1838,7 +1928,9 @@
         // Current sentence with word highlights
         const current = sentences[currentIndex];
         const activeWordIndex = findActiveWord(current, currentTime);
-        karaokeCurrent.innerHTML = renderSentenceWithWords(current, activeWordIndex, 'current');
+        const activeWord = activeWordIndex >= 0 ? current.words[activeWordIndex] : null;
+        karaokeCurrent.innerHTML = renderSentence(current, activeWord);
+
         karaokeCurrent.style.display = 'flex';
 
         // Next sentence (or empty placeholder)
@@ -1881,80 +1973,57 @@
         return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
       }
 
-      // === Render a sentence with word-by-word highlighting – includes timestamp and proper spacing ===
-      function renderSentenceWithWords(sentence, activeWordIndex, className) {
-        const text = sentence.text || '';
-        const words = sentence.words || [];
+      function renderSentence(sentence, activeWord) {
+
+        if (!sentence.renderMap || sentence.renderMap.length === 0)
+            return escapeHtml(sentence.text);
+
+        let html = "";
+
+        let cursor = 0;
+
+        for (const item of sentence.renderMap) {
+
+            html += escapeHtml(
+                sentence.text.slice(cursor, item.startChar)
+            );
+
+            const text = sentence.text.slice(
+                item.startChar,
+                item.endChar
+            );
+
+            if (item.word === activeWord) {
+
+                html += `<span class="karaoke-word active">${escapeHtml(text)}</span>`;
+
+            } else {
+
+                html += `<span class="karaoke-word">${escapeHtml(text)}</span>`;
+
+            }
+
+            cursor = item.endChar;
+        }
+
+        html += escapeHtml(sentence.text.slice(cursor));
+
         const timeStr = formatTime(sentence.start);
 
-        // 如果没有单词级对齐，显示纯文本（带翻译）
-        if (words.length === 0) {
-            let textBlockHtml = `<span class="karaoke-sentence-line">${escapeHtml(text)}</span>`;
-            if (showTranslation && sentence.translation) {
-                textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
-            }
-            return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
-        }
+        let textBlockHtml =
+            `<span class="karaoke-sentence-line">${html}</span>`;
 
-        // 按顺序在 text 中查找每个 word 的位置
-        let cursor = 0;
-        let parts = []; // 存储 { text, isWord, isActive? }
-        let allMatched = true;
-
-        for (let i = 0; i < words.length; i++) {
-            const wordObj = words[i];
-            const wordText = wordObj.word;
-            // 从 cursor 开始查找 wordText（区分大小写，保持原样）
-            const foundIndex = text.indexOf(wordText, cursor);
-            if (foundIndex === -1) {
-                // 匹配失败，降级为纯文本（避免错误高亮）
-                allMatched = false;
-                break;
-            }
-            // 添加前面的普通文本（标点、空格等）
-            if (foundIndex > cursor) {
-                parts.push({ text: text.substring(cursor, foundIndex), isWord: false });
-            }
-            // 添加当前单词（高亮部分）
-            const isActive = (i === activeWordIndex);
-            parts.push({ text: wordText, isWord: true, isActive: isActive });
-            cursor = foundIndex + wordText.length;
-        }
-
-        // 如果匹配失败，降级为纯文本
-        if (!allMatched) {
-            let textBlockHtml = `<span class="karaoke-sentence-line">${escapeHtml(text)}</span>`;
-            if (showTranslation && sentence.translation) {
-                textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
-            }
-            return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
-        }
-
-        // 添加剩余部分（如果有）
-        if (cursor < text.length) {
-            parts.push({ text: text.substring(cursor), isWord: false });
-        }
-
-        // 构建最终的 HTML
-        let lineHtml = '';
-        for (const part of parts) {
-            if (part.isWord) {
-                const wordClass = part.isActive ? 'karaoke-word active' : 'karaoke-word inactive';
-                lineHtml += `<span class="${wordClass}">${escapeHtml(part.text)}</span>`;
-            } else {
-                lineHtml += escapeHtml(part.text);
-            }
-        }
-
-        // 组装包含翻译的完整块
-        let textBlockHtml = `<span class="karaoke-sentence-line">${lineHtml}</span>`;
         if (showTranslation && sentence.translation) {
-            textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
+            textBlockHtml +=
+                `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
         }
-        return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
-    }
 
-
+        return `
+        <span class="karaoke-timestamp">${timeStr}</span>
+        <div class="karaoke-text-block">
+        ${textBlockHtml}
+        </div>`;
+     }
 
 
       // === Reset karaoke state ===
@@ -1989,9 +2058,63 @@
       }
 
 
+
+      function buildSentenceRenderMaps(transcript) {
+
+        if (!transcript.sentenceAlignment)
+            return;
+
+        if (!transcript.wordAlignment)
+            return;
+
+        const EPS = 0.03;
+
+        for (const sentence of transcript.sentenceAlignment) {
+
+            const sentenceWords = transcript.wordAlignment.filter(w =>
+                w.start >= sentence.start - EPS &&
+                w.end <= sentence.end + EPS
+            );
+
+            const tokens = tokenizeSentence(sentence.text);
+
+            const renderMap = [];
+
+            let tokenIndex = 0;
+
+            for (const word of sentenceWords) {
+
+                const normalizedWord = normalizeToken(word.word);
+
+                while (tokenIndex < tokens.length) {
+
+                    const token = tokens[tokenIndex++];
+
+                    if (token.normalized === normalizedWord) {
+
+                        renderMap.push({
+
+                            startChar: token.startChar,
+
+                            endChar: token.endChar,
+
+                            word: word
+
+                        });
+
+                        break;
+                    }
+                }
+            }
+
+            sentence.renderMap = renderMap;
+        }
+      }
+
       function buildAlignmentFromTranscript(transcript) {
         const sentenceAlignment = transcript.sentenceAlignment || [];
         const wordAlignment = transcript.wordAlignment || [];
+        buildSentenceRenderMaps(transcript);
         const translationText = transcript.translation || '';
 
         // Split translation into lines, trim, and filter empty (keep empty lines as placeholders?)
@@ -2001,19 +2124,23 @@
 
         const sentences = sentenceAlignment.map((s, index) => {
           // Filter words that belong to this sentence (by start/end overlap)
+          const EPS = 0.03;
+
           const words = wordAlignment.filter(w =>
-            w.start >= s.start && w.end <= s.end
-          ).map(w => ({ word: w.word, start: w.start, end: w.end }));
+              w.start >= s.start - EPS &&
+              w.end <= s.end + EPS
+          );
 
           // Get translation line if available
           const translation = (index < translationLines.length) ? translationLines[index] : '';
 
           return {
-            text: s.text,
-            start: s.start,
-            end: s.end,
-            words: words,
-            translation: translation
+              text: s.text,
+              start: s.start,
+              end: s.end,
+              words: words,
+              translation: translation,
+              renderMap: s.renderMap || []
           };
         });
 
@@ -2096,7 +2223,7 @@
                       type: mimeTypes[ext] || "application/octet-stream"
                   }
               );
-              console.log("loaded audio media type: ",audioBlob.type);
+              // console.log("loaded audio media type: ",audioBlob.type); // debug info log
 
             } catch (e) {
               console.warn(`Failed to extract audio file: ${transcript.audioFileName}`, e);
