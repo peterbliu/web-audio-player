@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <script src="https://unpkg.com/wavesurfer.js@7.12.6/dist/wavesurfer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <style>
       * {
         box-sizing: border-box;
@@ -725,20 +726,41 @@
         opacity: 0.6;
         flex-shrink: 0;
       }
+
+
       .karaoke-sentence {
-        padding: 2px 0px;          /* only 2px top/bottom, 1px left/right */
+        padding: 2px 0px;
         margin: 1px 0;
         line-height: 1.5;
-        font-size: 16px;           /* slightly smaller for compactness */
+        font-size: 16px;
         min-height: 1.8em;
-        gap: 4px;
         font-weight: 400;
         color: var(--text-muted);
         border-radius: 4px;
         border: 1px solid transparent;
         transition: border-color 0.2s ease, color 0.2s ease;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 4px 8px;
+        align-items: baseline; 
+      }
+
+      .karaoke-text-block {
+        grid-column: 2;           /* 强制放在第二列 */
         display: flex;
-        align-items: baseline;
+        flex-direction: column;
+        align-items: flex-start;  /* 内部左对齐 */
+        gap: 1px;                 /* 原文和翻译之间的垂直间距为1px */
+        min-width: 0;             /* 防止溢出 */
+      }
+
+      .karaoke-translation {
+        display: block;
+        margin-top: 0;            /* 由父容器的 gap 控制 */
+        font-size: 14px;
+        color: var(--text-muted);
+        opacity: 0.8;
+        width: 100%;
       }
 
       .karaoke-sentence.prev {
@@ -774,25 +796,6 @@
       }
 
 
-
-      /* Mobile-specific fine‑tuning */
-      @media (max-width: 640px) {
-        .karaoke-container {
-          padding: 8px 4px 8px 4px; /*top bottom 8px left right 4px*/
-          margin: 6px 0 2px 0;
-        }
-        .karaoke-sentence {
-          font-size: 14px;
-          padding: 1px 0px 1px 0px;
-          line-height: 1.4;
-          min-height: 1.6em;
-          gap: 4px;
-        }
-        .karaoke-timestamp {
-          font-size: 11px;
-          min-width: 11px;
-        }
-      }
 
       .karaoke-sentence.current .karaoke-timestamp {
         color: var(--emerald);
@@ -855,6 +858,29 @@
         display: inline-block;
       }
 
+
+
+      /* Mobile-specific fine‑tuning */
+      @media (max-width: 640px) {
+        .karaoke-sentence {
+          font-size: 14px;
+          padding: 1px 0px;
+          line-height: 1.4;
+          min-height: 1.6em;
+          gap: 4px;               /* 可保持左右间隙一致 */
+        }
+        .karaoke-timestamp {
+          font-size: 11px;
+          min-width: 11px;
+        }
+        .karaoke-translation {
+          font-size: 12px;
+          margin-top: 0;
+        }
+        .karaoke-text-block {
+          gap: 1px;               /* 同样保持1px */
+        }
+      }
 
       /* Header controls - settings button + language switcher */
       .header-controls {
@@ -1080,6 +1106,9 @@
           height: 14px;
         }
       }
+
+
+
 
     </style>
   </head>
@@ -1670,10 +1699,30 @@
       karaokeFileInput.id = 'karaokeFileInput';
       document.body.appendChild(karaokeFileInput);
 
+      
       // === Load alignment data from JSON ===
       function loadAlignmentData(jsonData) {
         try {
           let segments = Array.isArray(jsonData) ? jsonData : (jsonData.segments || jsonData.sentences || []);
+          // If the input is a full transcript object (from session.json), it may have sentenceAlignment and wordAlignment
+          // We'll try to detect that and use it.
+          if (jsonData.sentenceAlignment && jsonData.wordAlignment) {
+            // Use the helper to build alignment with translation
+            const result = buildAlignmentFromTranscript(jsonData);
+            alignmentData = result;
+            karaokeActive = true;
+            updateKaraokeDisplay(0);
+            showKaraokeUI(true);
+            setExportStatus(t('karaokeLoaded', { sentences: alignmentData.sentences.length }));
+            // Store on current track
+            const currentTrack = getCurrentTrack();
+            if (currentTrack) {
+              currentTrack.alignmentData = alignmentData;
+            }
+            return true;
+          }
+
+          // Otherwise, treat as simple array of sentence objects (no translation)
           if (!Array.isArray(segments) || segments.length === 0) {
             throw new Error('Invalid alignment format: expected array of segments.');
           }
@@ -1688,7 +1737,8 @@
               words: Array.isArray(s.words) ? s.words
                 .filter(w => w.word && typeof w.start === 'number' && typeof w.end === 'number')
                 .map(w => ({ word: w.word.trim(), start: w.start, end: w.end }))
-                : []
+                : [],
+              translation: s.translation || '' // might already have translation
             }))
             .filter(s => s.text.length > 0);
 
@@ -1843,7 +1893,11 @@
       // === Render a sentence without word highlights (for prev/next) – includes timestamp ===
       function renderSentencePlain(sentence, className) {
         const timeStr = formatTime(sentence.start);
-        return `<span class="karaoke-timestamp">${timeStr}</span><span class="karaoke-sentence-line">${escapeHtml(sentence.text)}</span>`;
+        let textBlockHtml = `<span class="karaoke-sentence-line">${escapeHtml(sentence.text)}</span>`;
+        if (showTranslation && sentence.translation) {
+          textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
+        }
+        return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
       }
 
       // === Render a sentence with word-by-word highlighting – includes timestamp and proper spacing ===
@@ -1851,19 +1905,22 @@
         const words = sentence.words || [];
         const timeStr = formatTime(sentence.start);
 
-        // Build word-by-word display with spaces between words
-        let html = `<span class="karaoke-timestamp">${timeStr}</span><span class="karaoke-sentence-line">`;
+        // Build word-by-word display
+        let lineHtml = '';
         for (let i = 0; i < words.length; i++) {
           const w = words[i];
           const isActive = (i === activeWordIndex);
           const wordClass = isActive ? 'karaoke-word active' : 'karaoke-word inactive';
           const wordText = escapeHtml(w.word);
-          // Insert a space after every word except the last
           const space = (i < words.length - 1) ? ' ' : '';
-          html += `<span class="${wordClass}">${wordText}</span>${space}`;
+          lineHtml += `<span class="${wordClass}">${wordText}</span>${space}`;
         }
-        html += '</span>';
-        return html;
+
+        let textBlockHtml = `<span class="karaoke-sentence-line">${lineHtml}</span>`;
+        if (showTranslation && sentence.translation) {
+          textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
+        }
+        return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
       }
 
       // === Reset karaoke state ===
@@ -1897,11 +1954,153 @@
         reader.readAsText(file);
       }
 
-      // === Extend the file input handler to detect JSON ===
+
+      function buildAlignmentFromTranscript(transcript) {
+        const sentenceAlignment = transcript.sentenceAlignment || [];
+        const wordAlignment = transcript.wordAlignment || [];
+        const translationText = transcript.translation || '';
+
+        // Split translation into lines, trim, and filter empty (keep empty lines as placeholders?)
+        const translationLines = translationText.split('\n').map(line => line.trim());
+        // We'll map each sentence to its translation line by index.
+        // If there are fewer translation lines, we'll pad with empty strings.
+
+        const sentences = sentenceAlignment.map((s, index) => {
+          // Filter words that belong to this sentence (by start/end overlap)
+          const words = wordAlignment.filter(w =>
+            w.start >= s.start && w.end <= s.end
+          ).map(w => ({ word: w.word, start: w.start, end: w.end }));
+
+          // Get translation line if available
+          const translation = (index < translationLines.length) ? translationLines[index] : '';
+
+          return {
+            text: s.text,
+            start: s.start,
+            end: s.end,
+            words: words,
+            translation: translation
+          };
+        });
+
+        return { sentences };
+      }
+
+
+      // import zip file - session with multiple audios/transcripts(translation)
+      async function processZipFile(zipFile) {
+        try {
+          const zip = await JSZip.loadAsync(zipFile);
+          
+          // Find session.json
+          const sessionFile = zip.file('session.json');
+          if (!sessionFile) {
+            showAlert('Invalid session zip: missing session.json', 'error');
+            console.error('session.json not found in zip.');
+            return;
+          }
+
+          const sessionContent = await sessionFile.async('string');
+          let sessionData;
+          try {
+            sessionData = JSON.parse(sessionContent);
+          } catch (e) {
+            showAlert('Invalid session.json: not a valid JSON file.', 'error');
+            console.error('JSON parse error:', e);
+            return;
+          }
+
+          if (!sessionData.transcripts || !Array.isArray(sessionData.transcripts) || sessionData.transcripts.length === 0) {
+            showAlert('Invalid session.json: missing or empty "transcripts" array.', 'error');
+            console.error('No transcripts found.');
+            return;
+          }
+
+          const newTracks = [];
+          let hasErrors = false;
+
+          for (const transcript of sessionData.transcripts) {
+            // Validate required fields
+            if (!transcript.id || !transcript.name || !transcript.audioFileName) {
+              console.warn('Skipping transcript with missing id/name/audioFileName:', transcript);
+              continue;
+            }
+
+            // Extract audio file from zip
+            const audioFileEntry = zip.file(transcript.audioFileName);
+            if (!audioFileEntry) {
+              console.warn(`Audio file not found in zip: ${transcript.audioFileName}`);
+              hasErrors = true;
+              continue;
+            }
+
+            let audioBlob;
+            try {
+              audioBlob = await audioFileEntry.async('blob');
+            } catch (e) {
+              console.warn(`Failed to extract audio file: ${transcript.audioFileName}`, e);
+              hasErrors = true;
+              continue;
+            }
+
+            // Build alignment data
+            const alignmentData = buildAlignmentFromTranscript(transcript);
+
+            // Create track
+            const track = {
+              id: transcript.id,
+              name: transcript.name,
+              size: formatFileSize(audioBlob.size),
+              file: audioBlob,
+              url: URL.createObjectURL(audioBlob),
+              alignmentData: alignmentData,
+            };
+            newTracks.push(track);
+          }
+
+          if (newTracks.length === 0) {
+            showAlert('No valid transcript-audio pairs found in the zip.', 'error');
+            console.error('No tracks imported.');
+            return;
+          }
+
+          // Append new tracks to existing list (or replace? We'll append)
+          tracks = [...tracks, ...newTracks];
+          renderPlaylist();
+          updateSelectionUi();
+
+          // Select the first imported track
+          if (newTracks[0]) {
+            selectTrack(newTracks[0].id, false);
+          }
+
+          showAlert(`Successfully imported ${newTracks.length} transcript(s) from session.`, 'success');
+          if (hasErrors) {
+            console.warn('Some audio files were missing; see console for details.');
+          }
+
+        } catch (error) {
+          console.error('Zip processing error:', error);
+          showAlert(`Failed to process zip: ${error.message}`, 'error');
+        }
+      }
+
+
+      // === Extend the file input handler to detect JSON / zip session file ===
       function addFiles(fileList) {
         const files = Array.from(fileList);
         const audioFiles = files.filter((file) => file.type.startsWith('audio/'));
         const jsonFiles = files.filter((file) => file.type === 'application/json' || file.name.endsWith('.json'));
+        const zipFiles = files.filter((file) => file.type === 'application/zip' || file.name.endsWith('.zip'));
+
+        // Handle zip files – only the first one is processed
+        if (zipFiles.length > 0) {
+          if (zipFiles.length > 1) {
+            console.warn('Multiple zip files dropped. Only the first one will be imported.');
+          }
+          processZipFile(zipFiles[0]);
+          return; // After processing zip, we don't process other files in the same batch
+        }
 
         // Handle JSON files first - attach to current track
         if (jsonFiles.length > 0) {
@@ -1955,7 +2154,6 @@
             currentTrack.alignmentData = alignmentData;
           }
         }
-
       }
 
 
@@ -3529,15 +3727,54 @@
       transBtn.addEventListener('click', () => {
         showTranslation = !showTranslation;
         transBtn.classList.toggle('active', showTranslation);
-        // Update aria-label and title to reflect state (optional)
         const labelKey = showTranslation ? 'karaokeTranslationHide' : 'karaokeTranslationShow';
         transBtn.setAttribute('aria-label', t(labelKey));
         transBtn.title = t(labelKey);
-        // Placeholder: you can add actual translation logic later
+        // Refresh karaoke display
+        let time = 0;
+        if (sound) {
+          try {
+            const seekVal = sound.seek();
+            if (typeof seekVal === 'number' && !isNaN(seekVal) && seekVal >= 0) {
+              time = seekVal;
+            }
+          } catch (_) {}
+        }
+        updateKaraokeDisplay(time);
         console.log(`Translation ${showTranslation ? 'on' : 'off'}`);
       });
 
-
+      function showAlert(message, type = 'info') {
+        // Use a custom dark theme alert (simple modal)
+        const existing = document.querySelector('.custom-alert');
+        if (existing) existing.remove();
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'custom-alert';
+        alertDiv.style.cssText = `
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: ${type === 'error' ? '#7f1d1d' : type === 'success' ? '#064e3b' : '#1e293b'};
+          color: #e5e7eb;
+          padding: 12px 24px;
+          border-radius: 8px;
+          border: 1px solid ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#475569'};
+          font-size: 14px;
+          z-index: 9999;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+          max-width: 90%;
+          text-align: center;
+          font-weight: 500;
+        `;
+        alertDiv.textContent = message;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => {
+          alertDiv.style.opacity = '0';
+          alertDiv.style.transition = 'opacity 0.5s';
+          setTimeout(() => alertDiv.remove(), 600);
+        }, 4000);
+      }
 
     </script>
   </body>
