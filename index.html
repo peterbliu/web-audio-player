@@ -1828,11 +1828,11 @@
       // === Load alignment data from JSON ===
       function loadAlignmentData(jsonData) {
         try {
+          // 1. Detect format: full transcript object (R/L Tools sesson) or array of segments (qwen asr result)
           let segments = Array.isArray(jsonData) ? jsonData : (jsonData.segments || jsonData.sentences || []);
-          // If the input is a full transcript object (from session.json), it may have sentenceAlignment and wordAlignment
-          // We'll try to detect that and use it.
+          
+          // 2. If it's a full transcript (with sentenceAlignment & wordAlignment), use the existing builder
           if (jsonData.sentenceAlignment && jsonData.wordAlignment) {
-            // Use the helper to build alignment with translation
             const result = buildAlignmentFromTranscript(jsonData);
             alignmentData = result;
             karaokeActive = true;
@@ -1847,12 +1847,12 @@
             return true;
           }
 
-          // Otherwise, treat as simple array of sentence objects (no translation)
+          // 3. Otherwise, treat as simple array of sentence segments (like your segments.json)
           if (!Array.isArray(segments) || segments.length === 0) {
             throw new Error('Invalid alignment format: expected array of segments.');
           }
 
-          // Validate and normalize
+          // Validate and normalize segments
           const sentences = segments
             .filter(s => s.text && typeof s.start === 'number' && typeof s.end === 'number')
             .map(s => ({
@@ -1863,13 +1863,20 @@
                 .filter(w => w.word && typeof w.start === 'number' && typeof w.end === 'number')
                 .map(w => ({ word: w.word.trim(), start: w.start, end: w.end }))
                 : [],
-              translation: s.translation || '' // might already have translation
+              translation: s.translation || ''
             }))
             .filter(s => s.text.length > 0);
 
           if (sentences.length === 0) {
             throw new Error('No valid sentences found in the JSON data.');
           }
+
+          // 4. Build renderMap for each sentence (for word highlighting) – same as zip import
+          const transcript = {
+            sentenceAlignment: sentences,
+            wordAlignment: sentences.flatMap(s => s.words)
+          };
+          buildSentenceRenderMaps(transcript);  // mutates each sentence in place, adding .renderMap
 
           alignmentData = { sentences };
           karaokeActive = true;
@@ -1892,6 +1899,8 @@
           return false;
         }
       }
+
+
 
       // === Show/hide karaoke UI ===
       function showKaraokeUI(show) {
