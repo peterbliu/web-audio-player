@@ -1856,19 +1856,19 @@
 
 
       // === Find which word is active at the current time ===
+      // 播放至最后一个单词结束后，高亮会停留在最后一个单词上，不会消失。 这样用户视线始终能追踪到最后一个被读到的词，避免了快速说话时高亮消失又出现的闪烁感。
       function findActiveWord(sentence, currentTime) {
-        const words = sentence.words || [];
-        for (let i = 0; i < words.length; i++) {
-          const w = words[i];
-          if (currentTime >= w.start && currentTime <= w.end) {
-            return i;
+          const words = sentence.words || [];
+          if (words.length === 0) return -1;
+          let activeIndex = -1;
+          for (let i = 0; i < words.length; i++) {
+              if (words[i].start <= currentTime) {
+                  activeIndex = i;
+              } else {
+                  break;
+              }
           }
-        }
-        // Check if we're past the last word
-        if (words.length > 0 && currentTime > words[words.length - 1].end) {
-          return words.length - 1;
-        }
-        return -1;
+          return activeIndex;
       }
 
       // === Render a sentence without word highlights (for prev/next) – includes timestamp ===
@@ -1883,64 +1883,79 @@
 
       // === Render a sentence with word-by-word highlighting – includes timestamp and proper spacing ===
       function renderSentenceWithWords(sentence, activeWordIndex, className) {
-          const text = sentence.text || '';
-          const words = sentence.words || [];
-          const timeStr = formatTime(sentence.start);
+        const text = sentence.text || '';
+        const words = sentence.words || [];
+        const timeStr = formatTime(sentence.start);
 
-          // 如果没有单词级对齐，显示纯文本
-          if (words.length === 0) {
-              let textBlockHtml = `<span class="karaoke-sentence-line">${escapeHtml(text)}</span>`;
-              if (showTranslation && sentence.translation) {
-                  textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
-              }
-              return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
-          }
+        // 如果没有单词级对齐，显示纯文本（带翻译）
+        if (words.length === 0) {
+            let textBlockHtml = `<span class="karaoke-sentence-line">${escapeHtml(text)}</span>`;
+            if (showTranslation && sentence.translation) {
+                textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
+            }
+            return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
+        }
 
-          // 使用 Unicode 感知的正则匹配所有单词（支持变音符号、撇号等）
-          const wordRegex = /\p{L}+(?:'\p{L}+)*/gu;
-          const matches = [...text.matchAll(wordRegex)];
+        // 按顺序在 text 中查找每个 word 的位置
+        let cursor = 0;
+        let parts = []; // 存储 { text, isWord, isActive? }
+        let allMatched = true;
 
-          // 如果匹配到的单词数与对齐数据不一致，降级为纯文本（避免错误高亮）
-          if (matches.length !== words.length) {
-              let textBlockHtml = `<span class="karaoke-sentence-line">${escapeHtml(text)}</span>`;
-              if (showTranslation && sentence.translation) {
-                  textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
-              }
-              return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
-          }
+        for (let i = 0; i < words.length; i++) {
+            const wordObj = words[i];
+            const wordText = wordObj.word;
+            // 从 cursor 开始查找 wordText（区分大小写，保持原样）
+            const foundIndex = text.indexOf(wordText, cursor);
+            if (foundIndex === -1) {
+                // 匹配失败，降级为纯文本（避免错误高亮）
+                allMatched = false;
+                break;
+            }
+            // 添加前面的普通文本（标点、空格等）
+            if (foundIndex > cursor) {
+                parts.push({ text: text.substring(cursor, foundIndex), isWord: false });
+            }
+            // 添加当前单词（高亮部分）
+            const isActive = (i === activeWordIndex);
+            parts.push({ text: wordText, isWord: true, isActive: isActive });
+            cursor = foundIndex + wordText.length;
+        }
 
-          // 构建带高亮的分段 HTML
-          let lineHtml = '';
-          let lastIndex = 0;
-          for (let i = 0; i < matches.length; i++) {
-              const match = matches[i];
-              const start = match.index;
-              const end = start + match[0].length;
-              // 添加单词前的非单词字符（标点、空格等）
-              if (start > lastIndex) {
-                  lineHtml += escapeHtml(text.substring(lastIndex, start));
-              }
-              // 添加单词本身，根据是否活跃添加样式
-              const isActive = (i === activeWordIndex);
-              const wordClass = isActive ? 'karaoke-word active' : 'karaoke-word inactive';
-              // 使用匹配到的原始字符串（保留原文大小写和变音）
-              lineHtml += `<span class="${wordClass}">${escapeHtml(match[0])}</span>`;
-              lastIndex = end;
-          }
-          // 添加剩余的非单词部分
-          if (lastIndex < text.length) {
-              lineHtml += escapeHtml(text.substring(lastIndex));
-          }
+        // 如果匹配失败，降级为纯文本
+        if (!allMatched) {
+            let textBlockHtml = `<span class="karaoke-sentence-line">${escapeHtml(text)}</span>`;
+            if (showTranslation && sentence.translation) {
+                textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
+            }
+            return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
+        }
 
-          // 组装最终 HTML（包含翻译）
-          let textBlockHtml = `<span class="karaoke-sentence-line">${lineHtml}</span>`;
-          if (showTranslation && sentence.translation) {
-              textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
-          }
-          return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
-      }
+        // 添加剩余部分（如果有）
+        if (cursor < text.length) {
+            parts.push({ text: text.substring(cursor), isWord: false });
+        }
 
-      
+        // 构建最终的 HTML
+        let lineHtml = '';
+        for (const part of parts) {
+            if (part.isWord) {
+                const wordClass = part.isActive ? 'karaoke-word active' : 'karaoke-word inactive';
+                lineHtml += `<span class="${wordClass}">${escapeHtml(part.text)}</span>`;
+            } else {
+                lineHtml += escapeHtml(part.text);
+            }
+        }
+
+        // 组装包含翻译的完整块
+        let textBlockHtml = `<span class="karaoke-sentence-line">${lineHtml}</span>`;
+        if (showTranslation && sentence.translation) {
+            textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
+        }
+        return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
+    }
+
+
+
 
       // === Reset karaoke state ===
       function clearKaraokeData() {
