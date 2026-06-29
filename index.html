@@ -36,6 +36,7 @@
         --violet: #7c3aed;
         --violet-hover: #8b5cf6;
         --danger: #f87171;
+        --karaoke-font-scale:1;
       }
 
       body {
@@ -717,8 +718,8 @@
       }
 
       .karaoke-timestamp {
-        font-size: 12px;
-        min-width: 12px;
+        font-size:calc(12px * var(--karaoke-font-scale));
+        min-width: calc(12px * var(--karaoke-font-scale));
         color: var(--text-faint);
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
@@ -732,7 +733,7 @@
         padding: 2px 0px;
         margin: 1px 0;
         line-height: 1.5;
-        font-size: 16px;
+        font-size:calc(16px * var(--karaoke-font-scale));
         min-height: 1.8em;
         font-weight: 400;
         color: var(--text-muted);
@@ -757,7 +758,7 @@
       .karaoke-translation {
         display: block;
         margin-top: 0;            /* 由父容器的 gap 控制 */
-        font-size: 14px;
+        font-size:calc(14px * var(--karaoke-font-scale));
         color: var(--text-muted);
         opacity: 0.8;
         width: 100%;
@@ -863,18 +864,18 @@
       /* Mobile-specific fine‑tuning */
       @media (max-width: 640px) {
         .karaoke-sentence {
-          font-size: 14px;
+          font-size: calc(14px * var(--karaoke-font-scale));
           padding: 1px 0px;
           line-height: 1.4;
           min-height: 1.6em;
           gap: 4px;               /* 可保持左右间隙一致 */
         }
         .karaoke-timestamp {
-          font-size: 11px;
-          min-width: 11px;
+          font-size: calc(11px * var(--karaoke-font-scale));
+          min-width: calc(11px * var(--karaoke-font-scale));
         }
         .karaoke-translation {
-          font-size: 12px;
+          font-size:calc(12px * var(--karaoke-font-scale));
           margin-top: 0;
         }
         .karaoke-text-block {
@@ -1202,6 +1203,25 @@
             <button class="karaoke-toggle-btn" id="karaokeTranslationToggle" aria-label="切换翻译（即将推出）" data-i18n-aria-label="karaokeTranslationToggle" data-i18n-title="karaokeTranslationToggle">
               <i data-lucide="languages"></i>
             </button>
+
+            <button
+                class="karaoke-toggle-btn"
+                type="button"
+                onclick="decreaseKaraokeFont()"
+                aria-label="Decrease font size"
+                title="Smaller text">
+                <i data-lucide="minus"></i>
+            </button>
+
+            <button
+                class="karaoke-toggle-btn"
+                type="button"
+                onclick="increaseKaraokeFont()"
+                aria-label="Increase font size"
+                title="Larger text">
+                <i data-lucide="plus"></i>
+            </button>
+
           </div>
           <div class="karaoke-upload-hint" id="karaokeUploadHint">
             <span data-i18n="karaokeHint">Drop a JSON alignment file here or</span>
@@ -1353,6 +1373,40 @@
 
       let karaokeVisible = true; // default: sentences shown
       let showTranslation = false; // default: translation hidden
+
+      let karaokeFontScale = 1.0;
+
+      function updateKaraokeFontSize() {
+        document.documentElement.style.setProperty(
+            '--karaoke-font-scale',
+            karaokeFontScale
+        );
+
+        localStorage.setItem(
+            'karaokeFontScale',
+            karaokeFontScale.toFixed(2)
+        );
+      }
+
+      function increaseKaraokeFont() {
+
+          karaokeFontScale = Math.min(
+              2.0,
+              karaokeFontScale + 0.05
+          );
+
+          updateKaraokeFontSize();
+      }
+
+      function decreaseKaraokeFont() {
+
+          karaokeFontScale = Math.max(
+              0.60,
+              karaokeFontScale - 0.05
+          );
+
+          updateKaraokeFontSize();
+      }
 
       const translations = {
         zh: {
@@ -4085,6 +4139,16 @@
           setTimeout(() => alertDiv.remove(), 600);
         }, 1000);
       }
+
+
+      const savedScale = parseFloat(
+          localStorage.getItem("karaokeFontScale")
+      );
+
+      if (!Number.isNaN(savedScale))
+          karaokeFontScale = savedScale;
+
+      updateKaraokeFontSize();
 
     </script>
   </body>
