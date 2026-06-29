@@ -1015,6 +1015,72 @@
       }
 
 
+      .karaoke-container {
+        position: relative; /* needed for absolute positioning of the overlay */
+      }
+
+      .karaoke-controls-overlay {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        display: flex;
+        gap: 6px;
+        z-index: 10;
+      }
+
+      .karaoke-toggle-btn {
+        background: rgba(0, 0, 0, 0.55);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text-muted);
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+        backdrop-filter: blur(4px);
+        padding: 0;
+      }
+
+      .karaoke-toggle-btn:hover {
+        background: var(--panel-raised);
+        border-color: var(--emerald);
+        color: var(--text);
+      }
+
+      .karaoke-toggle-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .karaoke-toggle-btn.active {
+        background: var(--emerald-strong);
+        border-color: var(--emerald);
+        color: #fff;
+      }
+
+      .karaoke-toggle-btn.active svg {
+        color: #fff;
+      }
+
+      /* Mobile fine‑tuning */
+      @media (max-width: 640px) {
+        .karaoke-controls-overlay {
+          top: 4px;
+          right: 4px;
+        }
+        .karaoke-toggle-btn {
+          width: 24px;
+          height: 24px;
+        }
+        .karaoke-toggle-btn svg {
+          width: 14px;
+          height: 14px;
+        }
+      }
+
     </style>
   </head>
 
@@ -1027,7 +1093,7 @@
           </button>
         </div> -->
 
-        <div class="upload-area" id="uploadArea">
+        <div class="upload-area" id="uploadArea" data-i18n-title="uploadMain">
           <p data-i18n="uploadMain">点击或拖拽音频文件到这里</p>
           <p class="upload-hint">
             <span data-i18n="uploadHint">支持一次添加多个文件</span>
@@ -1059,44 +1125,54 @@
         </div>
 
         <div class="controls">
-          <button class="ctrl-btn" id="toBeginBtn" aria-label="回到开头" data-i18n-aria-label="toBegin">
+          <button class="ctrl-btn" id="toBeginBtn" aria-label="回到开头" data-i18n-aria-label="toBegin" data-i18n-title="toBegin">
             <i data-lucide="skip-back"></i>
           </button>
-          <button class="ctrl-btn" id="skipBackBtn" aria-label="后退5秒" data-i18n-aria-label="skipBack">
+          <button class="ctrl-btn" id="skipBackBtn" aria-label="后退5秒" data-i18n-aria-label="skipBack" data-i18n-title="skipBack">
             <i data-lucide="rewind"></i>
           </button>
-          <button class="play-btn" id="playBtn" aria-label="播放" data-i18n-aria-label="play">
+          <button class="play-btn" id="playBtn" aria-label="播放" data-i18n-aria-label="play" data-i18n-title="play">
             <i data-lucide="play"></i>
           </button>
-          <button class="ctrl-btn" id="skipForwardBtn" aria-label="前进5秒" data-i18n-aria-label="skipForward">
+          <button class="ctrl-btn" id="skipForwardBtn" aria-label="前进5秒" data-i18n-aria-label="skipForward" data-i18n-title="skipForward">
             <i data-lucide="fast-forward"></i>
           </button>
-          <button class="ctrl-btn" id="toEndBtn" aria-label="跳到结尾" data-i18n-aria-label="toEnd">
+          <button class="ctrl-btn" id="toEndBtn" aria-label="跳到结尾" data-i18n-aria-label="toEnd" data-i18n-title="toEnd">
             <i data-lucide="skip-forward"></i>
           </button>
         </div>
 
         <div class="speed-group">
-          <button class="speed-btn" data-speed="0.5">0.5x</button>
-          <button class="speed-btn" data-speed="0.55">0.55x</button>
-          <button class="speed-btn" data-speed="0.6">0.6x</button>
-          <button class="speed-btn" data-speed="0.65">0.65x</button>
-          <button class="speed-btn" data-speed="0.7">0.7x</button>
-          <button class="speed-btn" data-speed="0.75">0.75x</button>
-          <button class="speed-btn" data-speed="0.8">0.8x</button>
-          <button class="speed-btn" data-speed="0.85">0.85x</button>
-          <button class="speed-btn" data-speed="0.9">0.9x</button>
-          <button class="speed-btn" data-speed="0.95">0.95x</button>
-          <button class="speed-btn active" data-speed="1.0">1.0x</button>
-          <button class="speed-btn" data-speed="1.1">1.1x</button>
-          <button class="speed-btn" data-speed="1.2">1.2x</button>
-          <button class="speed-btn" data-speed="1.3">1.3x</button>
-          <button class="speed-btn" data-speed="1.4">1.4x</button>
-          <button class="speed-btn" data-speed="1.5">1.5x</button>
+          <button class="speed-btn" data-speed="0.5"  title="0.5x">0.5x</button>
+          <button class="speed-btn" data-speed="0.55" title="0.55x">0.55x</button>
+          <button class="speed-btn" data-speed="0.6"  title="0.6" >0.6x</button>
+          <button class="speed-btn" data-speed="0.65" title="0.65">0.65x</button>
+          <button class="speed-btn" data-speed="0.7"  title="0.7" >0.7x</button>
+          <button class="speed-btn" data-speed="0.75" title="0.75">0.75x</button>
+          <button class="speed-btn" data-speed="0.8"  title="0.8" >0.8x</button>
+          <button class="speed-btn" data-speed="0.85" title="0.85">0.85x</button>
+          <button class="speed-btn" data-speed="0.9"  title="0.9" >0.9x</button>
+          <button class="speed-btn" data-speed="0.95" title="0.95">0.95x</button>
+          <button class="speed-btn active" data-spee>d="1.0"1.0x</button>
+          <button class="speed-btn" data-speed="1.1"  title="1.1">1.1x</button>
+          <button class="speed-btn" data-speed="1.2"  title="1.2">1.2x</button>
+          <button class="speed-btn" data-speed="1.3"  title="1.3">1.3x</button>
+          <button class="speed-btn" data-speed="1.4"  title="1.4">1.4x</button>
+          <button class="speed-btn" data-speed="1.5"  title="1.5">1.5x</button>
         </div>
 
         <!-- ===== karaoke timestamps segments display ===== -->
         <div class="karaoke-container" id="karaokeContainer">
+          <!-- control buttons for visibility-->
+          <div class="karaoke-controls-overlay">
+            
+            <button class="karaoke-toggle-btn" id="karaokeVisibilityToggle" aria-label="切换句子显示" data-i18n-aria-label="karaokeVisibilityToggle" data-i18n-title="karaokeVisibilityHide">
+               <i data-lucide="eye-closed"></i> 
+            </button>
+            <button class="karaoke-toggle-btn" id="karaokeTranslationToggle" aria-label="切换翻译（即将推出）" data-i18n-aria-label="karaokeTranslationToggle" data-i18n-title="karaokeTranslationToggle">
+              <i data-lucide="languages"></i>
+            </button>
+          </div>
           <div class="karaoke-upload-hint" id="karaokeUploadHint">
             <span data-i18n="karaokeHint">Drop a JSON alignment file here or</span>
             <button id="karaokeUploadBtn" data-i18n="karaokeUploadBtn">Browse JSON</button>
@@ -1117,7 +1193,7 @@
           <div class="info-label">语音播放器</div>
           <div class="author-label">piu7工作室</div>
           <div class="version-label">v0.026</div>
-          <button class="settings-toggle-btn" id="settingsToggleBtn" aria-label="切换设置" data-i18n-aria-label="settingsToggle">
+          <button class="settings-toggle-btn" id="settingsToggleBtn" aria-label="切换设置" data-i18n-aria-label="settingsToggle" data-i18n-title="settingsToggle">
             <i data-lucide="settings"></i>
           </button>
         </div>
@@ -1137,7 +1213,7 @@
 
           <div class="export-panel" id="exportPanel">
               <div class="export-header">
-                <button class="export-toggle-btn" id="exportToggleBtn" aria-expanded="false">
+                <button class="export-toggle-btn" id="exportToggleBtn" aria-expanded="false" data-i18n-title="exportToggleLabel">
                   <i data-lucide="chevron-right"></i>
                   <span data-i18n="exportToggleLabel">导出</span>
                 </button>
@@ -1169,17 +1245,11 @@
                           <span data-i18n="batchExportLabel">导出已选</span>
                         </label>
                       </div>
-                      <button class="download-btn" id="downloadBtn" type="button">
+                      <button class="download-btn" id="downloadBtn" type="button" data-i18n-title="downloadCurrent">
                         <i data-lucide="download"></i>
                         <span data-i18n="downloadCurrent">下载当前速度音频</span>
                       </button>
-                      <button
-                        class="cancel-export-btn"
-                        id="cancelExportBtn"
-                        type="button"
-                        aria-label="取消导出"
-                        data-i18n-aria-label="cancelExport"
-                      >
+                      <button class="cancel-export-btn" id="cancelExportBtn" type="button" aria-label="取消导出" data-i18n-aria-label="cancelExport" data-i18n-title="cancelExport">
                         <i data-lucide="x"></i>
                         <span data-i18n="cancel">取消</span>
                       </button>
@@ -1250,6 +1320,9 @@
         }
       }
 
+      let karaokeVisible = true; // default: sentences shown
+      let showTranslation = false; // default: translation hidden
+
       const translations = {
         zh: {
           appTitle: "变速音频工具",
@@ -1313,6 +1386,13 @@
           karaokeEmpty: "未加载对齐数据。请上传包含句子和单词时间戳的 JSON 文件。",
           karaokeClear: "清除对齐",
           karaokeLoaded: "已加载对齐数据：{sentences} 个句子",
+          karaokeVisibilityHide: "隐藏句子",
+          karaokeVisibilityShow: "显示句子",
+          settingsToggle: "设置",   // for zh
+          karaokeTranslationToggle: "切换翻译（即将推出）", // zh
+          karaokeTranslationHide: "隐藏翻译",
+          karaokeTranslationShow: "显示翻译",
+          
         },
         en: {
           appTitle: "Vario-Speed Audio Tools",
@@ -1376,6 +1456,12 @@
           karaokeEmpty: "No alignment data loaded. Upload a JSON file with sentence and word timings.",
           karaokeClear: "Clear alignment",
           karaokeLoaded: "Alignment loaded: {sentences} sentences",
+          karaokeVisibilityHide: "Hide sentences",
+          karaokeVisibilityShow: "Show sentences",
+          settingsToggle: "Settings", // for en
+          karaokeTranslationToggle: "Toggle translation (coming soon)", // en
+          karaokeTranslationHide: "Hide translation",
+          karaokeTranslationShow: "Show translation",
         },
       };
 
@@ -1405,6 +1491,8 @@
       const selectAllControl = document.getElementById("selectAllControl");
       const selectAllTracks = document.getElementById("selectAllTracks");
       const selectAllLabel = document.getElementById("selectAllLabel");
+
+      
 
       let pendingSeek = null;
 
@@ -1659,6 +1747,15 @@
       function updateKaraokeDisplay(currentTime) {
         if (!alignmentData || !alignmentData.sentences.length) {
           showKaraokeUI(false);
+          return;
+        }
+        // visibility check
+        if (!karaokeVisible) {
+          karaokePrev.innerHTML = '';
+          karaokeCurrent.innerHTML = '';
+          karaokeNext.innerHTML = '';
+          // Keep the container visible but with empty lines
+          showKaraokeUI(true);
           return;
         }
 
@@ -3388,6 +3485,59 @@
 
       // Initially hide waveform container
       updateWaveformVisibility(false);
+
+      // Karaoke visibility toggle
+      const visibilityBtn = document.getElementById('karaokeVisibilityToggle');
+
+      // Set initial aria-label
+      visibilityBtn.setAttribute('aria-label', karaokeVisible ? t('karaokeVisibilityHide') : t('karaokeVisibilityShow'));
+
+      visibilityBtn.addEventListener('click', () => {
+        // Toggle state
+        karaokeVisible = !karaokeVisible;
+        
+        // Update icon using innerHTML (replaces the <i> element with a new one)
+        const iconName = karaokeVisible ? 'eye-closed' : 'eye';
+        visibilityBtn.innerHTML = `<i data-lucide="${iconName}"></i>`;
+        lucide.createIcons();
+        
+        // Update aria-label
+        visibilityBtn.setAttribute('aria-label', karaokeVisible ? '隐藏句子' : '显示句子');
+        
+        // Get current playback time safely
+        let time = 0;
+        if (sound) {
+          try {
+            const seekVal = sound.seek();
+            if (typeof seekVal === 'number' && !isNaN(seekVal) && seekVal >= 0) {
+              time = seekVal;
+            }
+          } catch (e) {
+            // If seek() fails, use 0
+            time = 0;
+          }
+        }
+  
+        // Update the karaoke display immediately
+        updateKaraokeDisplay(time);
+      });
+
+
+
+      // Translation toggle – placeholder (no functionality)
+      const transBtn = document.getElementById('karaokeTranslationToggle');
+      transBtn.addEventListener('click', () => {
+        showTranslation = !showTranslation;
+        transBtn.classList.toggle('active', showTranslation);
+        // Update aria-label and title to reflect state (optional)
+        const labelKey = showTranslation ? 'karaokeTranslationHide' : 'karaokeTranslationShow';
+        transBtn.setAttribute('aria-label', t(labelKey));
+        transBtn.title = t(labelKey);
+        // Placeholder: you can add actual translation logic later
+        console.log(`Translation ${showTranslation ? 'on' : 'off'}`);
+      });
+
+
 
     </script>
   </body>
