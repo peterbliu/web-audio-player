@@ -1542,27 +1542,6 @@
       }
 
 
-      // function safeSeek(time) {
-      //     if (!sound) return;
-      //     const state = sound.state();
-      //     if (state === 'loaded') {
-      //         setAudioPosition(time);
-      //         pendingSeek = null;
-      //     } else {
-      //         pendingSeek = time;
-      //         sound.off('load', applyPendingSeek);
-      //         sound.once('load', applyPendingSeek);
-      //     }
-      // }
-
-
-      // function applyPendingSeek() {
-      //     if (pendingSeek !== null) {
-      //         setAudioPosition(pendingSeek);
-      //         pendingSeek = null;
-      //     }
-      // }
-
       // === WaveSurfer instance ===
       let wavesurfer = null;
       let isWaveformLoading = false;
@@ -1904,25 +1883,50 @@
 
       // === Render a sentence with word-by-word highlighting – includes timestamp and proper spacing ===
       function renderSentenceWithWords(sentence, activeWordIndex, className) {
-        const words = sentence.words || [];
-        const timeStr = formatTime(sentence.start);
+          const text = sentence.text || '';
+          const words = sentence.words || [];
+          const timeStr = formatTime(sentence.start);
 
-        // Build word-by-word display
-        let lineHtml = '';
-        for (let i = 0; i < words.length; i++) {
-          const w = words[i];
-          const isActive = (i === activeWordIndex);
-          const wordClass = isActive ? 'karaoke-word active' : 'karaoke-word inactive';
-          const wordText = escapeHtml(w.word);
-          const space = (i < words.length - 1) ? ' ' : '';
-          lineHtml += `<span class="${wordClass}">${wordText}</span>${space}`;
-        }
+          // 如果没有单词级对齐，就显示纯文本（带翻译）
+          if (words.length === 0) {
+              let textBlockHtml = `<span class="karaoke-sentence-line">${escapeHtml(text)}</span>`;
+              if (showTranslation && sentence.translation) {
+                  textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
+              }
+              return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
+          }
 
-        let textBlockHtml = `<span class="karaoke-sentence-line">${lineHtml}</span>`;
-        if (showTranslation && sentence.translation) {
-          textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
-        }
-        return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
+          // 按词边界拆分（保留所有标点、空格、特殊字符）
+          const tokens = text.split(/\b/);
+          let wordIndex = 0;
+          let lineHtml = '';
+
+          for (let token of tokens) {
+              // 判断是否为单词（字母、数字、撇号等）
+              if (/^[\p{L}']+$/u.test(token)) {
+                  // 若还有对应的对齐单词
+                  if (wordIndex < words.length) {
+                      const isActive = (wordIndex === activeWordIndex);
+                      const wordClass = isActive ? 'karaoke-word active' : 'karaoke-word inactive';
+                      // 保留 token 原始大小写和字符，仅加高亮 span
+                      lineHtml += `<span class="${wordClass}">${escapeHtml(token)}</span>`;
+                      wordIndex++;
+                  } else {
+                      // 若对齐单词不足，直接输出 token
+                      lineHtml += escapeHtml(token);
+                  }
+              } else {
+                  // 非单词（标点、空格、特殊符号如“○”）原样输出
+                  lineHtml += escapeHtml(token);
+              }
+          }
+
+          // 构建最终 HTML（包含翻译）
+          let textBlockHtml = `<span class="karaoke-sentence-line">${lineHtml}</span>`;
+          if (showTranslation && sentence.translation) {
+              textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
+          }
+          return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
       }
 
       // === Reset karaoke state ===
