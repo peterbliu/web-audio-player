@@ -1887,7 +1887,7 @@
           const words = sentence.words || [];
           const timeStr = formatTime(sentence.start);
 
-          // 如果没有单词级对齐，就显示纯文本（带翻译）
+          // 如果没有单词级对齐，显示纯文本
           if (words.length === 0) {
               let textBlockHtml = `<span class="karaoke-sentence-line">${escapeHtml(text)}</span>`;
               if (showTranslation && sentence.translation) {
@@ -1896,38 +1896,51 @@
               return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
           }
 
-          // 按词边界拆分（保留所有标点、空格、特殊字符）
-          const tokens = text.split(/\b/);
-          let wordIndex = 0;
-          let lineHtml = '';
+          // 使用 Unicode 感知的正则匹配所有单词（支持变音符号、撇号等）
+          const wordRegex = /\p{L}+(?:'\p{L}+)*/gu;
+          const matches = [...text.matchAll(wordRegex)];
 
-          for (let token of tokens) {
-              // 判断是否为单词（字母、数字、撇号等）
-              if (/^[\p{L}']+$/u.test(token)) {
-                  // 若还有对应的对齐单词
-                  if (wordIndex < words.length) {
-                      const isActive = (wordIndex === activeWordIndex);
-                      const wordClass = isActive ? 'karaoke-word active' : 'karaoke-word inactive';
-                      // 保留 token 原始大小写和字符，仅加高亮 span
-                      lineHtml += `<span class="${wordClass}">${escapeHtml(token)}</span>`;
-                      wordIndex++;
-                  } else {
-                      // 若对齐单词不足，直接输出 token
-                      lineHtml += escapeHtml(token);
-                  }
-              } else {
-                  // 非单词（标点、空格、特殊符号如“○”）原样输出
-                  lineHtml += escapeHtml(token);
+          // 如果匹配到的单词数与对齐数据不一致，降级为纯文本（避免错误高亮）
+          if (matches.length !== words.length) {
+              let textBlockHtml = `<span class="karaoke-sentence-line">${escapeHtml(text)}</span>`;
+              if (showTranslation && sentence.translation) {
+                  textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
               }
+              return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
           }
 
-          // 构建最终 HTML（包含翻译）
+          // 构建带高亮的分段 HTML
+          let lineHtml = '';
+          let lastIndex = 0;
+          for (let i = 0; i < matches.length; i++) {
+              const match = matches[i];
+              const start = match.index;
+              const end = start + match[0].length;
+              // 添加单词前的非单词字符（标点、空格等）
+              if (start > lastIndex) {
+                  lineHtml += escapeHtml(text.substring(lastIndex, start));
+              }
+              // 添加单词本身，根据是否活跃添加样式
+              const isActive = (i === activeWordIndex);
+              const wordClass = isActive ? 'karaoke-word active' : 'karaoke-word inactive';
+              // 使用匹配到的原始字符串（保留原文大小写和变音）
+              lineHtml += `<span class="${wordClass}">${escapeHtml(match[0])}</span>`;
+              lastIndex = end;
+          }
+          // 添加剩余的非单词部分
+          if (lastIndex < text.length) {
+              lineHtml += escapeHtml(text.substring(lastIndex));
+          }
+
+          // 组装最终 HTML（包含翻译）
           let textBlockHtml = `<span class="karaoke-sentence-line">${lineHtml}</span>`;
           if (showTranslation && sentence.translation) {
               textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
           }
           return `<span class="karaoke-timestamp">${timeStr}</span><div class="karaoke-text-block">${textBlockHtml}</div>`;
       }
+
+      
 
       // === Reset karaoke state ===
       function clearKaraokeData() {
@@ -2611,7 +2624,6 @@
           progressFrame = null;
         }
       }
-
       speedBtns.forEach((btn) => {
         btn.addEventListener("click", () => {
           speedBtns.forEach((b) => b.classList.remove("active"));
@@ -2622,6 +2634,10 @@
           // 更新所有缓存的实例，以便切换后速度一致
           for (const [_, cachedHowl] of howlMap) {
             cachedHowl.rate(currentSpeed);
+          }
+          // ⬇️ 新增：立即刷新高亮
+          if (sound) {
+            updateKaraokeDisplay(sound.seek());
           }
         });
       });
