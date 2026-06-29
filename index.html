@@ -2073,7 +2073,31 @@
 
             let audioBlob;
             try {
-              audioBlob = await audioFileEntry.async('blob');
+              const rawBlob = await audioFileEntry.async("blob");
+
+              const ext = transcript.audioFileName
+                  .split(".")
+                  .pop()
+                  .toLowerCase();
+
+              const mimeTypes = {
+                  mp3: "audio/mpeg",
+                  m4a: "audio/mp4",
+                  wav: "audio/wav",
+                  ogg: "audio/ogg",
+                  opus: "audio/ogg",
+                  aac: "audio/aac",
+                  flac: "audio/flac"
+              };
+
+              audioBlob = new Blob(
+                  [rawBlob],
+                  {
+                      type: mimeTypes[ext] || "application/octet-stream"
+                  }
+              );
+              console.log("loaded audio media type: ",audioBlob.type);
+
             } catch (e) {
               console.warn(`Failed to extract audio file: ${transcript.audioFileName}`, e);
               hasErrors = true;
@@ -2294,7 +2318,8 @@
       function createHowlForTrack(track) {
         const howl = new Howl({
           src: [track.url],
-          html5: true,
+          html5: true, 
+          // html5: false,  //maybe the cause - ios ipad os, not loading audio 
           rate: currentSpeed,
           onplay: function () {
             if (currentTrackId !== track.id) return;
