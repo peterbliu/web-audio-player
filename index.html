@@ -99,6 +99,15 @@
       }
 
       .upload-area {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        width: 100%;
+        height: 76px;
+        overflow: hidden;
         border: 1px dashed var(--border-strong);
         border-radius: 10px;
         padding: 10px 20px;
@@ -106,6 +115,10 @@
         text-align: center;
         cursor: pointer;
         transition:
+          width 0.28s ease,
+          height 0.28s ease,
+          padding 0.28s ease,
+          border-radius 0.28s ease,
           border-color 0.2s,
           background 0.2s,
           box-shadow 0.2s;
@@ -113,9 +126,95 @@
         color: var(--text);
       }
 
+      .upload-area.collapsed {
+        width: 28px;
+        height: 28px;
+        margin-bottom: 4px;
+        padding: 0;
+        border-radius: 7px;
+        border-style: solid;
+      }
+
+      .upload-area.collapsed p {
+        max-height: 0;
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+
+      .upload-compact-icon {
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        color: var(--text-muted);
+        opacity: 0;
+        transform: scale(0.72);
+        transition: opacity 0.18s ease 0.1s, transform 0.2s ease 0.1s;
+      }
+
+      .upload-area.collapsed .upload-compact-icon {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .upload-area.expanded .upload-compact-icon {
+        opacity: 0;
+        transform: scale(0.72);
+      }
+
       .upload-area p {
+        max-height: 28px;
+        margin: 0;
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 0.16s ease, transform 0.2s ease, max-height 0.24s ease;
         line-height: 1.45;
         overflow-wrap: anywhere;
+      }
+
+      .upload-area.collapsed .upload-hint {
+        margin-top: 0;
+      }
+
+      .upload-minimize-btn {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        border: 1px solid var(--border-strong);
+        border-radius: 7px;
+        background: rgba(24, 24, 27, 0.82);
+        color: var(--text-muted);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 1;
+        transform: scale(1);
+        transition: opacity 0.16s ease, transform 0.2s ease, border-color 0.2s, color 0.2s;
+      }
+
+      .upload-minimize-btn:hover {
+        border-color: var(--emerald);
+        color: var(--text);
+      }
+
+      .upload-minimize-btn svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      .upload-area.collapsed .upload-minimize-btn {
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.72);
+      }
+
+      .upload-hint {
+        color: var(--text-faint);
+        font-size: 12px;
+        margin-top: 6px;
       }
 
       .upload-area:hover {
@@ -131,12 +230,6 @@
 
       .upload-area input {
         display: none;
-      }
-
-      .upload-hint {
-        color: var(--text-faint);
-        font-size: 12px;
-        margin-top: 8px;
       }
 
       .player {
@@ -228,6 +321,47 @@
         height: 16px;
         accent-color: var(--emerald);
         cursor: pointer;
+      }
+
+      .playback-option.icon-option {
+        position: relative;
+        min-height: 22px;
+        gap: 0;
+        cursor: pointer;
+      }
+
+      .playback-option.icon-option input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .icon-checkbox {
+        width: 26px;
+        height: 22px;
+        border: 1px solid var(--border-strong);
+        border-radius: 8px;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, border-color 0.2s, color 0.2s;
+      }
+
+      .icon-checkbox svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .playback-option.icon-option:hover .icon-checkbox {
+        border-color: var(--emerald);
+        color: var(--text);
+      }
+
+      .playback-option.icon-option input:checked + .icon-checkbox {
+        background: var(--emerald-strong);
+        border-color: var(--emerald);
+        color: #ecfdf5;
       }
 
       .ctrl-btn {
@@ -1257,9 +1391,12 @@
           </button>
         </div> -->
 
-        <div class="upload-area" id="uploadArea" data-i18n-title="uploadMain">
+        <div class="upload-area expanded" id="uploadArea" data-i18n-title="uploadMain">
+          <button class="upload-minimize-btn" id="uploadMinimizeBtn" type="button" aria-label="收起上传区域" title="收起上传区域">
+            <i data-lucide="minimize-2"></i>
+          </button>
+          <i class="upload-compact-icon" data-lucide="file-plus-2"></i>
           <p data-i18n="uploadMain">点击或拖拽文件到这里</p>
-          <p class="upload-hint">
           <p class="upload-hint">
             <span data-i18n="uploadHint">支持一次添加多个文件</span>
             mp3 / wav / m4a / ogg / json / zip
@@ -1311,10 +1448,6 @@
           <button class="ctrl-btn" id="nextTrackBtn" aria-label="下一条音频" data-i18n-aria-label="nextTrack" data-i18n-title="nextTrack">
             <i data-lucide="arrow-down-from-line"></i>
           </button>
-          <label class="playback-option" title="自动播放播放列表中的下一条音频" data-i18n-title="autoPlayNextTitle">
-            <input type="checkbox" id="autoPlayNextCheckbox" checked />
-            <span data-i18n="autoPlayNextLabel">自动下一条</span>
-          </label>
         </div>
 
         <div class="speed-group">
@@ -1387,6 +1520,12 @@
           <div class="info-label">语音播放器 - 听力Pro</div>
           <div class="author-label">piu7工作室</div>
           <div class="version-label">v0.030</div>
+          <label class="playback-option icon-option" title="自动播放播放列表中的下一条音频" data-i18n-title="autoPlayNextTitle">
+            <input type="checkbox" id="autoPlayNextCheckbox" checked />
+            <span class="icon-checkbox" aria-hidden="true">
+              <i data-lucide="a-arrow-down"></i>
+            </span>
+          </label>
           <button class="settings-toggle-btn" id="settingsToggleBtn" aria-label="切换设置" data-i18n-aria-label="settingsToggle" data-i18n-title="settingsToggle">
             <i data-lucide="settings"></i>
           </button>
@@ -1517,6 +1656,7 @@
       let activeFfmpeg = null;
       let ffmpegInstance = null;
       let currentLanguage = "zh";
+      let uploadCollapseTimer = null;
       // progress knob
       let isDraggingKnob = false;
       let knobDragStartX = 0;
@@ -1718,6 +1858,7 @@
       };
 
       const uploadArea = document.getElementById("uploadArea");
+      const uploadMinimizeBtn = document.getElementById("uploadMinimizeBtn");
       const languageSelect = document.getElementById("languageSelect");
       const fileInput = document.getElementById("fileInput");
       const player = document.getElementById("player");
@@ -2492,6 +2633,7 @@
           renderPlaylist();
           updateSelectionUi();
           hydrateTrackDurations(newTracks);
+          syncUploadAreaState();
 
           // Select the first imported track
           if (newTracks[0]) {
@@ -2565,6 +2707,7 @@
           renderPlaylist();
           updateSelectionUi();
           hydrateTrackDurations(newTracks);
+          syncUploadAreaState();
 
           // Select the first new track
           if (newTracks[0]) {
@@ -2583,6 +2726,43 @@
             currentTrack.alignmentData = alignmentData;
           }
         }
+      }
+
+      function setUploadExpanded(expanded) {
+        uploadArea.classList.toggle("expanded", expanded);
+        uploadArea.classList.toggle("collapsed", !expanded);
+      }
+
+      function clearUploadCollapseTimer() {
+        if (!uploadCollapseTimer) return;
+        clearTimeout(uploadCollapseTimer);
+        uploadCollapseTimer = null;
+      }
+
+      function scheduleUploadCollapse() {
+        clearUploadCollapseTimer();
+        if (!tracks.length) {
+          setUploadExpanded(true);
+          return;
+        }
+        uploadCollapseTimer = setTimeout(() => {
+          setUploadExpanded(false);
+        }, 10000);
+      }
+
+      function expandUploadTemporarily() {
+        setUploadExpanded(true);
+        scheduleUploadCollapse();
+      }
+
+      function syncUploadAreaState() {
+        if (!tracks.length) {
+          clearUploadCollapseTimer();
+          setUploadExpanded(true);
+          return;
+        }
+        clearUploadCollapseTimer();
+        setUploadExpanded(false);
       }
 
 
@@ -2627,24 +2807,47 @@
         }
       });
 
-      uploadArea.addEventListener("click", () => fileInput.click());
+      uploadArea.addEventListener("click", () => {
+        if (uploadArea.classList.contains("collapsed")) {
+          expandUploadTemporarily();
+          return;
+        }
+        scheduleUploadCollapse();
+        fileInput.click();
+      });
+
+      uploadMinimizeBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        clearUploadCollapseTimer();
+        setUploadExpanded(false);
+      });
 
       uploadArea.addEventListener("dragover", (e) => {
         e.preventDefault();
+        if (tracks.length) expandUploadTemporarily();
         uploadArea.classList.add("dragover");
       });
       uploadArea.addEventListener("dragleave", () => {
         uploadArea.classList.remove("dragover");
+        scheduleUploadCollapse();
+      });
+      uploadArea.addEventListener("pointerenter", () => {
+        if (tracks.length && uploadArea.classList.contains("expanded")) {
+          scheduleUploadCollapse();
+        }
       });
       uploadArea.addEventListener("drop", (e) => {
         e.preventDefault();
         uploadArea.classList.remove("dragover");
         addFiles(e.dataTransfer.files);
+        syncUploadAreaState();
       });
 
       fileInput.addEventListener("change", (e) => {
         addFiles(e.target.files);
         fileInput.value = "";
+        syncUploadAreaState();
       });
 
       languageSelect.addEventListener("change", () => {
@@ -2834,6 +3037,7 @@
 
         renderPlaylist();
         updateSelectionUi();
+        syncUploadAreaState();
       }
 
 
@@ -3994,11 +4198,13 @@
             renderPlaylist();
             updateSelectionUi();
           }
+          syncUploadAreaState();
           return;
         }
 
         renderPlaylist();
         updateSelectionUi();
+        syncUploadAreaState();
       }
 
       function deleteSelectedTracks() {
@@ -4018,12 +4224,14 @@
           const fallbackTrack = tracks[firstDeletedIndex] || tracks[firstDeletedIndex - 1];
           if (fallbackTrack) {
             selectTrack(fallbackTrack.id, false);
+            syncUploadAreaState();
             return;
           }
         }
 
         renderPlaylist();
         updateSelectionUi();
+        syncUploadAreaState();
       }
 
       function disposeTrack(track) {
@@ -4100,6 +4308,7 @@
         renderPlaylist();
         updateSelectionUi();
         lucide.createIcons();
+        syncUploadAreaState();
       }
 
 
@@ -4176,6 +4385,7 @@
 
       setLanguage("zh");
       lucide.createIcons();
+      syncUploadAreaState();
 
       const exportToggleBtn = document.getElementById('exportToggleBtn');
       const exportBody = document.getElementById('exportBody');
