@@ -212,6 +212,24 @@
         margin: 16px 0;
       }
 
+      .playback-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 32px;
+        color: var(--text-muted);
+        font-size: 12px;
+        user-select: none;
+        white-space: nowrap;
+      }
+
+      .playback-option input {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--emerald);
+        cursor: pointer;
+      }
+
       .ctrl-btn {
         width: 40px;
         height: 40px;
@@ -545,10 +563,50 @@
         margin-bottom: 12px;
       }
 
+      .playlist-actions {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
       .playlist-title {
         font-size: 15px;
         font-weight: 600;
         color: var(--text);
+      }
+
+      .delete-selected-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 7px;
+        border: 1px solid rgba(248, 113, 113, 0.4);
+        background: transparent;
+        color: var(--danger);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        visibility: hidden;
+      }
+
+      .delete-selected-btn.visible {
+        visibility: visible;
+      }
+
+      .delete-selected-btn:hover {
+        background: rgba(248, 113, 113, 0.12);
+        border-color: var(--danger);
+      }
+
+      .delete-selected-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .delete-selected-btn svg {
+        width: 16px;
+        height: 16px;
       }
 
       .select-all-control {
@@ -571,15 +629,15 @@
       .track-list {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
       }
 
       .track-item {
         width: 100%;
         border: 1px solid var(--border);
         background: var(--panel);
-        border-radius: 10px;
-        padding: 14px 16px;
+        border-radius: 8px;
+        padding: 9px 12px;
         cursor: pointer;
         text-align: left;
         transition:
@@ -603,24 +661,29 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: 10px;
       }
 
       .track-main {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         min-width: 0;
         flex: 1;
       }
 
       .track-info {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
         min-width: 0;
         flex: 1;
       }
 
       .track-name {
-        display: block;
+        display: inline-block;
+        min-width: 0;
+        flex: 1;
         font-size: 14px;
         font-weight: 500;
         color: var(--text);
@@ -630,15 +693,24 @@
       }
 
       .track-meta {
-        display: block;
-        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+        font-size: 11px;
         color: var(--text-faint);
-        margin-top: 4px;
+        white-space: nowrap;
+      }
+
+      .track-meta-part + .track-meta-part::before {
+        content: "/";
+        margin-right: 6px;
+        color: var(--text-faint);
       }
 
       .delete-btn {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
         border: none;
         background: transparent;
         color: var(--danger);
@@ -655,8 +727,8 @@
       }
 
       .delete-btn svg {
-        width: 15px;
-        height: 15px;
+        width: 14px;
+        height: 14px;
       }
 
       @media (max-width: 640px) {
@@ -694,6 +766,68 @@
         .batch-export-control,
         .field {
           width: 100%;
+        }
+
+        .playlist-actions {
+          gap: 7px;
+        }
+
+        .delete-selected-btn {
+          width: 29px;
+          height: 29px;
+        }
+
+        .track-list {
+          gap: 7px;
+        }
+
+        .track-item {
+          padding: 8px 10px;
+        }
+
+        .track-main {
+          gap: 7px;
+        }
+
+        .track-info {
+          gap: 6px;
+        }
+
+        .controls {
+          gap: 7px;
+          margin: 10px 0;
+          padding: 0 2px;
+        }
+
+        .ctrl-btn {
+          width: 34px;
+          height: 34px;
+          font-size: 14px;
+          flex: 0 0 34px;
+        }
+
+        .play-btn {
+          width: 42px;
+          height: 42px;
+          font-size: 17px;
+          flex: 0 0 42px;
+        }
+
+        .ctrl-btn svg,
+        .play-btn svg {
+          width: 17px;
+          height: 17px;
+        }
+
+        .playback-option {
+          gap: 5px;
+          min-height: 28px;
+          font-size: 10px;
+        }
+
+        .playback-option input {
+          width: 14px;
+          height: 14px;
         }
       }
 
@@ -1156,6 +1290,9 @@
         </div>
 
         <div class="controls">
+          <button class="ctrl-btn" id="previousTrackBtn" aria-label="上一条音频" data-i18n-aria-label="previousTrack" data-i18n-title="previousTrack">
+            <i data-lucide="arrow-up-from-line"></i>
+          </button>
           <button class="ctrl-btn" id="toBeginBtn" aria-label="回到开头" data-i18n-aria-label="toBegin" data-i18n-title="toBegin">
             <i data-lucide="skip-back"></i>
           </button>
@@ -1171,6 +1308,13 @@
           <button class="ctrl-btn" id="toEndBtn" aria-label="跳到结尾" data-i18n-aria-label="toEnd" data-i18n-title="toEnd">
             <i data-lucide="skip-forward"></i>
           </button>
+          <button class="ctrl-btn" id="nextTrackBtn" aria-label="下一条音频" data-i18n-aria-label="nextTrack" data-i18n-title="nextTrack">
+            <i data-lucide="arrow-down-from-line"></i>
+          </button>
+          <label class="playback-option" title="自动播放播放列表中的下一条音频" data-i18n-title="autoPlayNextTitle">
+            <input type="checkbox" id="autoPlayNextCheckbox" checked />
+            <span data-i18n="autoPlayNextLabel">自动下一条</span>
+          </label>
         </div>
 
         <div class="speed-group">
@@ -1240,12 +1384,44 @@
 
         <!-- footer area Settings button -->
         <div class="footer-container" >
-          <div class="info-label">语音播放器 - 听力训练Pro</div>
+          <div class="info-label">语音播放器 - 听力Pro</div>
           <div class="author-label">piu7工作室</div>
-          <div class="version-label">v0.028</div>
+          <div class="version-label">v0.030</div>
           <button class="settings-toggle-btn" id="settingsToggleBtn" aria-label="切换设置" data-i18n-aria-label="settingsToggle" data-i18n-title="settingsToggle">
             <i data-lucide="settings"></i>
           </button>
+        </div>
+
+        <div class="playlist">
+            <div class="playlist-header">
+              <div class="playlist-title" data-i18n="playlistTitle">播放列表</div>
+              <div class="playlist-actions">
+                <button
+                  class="delete-selected-btn"
+                  id="deleteSelectedTracksBtn"
+                  type="button"
+                  aria-label="删除已选音频"
+                  title="删除已选音频"
+                  data-i18n-aria-label="deleteSelectedTracks"
+                  data-i18n-title="deleteSelectedTracks"
+                >
+                  <i data-lucide="trash-2"></i>
+                </button>
+                <label
+                  class="select-all-control"
+                  id="selectAllControl"
+                  title="Click to select all. Shift-click to clear all."
+                  data-i18n-title="selectAllTitle"
+                >
+                  <input type="checkbox" id="selectAllTracks" />
+                  <span id="selectAllLabel">全选</span>
+                </label>
+              </div>
+            </div>
+            <div class="playlist-empty" id="playlistEmpty" data-i18n="playlistEmpty">
+              还没有音频文件，拖拽或上传多个文件后会自动加入列表。
+            </div>
+            <div class="track-list" id="trackList"></div>
         </div>
 
         <!-- Settings container – hidden by default -->
@@ -1318,25 +1494,6 @@
                       默认使用浏览器实时 PCM 捕获导出 WAV，使用当前选择的播放速度。
                     </div>
                   </div>
-          </div>
-              
-          <div class="playlist">
-            <div class="playlist-header">
-              <div class="playlist-title" data-i18n="playlistTitle">播放列表</div>
-              <label
-                class="select-all-control"
-                id="selectAllControl"
-                title="Click to select all. Shift-click to clear all."
-                data-i18n-title="selectAllTitle"
-              >
-                <input type="checkbox" id="selectAllTracks" />
-                <span id="selectAllLabel">全选</span>
-              </label>
-            </div>
-            <div class="playlist-empty" id="playlistEmpty" data-i18n="playlistEmpty">
-              还没有音频文件，拖拽或上传多个文件后会自动加入列表。
-            </div>
-            <div class="track-list" id="trackList"></div>
           </div>
 
         </div>
@@ -1414,10 +1571,14 @@
           documentTitle: "语音播放器",
           uploadMain: "点击或拖拽文件到这里",
           uploadHint: "支持一次添加多个文件",
+          previousTrack: "上一条音频",
           toBegin: "回到开头",
           play: "播放",
           pause: "暂停",
           toEnd: "跳到结尾",
+          nextTrack: "下一条音频",
+          autoPlayNextLabel: "自动下一条",
+          autoPlayNextTitle: "当前音频结束后自动播放播放列表中的下一条音频",
           exportModeLabel: "导出模式",
           exportModeLive: "浏览器 PCM 捕获 - 实时速度",
           exportModeFfmpeg: "FFmpeg atempo 导出 - 直接渲染",
@@ -1434,6 +1595,7 @@
           selectAllTitle: "单击全选。按住 Shift 单击清空选择。",
           selectAll: "全选",
           selectedCount: "已选 {selected}/{total}",
+          deleteSelectedTracks: "删除已选音频",
           playlistEmpty: "还没有音频文件，拖拽或上传多个文件后会自动加入列表。",
           selectTrack: "选择 {name}",
           deleteTrack: "删除 {name}",
@@ -1484,10 +1646,14 @@
           documentTitle: "Speech Player",
           uploadMain: "Upload or drop files here",
           uploadHint: "Add multiple files at once",
+          previousTrack: "Previous audio item",
           toBegin: "Back to start",
           play: "Play",
           pause: "Pause",
           toEnd: "Skip to end",
+          nextTrack: "Next audio item",
+          autoPlayNextLabel: "Auto next",
+          autoPlayNextTitle: "Automatically play the next audio item in the playlist when the current audio ends",
           exportModeLabel: "Export mode",
           exportModeLive: "Browser PCM capture - live speed",
           exportModeFfmpeg: "FFmpeg atempo export - direct render",
@@ -1504,6 +1670,7 @@
           selectAllTitle: "Click to select all. Shift-click to clear all.",
           selectAll: "Select all",
           selectedCount: "Selected {selected}/{total}",
+          deleteSelectedTracks: "Delete selected audio",
           playlistEmpty: "No audio files yet. Drag or upload multiple files to add them here.",
           selectTrack: "Select {name}",
           deleteTrack: "Delete {name}",
@@ -1555,6 +1722,9 @@
       const fileInput = document.getElementById("fileInput");
       const player = document.getElementById("player");
       const playBtn = document.getElementById("playBtn");
+      const autoPlayNextCheckbox = document.getElementById("autoPlayNextCheckbox");
+      const previousTrackBtn = document.getElementById("previousTrackBtn");
+      const nextTrackBtn = document.getElementById("nextTrackBtn");
       const toBeginBtn = document.getElementById("toBeginBtn");
       const toEndBtn = document.getElementById("toEndBtn");
       const progressBar = document.getElementById("progressBar");
@@ -1576,6 +1746,7 @@
       const selectAllControl = document.getElementById("selectAllControl");
       const selectAllTracks = document.getElementById("selectAllTracks");
       const selectAllLabel = document.getElementById("selectAllLabel");
+      const deleteSelectedTracksBtn = document.getElementById("deleteSelectedTracksBtn");
 
       //helper for finding ASR aligned result word in the original text
       function normalizeToken(text) {
@@ -2302,6 +2473,7 @@
               id: transcript.id,
               name: transcript.name,
               size: formatFileSize(audioBlob.size),
+              duration: null,
               file: audioBlob,
               url: URL.createObjectURL(audioBlob),
               alignmentData: alignmentData,
@@ -2319,6 +2491,7 @@
           tracks = [...tracks, ...newTracks];
           renderPlaylist();
           updateSelectionUi();
+          hydrateTrackDurations(newTracks);
 
           // Select the first imported track
           if (newTracks[0]) {
@@ -2382,6 +2555,7 @@
             id: `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`,
             name: file.name,
             size: formatFileSize(file.size),
+            duration: null,
             file,
             url: URL.createObjectURL(file),
             alignmentData: null,
@@ -2390,6 +2564,7 @@
           tracks = [...tracks, ...newTracks];
           renderPlaylist();
           updateSelectionUi();
+          hydrateTrackDurations(newTracks);
 
           // Select the first new track
           if (newTracks[0]) {
@@ -2525,6 +2700,9 @@
           },
           onend: function () {
             if (currentTrackId !== track.id) return;
+            if (autoPlayNextCheckbox.checked && playNextTrack(track.id)) {
+              return;
+            }
             isPlaying = false;
             stopProgressLoop();
             progress.style.width = "100%";
@@ -2542,6 +2720,26 @@
           }
         });
         return howl;
+      }
+
+      function playNextTrack(fromTrackId) {
+        const nextTrack = getAdjacentTrack(fromTrackId, 1);
+        if (!nextTrack) return false;
+        selectTrack(nextTrack.id, true);
+        return true;
+      }
+
+      function playPreviousTrack(fromTrackId) {
+        const previousTrack = getAdjacentTrack(fromTrackId, -1);
+        if (!previousTrack) return false;
+        selectTrack(previousTrack.id, true);
+        return true;
+      }
+
+      function getAdjacentTrack(fromTrackId, offset) {
+        const currentIndex = tracks.findIndex((item) => item.id === fromTrackId);
+        if (currentIndex === -1) return null;
+        return tracks[currentIndex + offset] || null;
       }
 
 
@@ -2643,6 +2841,16 @@
 
       playBtn.addEventListener("click", () => {
         togglePlayback();
+      });
+
+      previousTrackBtn.addEventListener("click", () => {
+        if (!currentTrackId) return;
+        playPreviousTrack(currentTrackId);
+      });
+
+      nextTrackBtn.addEventListener("click", () => {
+        if (!currentTrackId) return;
+        playNextTrack(currentTrackId);
       });
 
       document.addEventListener("keydown", (event) => {
@@ -2888,6 +3096,11 @@
         }
         renderPlaylist();
         updateSelectionUi();
+        if (event.shiftKey) requestAnimationFrame(updateSelectionUi);
+      });
+
+      deleteSelectedTracksBtn.addEventListener("click", () => {
+        deleteSelectedTracks();
       });
 
       cancelExportBtn.addEventListener("click", () => {
@@ -3444,6 +3657,7 @@
         exportFormat.disabled = busy;
         batchExportSelected.disabled = busy;
         selectAllTracks.disabled = busy;
+        deleteSelectedTracksBtn.disabled = busy || selectedTrackIds.size === 0;
         speedBtns.forEach((button) => {
           button.disabled = busy;
         });
@@ -3651,7 +3865,11 @@
         cleanupSelectedTrackIds();
         trackList.innerHTML = tracks
           .map(
-            (track) => `
+            (track) => {
+              const durationLabel = Number.isFinite(track.duration)
+                ? formatTime(track.duration)
+                : "--:--";
+              return `
               <div
                 class="track-item ${track.id === currentTrackId ? "active" : ""}"
                 data-track-id="${escapeHtml(track.id)}"
@@ -3669,7 +3887,10 @@
                     </label>
                     <span class="track-info">
                       <span class="track-name">${escapeHtml(track.name)}</span>
-                      <span class="track-meta">${track.size}</span>
+                      <span class="track-meta">
+                        <span class="track-meta-part">${escapeHtml(track.size)}</span>
+                        <span class="track-meta-part">${escapeHtml(durationLabel)}</span>
+                      </span>
                     </span>
                   </span>
                   <button
@@ -3682,7 +3903,8 @@
                   </button>
                 </span>
               </div>
-            `,
+            `;
+            },
           )
           .join("");
 
@@ -3727,6 +3949,28 @@
         lucide.createIcons();
       }
 
+      function hydrateTrackDurations(trackBatch) {
+        trackBatch.forEach((track) => {
+          const audio = new Audio();
+          audio.preload = "metadata";
+          audio.src = track.url;
+
+          audio.addEventListener("loadedmetadata", () => {
+            if (!Number.isFinite(audio.duration)) return;
+            const existingTrack = tracks.find((item) => item.id === track.id);
+            if (!existingTrack) return;
+            existingTrack.duration = audio.duration;
+            renderPlaylist();
+          }, { once: true });
+
+          audio.addEventListener("error", () => {
+            const existingTrack = tracks.find((item) => item.id === track.id);
+            if (!existingTrack) return;
+            existingTrack.duration = null;
+          }, { once: true });
+        });
+      }
+
       
 
 
@@ -3735,47 +3979,83 @@
         if (trackIndex === -1) return;
 
         const [removedTrack] = tracks.splice(trackIndex, 1);
-        URL.revokeObjectURL(removedTrack.url);
+        disposeTrack(removedTrack);
         selectedTrackIds.delete(trackId);
-
-        // 清理缓存的 Howl 实例
-        if (howlMap.has(trackId)) {
-          const cachedHowl = howlMap.get(trackId);
-          cachedHowl.unload();
-          howlMap.delete(trackId);
-        }
 
         // 如果当前播放的正是这个曲目，需要重置播放状态
         if (currentTrackId === trackId) {
-          if (sound) {
-            sound.unload();
-            sound = null;
-          }
-          updateWaveformVisibility(false);
-          if (wavesurfer) {
-            try { wavesurfer.destroy(); } catch(e) {}
-            wavesurfer = null;
-          }
-          isPlaying = false;
-          currentTrackId = null;
-          stopProgressLoop();
-          setPlayButton(false);
-          progress.style.width = "0%";
-          currentTimeEl.textContent = "0:00";
-          durationEl.textContent = "0:00";
-          fileName.textContent = "";
-          player.style.display = tracks.length ? "block" : "none";
-          updateSelectionUi();
+          resetCurrentPlayback();
 
           // 自动选中下一首（如果有）
           const fallbackTrack = tracks[trackIndex] || tracks[trackIndex - 1];
           if (fallbackTrack) {
             selectTrack(fallbackTrack.id, false);
+          } else {
+            renderPlaylist();
+            updateSelectionUi();
           }
           return;
         }
 
         renderPlaylist();
+        updateSelectionUi();
+      }
+
+      function deleteSelectedTracks() {
+        const selectedTracks = getSelectedTracks();
+        if (!selectedTracks.length || isExporting) return;
+
+        const deletedIds = new Set(selectedTracks.map((track) => track.id));
+        const firstDeletedIndex = tracks.findIndex((track) => deletedIds.has(track.id));
+        const deletingCurrentTrack = currentTrackId && deletedIds.has(currentTrackId);
+
+        selectedTracks.forEach(disposeTrack);
+        tracks = tracks.filter((track) => !deletedIds.has(track.id));
+        selectedTrackIds.clear();
+
+        if (deletingCurrentTrack) {
+          resetCurrentPlayback();
+          const fallbackTrack = tracks[firstDeletedIndex] || tracks[firstDeletedIndex - 1];
+          if (fallbackTrack) {
+            selectTrack(fallbackTrack.id, false);
+            return;
+          }
+        }
+
+        renderPlaylist();
+        updateSelectionUi();
+      }
+
+      function disposeTrack(track) {
+        URL.revokeObjectURL(track.url);
+
+        // 清理缓存的 Howl 实例
+        if (howlMap.has(track.id)) {
+          const cachedHowl = howlMap.get(track.id);
+          cachedHowl.unload();
+          howlMap.delete(track.id);
+        }
+      }
+
+      function resetCurrentPlayback() {
+        if (sound) {
+          sound.unload();
+          sound = null;
+        }
+        updateWaveformVisibility(false);
+        if (wavesurfer) {
+          try { wavesurfer.destroy(); } catch(e) {}
+          wavesurfer = null;
+        }
+        isPlaying = false;
+        currentTrackId = null;
+        stopProgressLoop();
+        setPlayButton(false);
+        progress.style.width = "0%";
+        currentTimeEl.textContent = "0:00";
+        durationEl.textContent = "0:00";
+        fileName.textContent = "";
+        player.style.display = tracks.length ? "block" : "none";
         updateSelectionUi();
       }
 
@@ -3842,6 +4122,8 @@
         const selectedCount = selectedTrackIds.size;
         const hasTracks = tracks.length > 0;
         selectAllControl.classList.toggle("visible", hasTracks);
+        deleteSelectedTracksBtn.classList.toggle("visible", selectedCount > 0);
+        deleteSelectedTracksBtn.disabled = isExporting || selectedCount === 0;
         selectAllTracks.checked = hasTracks && selectedCount === tracks.length;
         selectAllTracks.indeterminate =
           selectedCount > 0 && selectedCount < tracks.length;
