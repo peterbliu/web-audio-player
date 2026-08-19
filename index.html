@@ -2115,57 +2115,48 @@
         return tokenForms.some((form) => segmentForms.includes(form));
       }
 
-      const germanSpokenNumberMap = {
-        1: ["eins"],
-        2: ["zwei"],
-        3: ["drei"],
-        4: ["vier"],
-        5: ["fünf"],
-        6: ["sechs"],
-        7: ["sieben"],
-        8: ["acht"],
-        9: ["neun"],
-        10: ["zehn"],
-      };
-
-      function getTokenMatchCandidates(text) {
-        // Base + German umlaut fuzzy forms (ä/ö/ü/ß normalized by the
-        // force-aligner) + spoken-number expansions.
-        const candidates = new Set(getAlignmentTokenCandidates(text));
-        const normalized = normalizeToken(text);
-
-        for (const spokenNumber of germanSpokenNumberMap[normalized] || []) {
-          for (const form of getAlignmentTokenCandidates(spokenNumber)) {
-            candidates.add(form);
-          }
-        }
-        return [...candidates];
-      }
-
       function tokenizeSentence(sentenceText) {
         const tokens = [];
 
-        // \p{M} keeps combining marks (decomposed umlauts like o + U+0308)
-        // attached to their base letter, so "Hassko\u0308ter" stays ONE
-        // token instead of being split into "Hassko" + "ter". The token text
-        // is NFKC-normalized later for the fuzzy umlaut match.
-        const regex = /[\p{L}\p{M}\p{N}’'`´-]+/gu;
+        // Whitespace-split tokenization — identical to the reference project's
+        // parseStructuredTranscript (line.split(/\s+/)). Punctuation and
+        // number separators stay attached to their word ("13.000", "16-18",
+        // "Hassköter.", "Oktober,"), so the fuzzy match only has to compare
+        // normalized forms and can never see a token split mid-word by a '.'
+        // or a combining mark. Char positions are measured on the ORIGINAL
+        // text, which the renderMap slices back out exactly.
+        const regex = /\S+/gu;
 
         let match;
 
         while ((match = regex.exec(sentenceText)) !== null) {
           tokens.push({
             text: match[0],
-
             normalized: normalizeToken(match[0]),
-
             startChar: match.index,
-
             endChar: match.index + match[0].length,
           });
         }
 
         return tokens;
+      }
+
+      // Reference findMatchingSegment: the first word at/after the cursor whose
+      // candidate forms intersect the token's candidates, searching to the END
+      // of the list. Returns -1 when nothing matches.
+      function findMatchingWordIndex(words, cursor, candidates) {
+        if (candidates.length === 0 || cursor >= words.length) {
+          return -1;
+        }
+
+        if (alignmentFormsIntersect(candidates, words[cursor].forms)) {
+          return cursor;
+        }
+
+        return words.findIndex(
+          (word, index) =>
+            index >= cursor && alignmentFormsIntersect(candidates, word.forms),
+        );
       }
 
       function buildSentenceRenderMaps(transcript) {
@@ -2176,12 +2167,16 @@
           return;
 
         // Align once from left to right so every ASR word belongs to at most
-        // one sentence. Timing tolerances duplicate very short boundary words
-        // when speakers overlap or adjacent sentences share an exact boundary.
-        // Candidate forms are precomputed once per ASR word so the fuzzy
-        // umlaut match (ä/ö/ü/ß) stays cheap. The fallback searches from the
-        // cursor to the END of the word list, exactly like the reference
-        // project's findMatchingSegment.
+        // one sentence. This is a direct port of the reference project's
+        // parseStructuredTranscript (the data the karaoke player renders):
+        //   - tokens are whitespace-split, so "13.000"/"16-18"/"Hassköter."
+        //     stay whole and the fuzzy match only sees normalized forms
+        //     (NFKC composes umlauts, strips separators/punctuation);
+        //   - punctuation-only tokens and tokens with no match anywhere are
+        //     left unmapped and do NOT advance the cursor — a mismatched or
+        //     separator-only token can never consume a word that a later
+        //     token needs;
+        //   - candidate forms are precomputed once per ASR word.
         const words = transcript.wordAlignment.map((word) => ({
           word,
           forms: getAlignmentTokenCandidates(word.word ?? word.text),
@@ -2192,6 +2187,12 @@
           const renderMap = [];
 
           for (const token of tokenizeSentence(sentence.text)) {
+            const candidates = getAlignmentTokenCandidates(token.text);
+
+            // Punctuation-only token (e.g. a standalone "...") — skip it
+            // without touching the cursor.
+            if (candidates.length === 0) continue;
+
             while (
               wordCursor < words.length &&
               words[wordCursor].forms.length === 0
@@ -2200,30 +2201,20 @@
             }
             if (wordCursor >= words.length) break;
 
-            const candidates = getTokenMatchCandidates(token.text);
-            let matchedIndex = wordCursor;
+            const matchedIndex = findMatchingWordIndex(
+              words,
+              wordCursor,
+              candidates,
+            );
 
-            if (!alignmentFormsIntersect(candidates, words[wordCursor].forms)) {
-              let exactIndex = -1;
+            // No match anywhere: leave the token unmapped, cursor unchanged
+            // (reference behaviour — no forced mapping).
+            if (matchedIndex < 0) continue;
 
-              for (let i = wordCursor + 1; i < words.length; i++) {
-                if (alignmentFormsIntersect(candidates, words[i].forms)) {
-                  exactIndex = i;
-                  break;
-                }
-              }
-
-              // Force inaccurate ASR text onto the current timing if no
-              // match exists anywhere. This preserves all later token
-              // mappings (identical to the reference behaviour).
-              if (exactIndex >= 0) matchedIndex = exactIndex;
-            }
-
-            const matchedWord = words[matchedIndex].word;
             renderMap.push({
               startChar: token.startChar,
               endChar: token.endChar,
-              word: matchedWord,
+              word: words[matchedIndex].word,
             });
             wordCursor = matchedIndex + 1;
           }

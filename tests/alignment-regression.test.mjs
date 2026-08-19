@@ -84,16 +84,20 @@ const imperfectAsr = {
 }
 context.imperfectAsr = imperfectAsr
 vm.runInContext('buildSentenceRenderMaps(imperfectAsr)', context)
+// Reference (parseStructuredTranscript) behaviour: an unmatched token is left
+// unmapped and does NOT consume the current word — "wirklich" matches nothing,
+// so it maps to no word and the cursor stays put for "gerne".
 assert.equal(
   imperfectAsr.sentenceAlignment[0].alignedWords.map((word) => word.text).join('|'),
-  'Sehr|völlig|gerne',
+  'Sehr|gerne',
 )
-assert.equal(imperfectAsr.sentenceAlignment[0].renderMap.length, 3)
+assert.equal(imperfectAsr.sentenceAlignment[0].renderMap.length, 2)
 
 // German umlaut fuzzy match — user case: transcript keeps "Hassköter", the
 // force-aligner emits the diacritic-stripped "Hasskoter". Both the precomposed
 // ö (U+00F6) and the decomposed form (o + U+0308, emitted by some editors)
-// must map the FULL word, with no trailing text left over.
+// must map the FULL word. Whitespace-split tokens keep the trailing period
+// attached (exactly like the reference), so the last token is "Hassköter.".
 for (const umlaut of ['\u00F6', 'o\u0308']) {
   const umlautCase = {
     sentenceAlignment: [
@@ -114,9 +118,88 @@ for (const umlaut of ['\u00F6', 'o\u0308']) {
   assert.equal(sentence.alignedWords.at(-1).word, 'Hasskoter')
   const lastItem = sentence.renderMap.at(-1)
   const lastTokenText = sentence.text.slice(lastItem.startChar, lastItem.endChar)
-  assert.equal(lastTokenText, `Hassk${umlaut}ter`)
-  assert.equal(sentence.text.slice(lastItem.endChar), '.')
+  assert.equal(lastTokenText, `Hassk${umlaut}ter.`)
+  assert.equal(sentence.text.slice(lastItem.endChar), '')
 }
+
+// Number separators — the force-aligner drops '-' and '.' and concatenates
+// digits: "16-18" -> "1618", "13.000" -> "13000". Whitespace-split tokens keep
+// the separator inside the token and the normalized form matches the ASR word.
+const rangeNumber = {
+  sentenceAlignment: [
+    { text: 'insgesamt 16-18 Tage.', start: 9, end: 12 },
+  ],
+  wordAlignment: [
+    { word: 'insgesamt', start: 9.28, end: 9.92 },
+    { word: '1618', start: 9.92, end: 11.12 },
+    { word: 'Tage', start: 11.12, end: 11.68 },
+  ],
+}
+context.rangeNumber = rangeNumber
+vm.runInContext('buildSentenceRenderMaps(rangeNumber)', context)
+assert.equal(rangeNumber.sentenceAlignment[0].renderMap.length, 3)
+assert.equal(
+  rangeNumber.sentenceAlignment[0].alignedWords.map((word) => word.word).join('|'),
+  'insgesamt|1618|Tage',
+)
+
+const thousandNumber = {
+  sentenceAlignment: [
+    { text: 'Auf dem Oktoberfest arbeiten jedes Jahr 13.000 Menschen.', start: 23.04, end: 27.36 },
+  ],
+  wordAlignment: [
+    { word: 'Auf', start: 23.04, end: 23.28 },
+    { word: 'dem', start: 23.28, end: 23.52 },
+    { word: 'Oktoberfest', start: 23.52, end: 24.24 },
+    { word: 'arbeiten', start: 24.24, end: 24.72 },
+    { word: 'jedes', start: 25.2, end: 25.68 },
+    { word: 'Jahr', start: 25.68, end: 25.84 },
+    { word: '13000', start: 25.84, end: 26.72 },
+    { word: 'Menschen', start: 26.72, end: 27.36 },
+  ],
+}
+context.thousandNumber = thousandNumber
+vm.runInContext('buildSentenceRenderMaps(thousandNumber)', context)
+assert.equal(thousandNumber.sentenceAlignment[0].renderMap.length, 8)
+assert.equal(
+  thousandNumber.sentenceAlignment[0].alignedWords.at(-2).word,
+  '13000',
+)
+assert.equal(thousandNumber.sentenceAlignment[0].alignedWords.at(-1).word, 'Menschen')
+
+// Punctuation-only and separator-only tokens must never consume an ASR word:
+// "16 - 18" (spaced separators) leaves 16/18 unmapped, "-" skipped, and "Tage"
+// still maps to the correct word.
+const spacedRange = {
+  sentenceAlignment: [
+    { text: '16 - 18 Tage', start: 0, end: 3 },
+  ],
+  wordAlignment: [
+    { word: '1618', start: 0, end: 2 },
+    { word: 'Tage', start: 2, end: 3 },
+  ],
+}
+context.spacedRange = spacedRange
+vm.runInContext('buildSentenceRenderMaps(spacedRange)', context)
+assert.equal(spacedRange.sentenceAlignment[0].renderMap.length, 1)
+assert.equal(spacedRange.sentenceAlignment[0].alignedWords[0].word, 'Tage')
+
+const punctuationSkip = {
+  sentenceAlignment: [
+    { text: 'Hallo ... Welt', start: 0, end: 2 },
+  ],
+  wordAlignment: [
+    { word: 'Hallo', start: 0, end: 1 },
+    { word: 'Welt', start: 1, end: 2 },
+  ],
+}
+context.punctuationSkip = punctuationSkip
+vm.runInContext('buildSentenceRenderMaps(punctuationSkip)', context)
+assert.equal(punctuationSkip.sentenceAlignment[0].renderMap.length, 2)
+assert.equal(
+  punctuationSkip.sentenceAlignment[0].alignedWords.map((word) => word.word).join('|'),
+  'Hallo|Welt',
+)
 
 const renderStart = html.indexOf('function renderSentence(sentence, activeWord)')
 const renderEnd = html.indexOf('// === Reset karaoke state', renderStart)
