@@ -36,7 +36,7 @@
         --violet: #7c3aed;
         --violet-hover: #8b5cf6;
         --danger: #f87171;
-        --karaoke-font-scale:1;
+        --karaoke-font-scale: 1;
       }
 
       body {
@@ -148,7 +148,9 @@
         color: var(--text-muted);
         opacity: 0;
         transform: scale(0.72);
-        transition: opacity 0.18s ease 0.1s, transform 0.2s ease 0.1s;
+        transition:
+          opacity 0.18s ease 0.1s,
+          transform 0.2s ease 0.1s;
       }
 
       .upload-area.collapsed .upload-compact-icon {
@@ -166,7 +168,10 @@
         margin: 0;
         opacity: 1;
         transform: translateY(0);
-        transition: opacity 0.16s ease, transform 0.2s ease, max-height 0.24s ease;
+        transition:
+          opacity 0.16s ease,
+          transform 0.2s ease,
+          max-height 0.24s ease;
         line-height: 1.45;
         overflow-wrap: anywhere;
       }
@@ -192,7 +197,11 @@
         justify-content: center;
         opacity: 1;
         transform: scale(1);
-        transition: opacity 0.16s ease, transform 0.2s ease, border-color 0.2s, color 0.2s;
+        transition:
+          opacity 0.16s ease,
+          transform 0.2s ease,
+          border-color 0.2s,
+          color 0.2s;
       }
 
       .upload-minimize-btn:hover {
@@ -272,20 +281,26 @@
         cursor: grab;
         pointer-events: auto;
         z-index: 2;
-        box-shadow: 0 0 8px rgba(16, 185, 129, 0.35), 0 0 0 2px rgba(16, 185, 129, 0.08);
-        transition: box-shadow 0.2s, transform 0.15s;
+        box-shadow:
+          0 0 8px rgba(16, 185, 129, 0.35),
+          0 0 0 2px rgba(16, 185, 129, 0.08);
+        transition:
+          box-shadow 0.2s,
+          transform 0.15s;
         left: 0%;
         will-change: transform;
       }
 
       .progress-knob:hover {
-        box-shadow: 0 0 14px rgba(16, 185, 129, 0.55), 0 0 0 3px rgba(16, 185, 129, 0.12);
+        box-shadow:
+          0 0 14px rgba(16, 185, 129, 0.55),
+          0 0 0 3px rgba(16, 185, 129, 0.12);
         transform: translate(-50%, -50%) scale(1.12);
       }
 
       .progress-knob:active {
         cursor: grabbing;
-        transform: translate(-50%, -50%) scale(1.0);
+        transform: translate(-50%, -50%) scale(1);
         box-shadow: 0 0 20px rgba(16, 185, 129, 0.7);
       }
 
@@ -345,7 +360,10 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        transition: background 0.2s, border-color 0.2s, color 0.2s;
+        transition:
+          background 0.2s,
+          border-color 0.2s,
+          color 0.2s;
       }
 
       .icon-checkbox svg {
@@ -437,79 +455,81 @@
       }
 
       .export-panel {
-          margin: 18px auto 0;
-          padding: 0;
-          border: 1px solid var(--border);
-          border-radius: 12px;
-          background: var(--panel);
-          overflow: hidden;
-        }
+        margin: 18px auto 0;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--panel);
+        overflow: hidden;
+      }
 
-        .export-header {
-          display: flex;
-          align-items: center;
-          padding: 6px 14px;
-          cursor: pointer;
-          user-select: none;
-          border-bottom: 1px solid transparent;
-          transition: border-color 0.2s;
-        }
+      .export-header {
+        display: flex;
+        align-items: center;
+        padding: 6px 14px;
+        cursor: pointer;
+        user-select: none;
+        border-bottom: 1px solid transparent;
+        transition: border-color 0.2s;
+      }
 
-        .export-header:hover {
-          border-bottom-color: var(--border-strong);
-        }
+      .export-header:hover {
+        border-bottom-color: var(--border-strong);
+      }
 
-        .export-toggle-btn {
-          background: none;
-          border: none;
-          color: var(--text-muted);
-          font-size: 12px;
-          font-weight: 500;
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          padding: 4px 6px;
-          cursor: pointer;
-          border-radius: 4px;
-          transition: background 0.2s, color 0.2s;
-        }
+      .export-toggle-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 6px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
 
-        .export-toggle-btn:hover {
-          background: var(--panel-raised);
-          color: var(--text);
-        }
+      .export-toggle-btn:hover {
+        background: var(--panel-raised);
+        color: var(--text);
+      }
 
-        .export-toggle-btn:focus-visible {
-          outline: 2px solid var(--emerald);
-          outline-offset: 1px;
-        }
+      .export-toggle-btn:focus-visible {
+        outline: 2px solid var(--emerald);
+        outline-offset: 1px;
+      }
 
-        .export-toggle-btn svg {
-          width: 14px;
-          height: 14px;
-          transition: transform 0.25s ease;
-        }
+      .export-toggle-btn svg {
+        width: 14px;
+        height: 14px;
+        transition: transform 0.25s ease;
+      }
 
-        .export-toggle-btn[aria-expanded="true"] svg {
-          transform: rotate(90deg);
-        }
+      .export-toggle-btn[aria-expanded="true"] svg {
+        transform: rotate(90deg);
+      }
 
-        .export-body {
-          padding: 14px;
-          border-top: 1px solid var(--border);
-          animation: fadeSlide 0.2s ease;
-        }
+      .export-body {
+        padding: 14px;
+        border-top: 1px solid var(--border);
+        animation: fadeSlide 0.2s ease;
+      }
 
-        @keyframes fadeSlide {
-          from {
-            opacity: 0;
-            transform: translateY(-6px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+      @keyframes fadeSlide {
+        from {
+          opacity: 0;
+          transform: translateY(-6px);
         }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
       .export-toolbar {
         display: grid;
@@ -965,12 +985,10 @@
         }
       }
 
-      
-
       /* ===== Karaoke display styles ===== */
       .karaoke-container {
         margin: 10px 0px 10px 0px;
-        padding: 10px 8px 10px 8px;  /* left/right 8px, top/bottom 10px */
+        padding: 10px 8px 10px 8px; /* left/right 8px, top/bottom 10px */
         border-radius: 8px;
         min-height: auto;
         background: var(--panel);
@@ -986,7 +1004,7 @@
       }
 
       .karaoke-timestamp {
-        font-size:calc(12px * var(--karaoke-font-scale));
+        font-size: calc(12px * var(--karaoke-font-scale));
         min-width: calc(12px * var(--karaoke-font-scale));
         color: var(--text-faint);
         font-variant-numeric: tabular-nums;
@@ -996,37 +1014,38 @@
         flex-shrink: 0;
       }
 
-
       .karaoke-sentence {
         padding: 2px 0px;
         margin: 1px 0;
         line-height: 1.5;
-        font-size:calc(16px * var(--karaoke-font-scale));
+        font-size: calc(16px * var(--karaoke-font-scale));
         min-height: 1.8em;
         font-weight: 400;
         color: var(--text-muted);
         border-radius: 4px;
         border: 1px solid transparent;
-        transition: border-color 0.2s ease, color 0.2s ease;
+        transition:
+          border-color 0.2s ease,
+          color 0.2s ease;
         display: grid;
         grid-template-columns: auto 1fr;
         gap: 4px 8px;
-        align-items: baseline; 
+        align-items: baseline;
       }
 
       .karaoke-text-block {
-        grid-column: 2;           /* 强制放在第二列 */
+        grid-column: 2; /* 强制放在第二列 */
         display: flex;
         flex-direction: column;
-        align-items: flex-start;  /* 内部左对齐 */
-        gap: 1px;                 /* 原文和翻译之间的垂直间距为1px */
-        min-width: 0;             /* 防止溢出 */
+        align-items: flex-start; /* 内部左对齐 */
+        gap: 1px; /* 原文和翻译之间的垂直间距为1px */
+        min-width: 0; /* 防止溢出 */
       }
 
       .karaoke-translation {
         display: block;
-        margin-top: 0;            /* 由父容器的 gap 控制 */
-        font-size:calc(14px * var(--karaoke-font-scale));
+        margin-top: 0; /* 由父容器的 gap 控制 */
+        font-size: calc(14px * var(--karaoke-font-scale));
         color: var(--text-muted);
         opacity: 0.8;
         width: 100%;
@@ -1063,8 +1082,6 @@
       .karaoke-word.inactive {
         border-bottom-color: transparent;
       }
-
-
 
       .karaoke-sentence.current .karaoke-timestamp {
         color: var(--emerald);
@@ -1127,8 +1144,6 @@
         display: inline-block;
       }
 
-
-
       /* Mobile-specific fine‑tuning */
       @media (max-width: 640px) {
         .karaoke-sentence {
@@ -1136,18 +1151,18 @@
           padding: 1px 0px;
           line-height: 1.4;
           min-height: 1.6em;
-          gap: 4px;               /* 可保持左右间隙一致 */
+          gap: 4px; /* 可保持左右间隙一致 */
         }
         .karaoke-timestamp {
           font-size: calc(11px * var(--karaoke-font-scale));
           min-width: calc(11px * var(--karaoke-font-scale));
         }
         .karaoke-translation {
-          font-size:calc(12px * var(--karaoke-font-scale));
+          font-size: calc(12px * var(--karaoke-font-scale));
           margin-top: 0;
         }
         .karaoke-text-block {
-          gap: 1px;               /* 同样保持1px */
+          gap: 1px; /* 同样保持1px */
         }
       }
 
@@ -1212,7 +1227,6 @@
         }
       }
 
-
       /* Footer area – flex row with version and settings */
       .footer-container {
         display: flex;
@@ -1252,7 +1266,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: color 0.2s, background 0.2s;
+        transition:
+          color 0.2s,
+          background 0.2s;
         flex-shrink: 0;
       }
 
@@ -1309,14 +1325,13 @@
         }
       }
 
-
       .karaoke-container {
         position: relative; /* needed for absolute positioning of the overlay */
       }
 
       .karaoke-controls-overlay {
         position: absolute;
-        bottom: 8px;       /* now at the bottom */
+        bottom: 8px; /* now at the bottom */
         right: 8px;
         display: flex;
         gap: 6px;
@@ -1334,7 +1349,10 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: background 0.2s, color 0.2s, border-color 0.2s;
+        transition:
+          background 0.2s,
+          color 0.2s,
+          border-color 0.2s;
         backdrop-filter: blur(4px);
         padding: 0;
       }
@@ -1375,272 +1393,376 @@
           height: 14px;
         }
       }
-
-
-
-
     </style>
   </head>
 
   <body>
     <div class="container">
-        <!-- <div class="app-header">
+      <!-- <div class="app-header">
           <div class="title" data-i18n="appTitle">变速音频工具</div>
           <button class="settings-toggle-btn" id="settingsToggleBtn" aria-label="切换设置" data-i18n-aria-label="settingsToggle">
             <i data-lucide="settings"></i>
           </button>
         </div> -->
 
-        <div class="upload-area expanded" id="uploadArea" data-i18n-title="uploadMain">
-          <button class="upload-minimize-btn" id="uploadMinimizeBtn" type="button" aria-label="收起上传区域" title="收起上传区域">
-            <i data-lucide="minimize-2"></i>
-          </button>
-          <i class="upload-compact-icon" data-lucide="file-plus-2"></i>
-          <p data-i18n="uploadMain">点击或拖拽文件到这里</p>
-          <p class="upload-hint">
-            <span data-i18n="uploadHint">支持一次添加多个文件</span>
-            mp3 / wav / m4a / ogg / json / zip
-          </p>
-          <input type="file" id="fileInput" accept="audio/*,.wav,.mp3,.ogg,.m4a,.json,application/json,.zip,application/zip" multiple />
+      <div
+        class="upload-area expanded"
+        id="uploadArea"
+        data-i18n-title="uploadMain"
+      >
+        <button
+          class="upload-minimize-btn"
+          id="uploadMinimizeBtn"
+          type="button"
+          aria-label="收起上传区域"
+          title="收起上传区域"
+        >
+          <i data-lucide="minimize-2"></i>
+        </button>
+        <i class="upload-compact-icon" data-lucide="file-plus-2"></i>
+        <p data-i18n="uploadMain">点击或拖拽文件到这里</p>
+        <p class="upload-hint">
+          <span data-i18n="uploadHint">支持一次添加多个文件</span>
+          mp3 / wav / m4a / ogg / json / zip
+        </p>
+        <input
+          type="file"
+          id="fileInput"
+          accept="audio/*,.wav,.mp3,.ogg,.m4a,.json,application/json,.zip,application/zip"
+          multiple
+        />
+      </div>
+
+      <div class="player" id="player">
+        <div class="filename" id="fileName">
+          <span id="fileNameText"></span>
         </div>
 
-
-        <div class="player" id="player">
-          
-          <div class="filename" id="fileName">
-            <span id="fileNameText"></span>
-          </div>
-          
-          <div class="waveform-container" id='waveformContainer'>
-            <div id='waveform'></div>
-          </div>
-
-          <div class="progress-bar" id="progressBar">
-            <div class="progress" id="progress"></div>
-            <div class="progress-knob" id="progressKnob"></div>
-          </div>
-
-          <div class="time">
-            <span id="current">0:00</span> / <span id="duration">0:00</span>
-          </div>
-
+        <div class="waveform-container" id="waveformContainer">
+          <div id="waveform"></div>
         </div>
 
-        <div class="controls">
-          <button class="ctrl-btn" id="previousTrackBtn" aria-label="上一条音频" data-i18n-aria-label="previousTrack" data-i18n-title="previousTrack">
-            <i data-lucide="arrow-up-from-line"></i>
-          </button>
-          <button class="ctrl-btn" id="toBeginBtn" aria-label="回到开头" data-i18n-aria-label="toBegin" data-i18n-title="toBegin">
-            <i data-lucide="skip-back"></i>
-          </button>
-          <button class="ctrl-btn" id="skipBackBtn" aria-label="后退5秒" data-i18n-aria-label="skipBack" data-i18n-title="skipBack">
-            <i data-lucide="rewind"></i>
-          </button>
-          <button class="play-btn" id="playBtn" aria-label="播放" data-i18n-aria-label="play" data-i18n-title="play">
-            <i data-lucide="play"></i>
-          </button>
-          <button class="ctrl-btn" id="skipForwardBtn" aria-label="前进5秒" data-i18n-aria-label="skipForward" data-i18n-title="skipForward">
-            <i data-lucide="fast-forward"></i>
-          </button>
-          <button class="ctrl-btn" id="toEndBtn" aria-label="跳到结尾" data-i18n-aria-label="toEnd" data-i18n-title="toEnd">
-            <i data-lucide="skip-forward"></i>
-          </button>
-          <button class="ctrl-btn" id="nextTrackBtn" aria-label="下一条音频" data-i18n-aria-label="nextTrack" data-i18n-title="nextTrack">
-            <i data-lucide="arrow-down-from-line"></i>
-          </button>
+        <div class="progress-bar" id="progressBar">
+          <div class="progress" id="progress"></div>
+          <div class="progress-knob" id="progressKnob"></div>
         </div>
 
-        <div class="speed-group">
-          <button class="speed-btn" data-speed="0.5"  title="0.5x">0.5x</button>
-          <button class="speed-btn" data-speed="0.55" title="0.55x">0.55x</button>
-          <button class="speed-btn" data-speed="0.6"  title="0.6" >0.6x</button>
-          <button class="speed-btn" data-speed="0.65" title="0.65">0.65x</button>
-          <button class="speed-btn" data-speed="0.7"  title="0.7" >0.7x</button>
-          <button class="speed-btn" data-speed="0.75" title="0.75">0.75x</button>
-          <button class="speed-btn" data-speed="0.8"  title="0.8" >0.8x</button>
-          <button class="speed-btn" data-speed="0.85" title="0.85">0.85x</button>
-          <button class="speed-btn" data-speed="0.9"  title="0.9" >0.9x</button>
-          <button class="speed-btn" data-speed="0.95" title="0.95">0.95x</button>
-          <button class="speed-btn active" data-speed="1.0"  title="0.95">1.0x</button>
-          <button class="speed-btn" data-speed="1.1"  title="1.1">1.1x</button>
-          <button class="speed-btn" data-speed="1.2"  title="1.2">1.2x</button>
-          <button class="speed-btn" data-speed="1.3"  title="1.3">1.3x</button>
-          <button class="speed-btn" data-speed="1.4"  title="1.4">1.4x</button>
-          <button class="speed-btn" data-speed="1.5"  title="1.5">1.5x</button>
+        <div class="time">
+          <span id="current">0:00</span> / <span id="duration">0:00</span>
         </div>
+      </div>
 
-        <!-- ===== karaoke timestamps segments display ===== -->
-        <div class="karaoke-container" id="karaokeContainer">
-          <!-- control buttons for visibility-->
-          <div class="karaoke-controls-overlay">
-            
-            <button class="karaoke-toggle-btn" id="karaokeVisibilityToggle" aria-label="切换句子显示" data-i18n-aria-label="karaokeVisibilityToggle" data-i18n-title="karaokeVisibilityHide">
-               <i data-lucide="eye-closed"></i> 
-            </button>
-            <button class="karaoke-toggle-btn" id="karaokeTranslationToggle" aria-label="切换翻译（即将推出）" data-i18n-aria-label="karaokeTranslationToggle" data-i18n-title="karaokeTranslationToggle">
-              <i data-lucide="languages"></i>
-            </button>
+      <div class="controls">
+        <button
+          class="ctrl-btn"
+          id="previousTrackBtn"
+          aria-label="上一条音频"
+          data-i18n-aria-label="previousTrack"
+          data-i18n-title="previousTrack"
+        >
+          <i data-lucide="arrow-up-from-line"></i>
+        </button>
+        <button
+          class="ctrl-btn"
+          id="toBeginBtn"
+          aria-label="回到开头"
+          data-i18n-aria-label="toBegin"
+          data-i18n-title="toBegin"
+        >
+          <i data-lucide="skip-back"></i>
+        </button>
+        <button
+          class="ctrl-btn"
+          id="skipBackBtn"
+          aria-label="后退5秒"
+          data-i18n-aria-label="skipBack"
+          data-i18n-title="skipBack"
+        >
+          <i data-lucide="rewind"></i>
+        </button>
+        <button
+          class="play-btn"
+          id="playBtn"
+          aria-label="播放"
+          data-i18n-aria-label="play"
+          data-i18n-title="play"
+        >
+          <i data-lucide="play"></i>
+        </button>
+        <button
+          class="ctrl-btn"
+          id="skipForwardBtn"
+          aria-label="前进5秒"
+          data-i18n-aria-label="skipForward"
+          data-i18n-title="skipForward"
+        >
+          <i data-lucide="fast-forward"></i>
+        </button>
+        <button
+          class="ctrl-btn"
+          id="toEndBtn"
+          aria-label="跳到结尾"
+          data-i18n-aria-label="toEnd"
+          data-i18n-title="toEnd"
+        >
+          <i data-lucide="skip-forward"></i>
+        </button>
+        <button
+          class="ctrl-btn"
+          id="nextTrackBtn"
+          aria-label="下一条音频"
+          data-i18n-aria-label="nextTrack"
+          data-i18n-title="nextTrack"
+        >
+          <i data-lucide="arrow-down-from-line"></i>
+        </button>
+      </div>
 
+      <div class="speed-group">
+        <button class="speed-btn" data-speed="0.5" title="0.5x">0.5x</button>
+        <button class="speed-btn" data-speed="0.55" title="0.55x">0.55x</button>
+        <button class="speed-btn" data-speed="0.6" title="0.6">0.6x</button>
+        <button class="speed-btn" data-speed="0.65" title="0.65">0.65x</button>
+        <button class="speed-btn" data-speed="0.7" title="0.7">0.7x</button>
+        <button class="speed-btn" data-speed="0.75" title="0.75">0.75x</button>
+        <button class="speed-btn" data-speed="0.8" title="0.8">0.8x</button>
+        <button class="speed-btn" data-speed="0.85" title="0.85">0.85x</button>
+        <button class="speed-btn" data-speed="0.9" title="0.9">0.9x</button>
+        <button class="speed-btn" data-speed="0.95" title="0.95">0.95x</button>
+        <button class="speed-btn active" data-speed="1.0" title="0.95">
+          1.0x
+        </button>
+        <button class="speed-btn" data-speed="1.1" title="1.1">1.1x</button>
+        <button class="speed-btn" data-speed="1.2" title="1.2">1.2x</button>
+        <button class="speed-btn" data-speed="1.3" title="1.3">1.3x</button>
+        <button class="speed-btn" data-speed="1.4" title="1.4">1.4x</button>
+        <button class="speed-btn" data-speed="1.5" title="1.5">1.5x</button>
+      </div>
+
+      <!-- ===== karaoke timestamps segments display ===== -->
+      <div class="karaoke-container" id="karaokeContainer">
+        <!-- control buttons for visibility-->
+        <div class="karaoke-controls-overlay">
+          <button
+            class="karaoke-toggle-btn"
+            id="karaokeVisibilityToggle"
+            aria-label="切换句子显示"
+            data-i18n-aria-label="karaokeVisibilityToggle"
+            data-i18n-title="karaokeVisibilityHide"
+          >
+            <i data-lucide="eye-closed"></i>
+          </button>
+          <button
+            class="karaoke-toggle-btn"
+            id="karaokeTranslationToggle"
+            aria-label="切换翻译（即将推出）"
+            data-i18n-aria-label="karaokeTranslationToggle"
+            data-i18n-title="karaokeTranslationToggle"
+          >
+            <i data-lucide="languages"></i>
+          </button>
+
+          <button
+            class="karaoke-toggle-btn"
+            type="button"
+            onclick="decreaseKaraokeFont()"
+            aria-label="Decrease font size"
+            title="Smaller text"
+          >
+            <i data-lucide="minus"></i>
+          </button>
+
+          <button
+            class="karaoke-toggle-btn"
+            type="button"
+            onclick="increaseKaraokeFont()"
+            aria-label="Increase font size"
+            title="Larger text"
+          >
+            <i data-lucide="plus"></i>
+          </button>
+        </div>
+        <div class="karaoke-upload-hint" id="karaokeUploadHint">
+          <span data-i18n="karaokeHint"
+            >Drop a JSON alignment file here or</span
+          >
+          <button id="karaokeUploadBtn" data-i18n="karaokeUploadBtn">
+            Browse JSON
+          </button>
+          <span data-i18n="karaokeFormat"
+            >(format: sentence segments with word timings)</span
+          >
+        </div>
+        <div id="karaokeDisplay" style="display: none">
+          <div id="karaokePrev" class="karaoke-sentence prev"></div>
+          <div id="karaokeCurrent" class="karaoke-sentence current"></div>
+          <div id="karaokeNext" class="karaoke-sentence next"></div>
+        </div>
+        <div class="karaoke-empty" id="karaokeEmpty" data-i18n="karaokeEmpty">
+          No alignment data loaded. Upload a JSON file with sentence and word
+          timings.
+        </div>
+      </div>
+
+      <!-- footer area Settings button -->
+      <div class="footer-container">
+        <div class="info-label"></div>
+        <div class="version-label"></div>
+        <div class="author-label"></div>
+        <label
+          class="playback-option icon-option"
+          title="自动播放播放列表中的下一条音频"
+          data-i18n-title="autoPlayNextTitle"
+        >
+          <input type="checkbox" id="autoPlayNextCheckbox" checked />
+          <span class="icon-checkbox" aria-hidden="true">
+            <i data-lucide="a-arrow-down"></i>
+          </span>
+        </label>
+        <button
+          class="settings-toggle-btn"
+          id="settingsToggleBtn"
+          aria-label="切换设置"
+          data-i18n-aria-label="settingsToggle"
+          data-i18n-title="settingsToggle"
+        >
+          <i data-lucide="settings"></i>
+        </button>
+      </div>
+
+      <div class="playlist">
+        <div class="playlist-header">
+          <div class="playlist-title" data-i18n="playlistTitle">播放列表</div>
+          <div class="playlist-actions">
             <button
-                class="karaoke-toggle-btn"
-                type="button"
-                onclick="decreaseKaraokeFont()"
-                aria-label="Decrease font size"
-                title="Smaller text">
-                <i data-lucide="minus"></i>
+              class="delete-selected-btn"
+              id="deleteSelectedTracksBtn"
+              type="button"
+              aria-label="删除已选音频"
+              title="删除已选音频"
+              data-i18n-aria-label="deleteSelectedTracks"
+              data-i18n-title="deleteSelectedTracks"
+            >
+              <i data-lucide="trash-2"></i>
             </button>
-
-            <button
-                class="karaoke-toggle-btn"
-                type="button"
-                onclick="increaseKaraokeFont()"
-                aria-label="Increase font size"
-                title="Larger text">
-                <i data-lucide="plus"></i>
-            </button>
-
-          </div>
-          <div class="karaoke-upload-hint" id="karaokeUploadHint">
-            <span data-i18n="karaokeHint">Drop a JSON alignment file here or</span>
-            <button id="karaokeUploadBtn" data-i18n="karaokeUploadBtn">Browse JSON</button>
-            <span data-i18n="karaokeFormat">(format: sentence segments with word timings)</span>
-          </div>
-          <div id="karaokeDisplay" style="display: none;">
-            <div id="karaokePrev" class="karaoke-sentence prev"></div>
-            <div id="karaokeCurrent" class="karaoke-sentence current"></div>
-            <div id="karaokeNext" class="karaoke-sentence next"></div>
-          </div>
-          <div class="karaoke-empty" id="karaokeEmpty" data-i18n="karaokeEmpty">
-            No alignment data loaded. Upload a JSON file with sentence and word timings.
-          </div>
-        </div>
-
-        <!-- footer area Settings button -->
-        <div class="footer-container" >
-          <div class="info-label">语音播放器 - 听力Pro</div>
-          <div class="version-label">v0.030</div>
-          <div class="author-label">PIU工作室 2026</div>
-          <label class="playback-option icon-option" title="自动播放播放列表中的下一条音频" data-i18n-title="autoPlayNextTitle">
-            <input type="checkbox" id="autoPlayNextCheckbox" checked />
-            <span class="icon-checkbox" aria-hidden="true">
-              <i data-lucide="a-arrow-down"></i>
-            </span>
-          </label>
-          <button class="settings-toggle-btn" id="settingsToggleBtn" aria-label="切换设置" data-i18n-aria-label="settingsToggle" data-i18n-title="settingsToggle">
-            <i data-lucide="settings"></i>
-          </button>
-        </div>
-
-        <div class="playlist">
-            <div class="playlist-header">
-              <div class="playlist-title" data-i18n="playlistTitle">播放列表</div>
-              <div class="playlist-actions">
-                <button
-                  class="delete-selected-btn"
-                  id="deleteSelectedTracksBtn"
-                  type="button"
-                  aria-label="删除已选音频"
-                  title="删除已选音频"
-                  data-i18n-aria-label="deleteSelectedTracks"
-                  data-i18n-title="deleteSelectedTracks"
-                >
-                  <i data-lucide="trash-2"></i>
-                </button>
-                <label
-                  class="select-all-control"
-                  id="selectAllControl"
-                  title="Click to select all. Shift-click to clear all."
-                  data-i18n-title="selectAllTitle"
-                >
-                  <input type="checkbox" id="selectAllTracks" />
-                  <span id="selectAllLabel">全选</span>
-                </label>
-              </div>
-            </div>
-            <div class="playlist-empty" id="playlistEmpty" data-i18n="playlistEmpty">
-              还没有音频文件，拖拽或上传多个文件后会自动加入列表。
-            </div>
-            <div class="track-list" id="trackList"></div>
-        </div>
-
-        <!-- Settings container – hidden by default -->
-        <div class="settings-container" id="settingsContainer">
-          <!-- Row 1: Language switcher -->
-          <div class="settings-row">
-            <label for="languageSelect">
-              <!-- <span data-i18n="languageLabel">语言 / Language</span> -->
-              <select id="languageSelect" aria-label="语言 / Language">
-                <option value="zh">CN</option>
-                <option value="en">EN</option>
-              </select>
+            <label
+              class="select-all-control"
+              id="selectAllControl"
+              title="Click to select all. Shift-click to clear all."
+              data-i18n-title="selectAllTitle"
+            >
+              <input type="checkbox" id="selectAllTracks" />
+              <span id="selectAllLabel">全选</span>
             </label>
           </div>
-
-          <div class="export-panel" id="exportPanel">
-              <div class="export-header">
-                <button class="export-toggle-btn" id="exportToggleBtn" aria-expanded="false" data-i18n-title="exportToggleLabel">
-                  <i data-lucide="chevron-right"></i>
-                  <span data-i18n="exportToggleLabel">导出</span>
-                </button>
-              </div>
-                  <div class="export-body" id="exportBody" style="display: none;">
-                    <div class="export-toolbar">
-                      <div class="export-fields">
-                        <div class="field">
-                          <label for="exportMode" data-i18n="exportModeLabel">导出模式</label>
-                          <select id="exportMode">
-                            <option value="live" selected data-i18n="exportModeLive">
-                              浏览器 PCM 捕获 - 实时速度
-                            </option>
-                            <option value="ffmpeg" data-i18n="exportModeFfmpeg">
-                              FFmpeg atempo 导出 - 直接渲染
-                            </option>
-                          </select>
-                        </div>
-                        <div class="field">
-                          <label for="exportFormat" data-i18n="formatLabel">格式</label>
-                          <select id="exportFormat">
-                            <option value="wav">WAV</option>
-                            <option value="mp3-192">MP3 192k</option>
-                            <option value="mp3-256">MP3 256k</option>
-                          </select>
-                        </div>
-                        <label class="batch-export-control" title="使用当前速度导出所有已选播放列表项目" data-i18n-title="batchExportTitle">
-                          <input type="checkbox" id="batchExportSelected" />
-                          <span data-i18n="batchExportLabel">导出已选</span>
-                        </label>
-                      </div>
-                      <button class="download-btn" id="downloadBtn" type="button" data-i18n-title="downloadCurrent">
-                        <i data-lucide="download"></i>
-                        <span data-i18n="downloadCurrent">下载当前速度音频</span>
-                      </button>
-                      <button class="cancel-export-btn" id="cancelExportBtn" type="button" aria-label="取消导出" data-i18n-aria-label="cancelExport" data-i18n-title="cancelExport">
-                        <i data-lucide="x"></i>
-                        <span data-i18n="cancel">取消</span>
-                      </button>
-                    </div>
-                    <div
-                      class="export-progress-bar"
-                      role="progressbar"
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                      aria-valuenow="0"
-                      id="exportProgressBar"
-                    >
-                      <div class="export-progress" id="exportProgress"></div>
-                    </div>
-                    <div class="export-status" id="exportStatus">
-                      默认使用浏览器实时 PCM 捕获导出 WAV，使用当前选择的播放速度。
-                    </div>
-                  </div>
-          </div>
-
         </div>
-      
+        <div
+          class="playlist-empty"
+          id="playlistEmpty"
+          data-i18n="playlistEmpty"
+        >
+          还没有音频文件，拖拽或上传多个文件后会自动加入列表。
+        </div>
+        <div class="track-list" id="trackList"></div>
+      </div>
 
+      <!-- Settings container – hidden by default -->
+      <div class="settings-container" id="settingsContainer">
+        <!-- Row 1: Language switcher -->
+        <div class="settings-row">
+          <label for="languageSelect">
+            <!-- <span data-i18n="languageLabel">语言 / Language</span> -->
+            <select id="languageSelect" aria-label="语言 / Language">
+              <option value="zh">CN</option>
+              <option value="en">EN</option>
+            </select>
+          </label>
+        </div>
 
-    </div> <!-- body -->
-      
+        <div class="export-panel" id="exportPanel">
+          <div class="export-header">
+            <button
+              class="export-toggle-btn"
+              id="exportToggleBtn"
+              aria-expanded="false"
+              data-i18n-title="exportToggleLabel"
+            >
+              <i data-lucide="chevron-right"></i>
+              <span data-i18n="exportToggleLabel">导出</span>
+            </button>
+          </div>
+          <div class="export-body" id="exportBody" style="display: none">
+            <div class="export-toolbar">
+              <div class="export-fields">
+                <div class="field">
+                  <label for="exportMode" data-i18n="exportModeLabel"
+                    >导出模式</label
+                  >
+                  <select id="exportMode">
+                    <option value="live" selected data-i18n="exportModeLive">
+                      浏览器 PCM 捕获 - 实时速度
+                    </option>
+                    <option value="ffmpeg" data-i18n="exportModeFfmpeg">
+                      FFmpeg atempo 导出 - 直接渲染
+                    </option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="exportFormat" data-i18n="formatLabel">格式</label>
+                  <select id="exportFormat">
+                    <option value="wav">WAV</option>
+                    <option value="mp3-192">MP3 192k</option>
+                    <option value="mp3-256">MP3 256k</option>
+                  </select>
+                </div>
+                <label
+                  class="batch-export-control"
+                  title="使用当前速度导出所有已选播放列表项目"
+                  data-i18n-title="batchExportTitle"
+                >
+                  <input type="checkbox" id="batchExportSelected" />
+                  <span data-i18n="batchExportLabel">导出已选</span>
+                </label>
+              </div>
+              <button
+                class="download-btn"
+                id="downloadBtn"
+                type="button"
+                data-i18n-title="downloadCurrent"
+              >
+                <i data-lucide="download"></i>
+                <span data-i18n="downloadCurrent">下载当前速度音频</span>
+              </button>
+              <button
+                class="cancel-export-btn"
+                id="cancelExportBtn"
+                type="button"
+                aria-label="取消导出"
+                data-i18n-aria-label="cancelExport"
+                data-i18n-title="cancelExport"
+              >
+                <i data-lucide="x"></i>
+                <span data-i18n="cancel">取消</span>
+              </button>
+            </div>
+            <div
+              class="export-progress-bar"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              id="exportProgressBar"
+            >
+              <div class="export-progress" id="exportProgress"></div>
+            </div>
+            <div class="export-status" id="exportStatus">
+              默认使用浏览器实时 PCM 捕获导出 WAV，使用当前选择的播放速度。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- body -->
 
     <script>
       let sound = null;
@@ -1662,7 +1784,7 @@
       let knobDragStartX = 0;
       let knobDragStartPercent = 0;
       function updateKnobPosition(percent) {
-        const knob = document.getElementById('progressKnob');
+        const knob = document.getElementById("progressKnob");
         if (knob) {
           knob.style.left = `${Math.max(0, Math.min(100, percent))}%`;
         }
@@ -1673,36 +1795,51 @@
 
       let karaokeFontScale = 1.0;
 
+      async function loadFooterLabels() {
+        try {
+          const response = await fetch("./footer.json", { cache: "no-store" });
+          if (!response.ok) {
+            throw new Error(`Failed to load footer.json: ${response.status}`);
+          }
+
+          const footer = await response.json();
+          const labels = {
+            info: document.querySelector(".info-label"),
+            version: document.querySelector(".version-label"),
+            author: document.querySelector(".author-label"),
+          };
+
+          for (const [key, element] of Object.entries(labels)) {
+            if (element && typeof footer[key] === "string") {
+              element.textContent = footer[key];
+            }
+          }
+        } catch (error) {
+          console.warn("Footer labels could not be loaded:", error);
+        }
+      }
+
+      loadFooterLabels();
+
       function updateKaraokeFontSize() {
         document.documentElement.style.setProperty(
-            '--karaoke-font-scale',
-            karaokeFontScale
+          "--karaoke-font-scale",
+          karaokeFontScale,
         );
 
-        localStorage.setItem(
-            'karaokeFontScale',
-            karaokeFontScale.toFixed(2)
-        );
+        localStorage.setItem("karaokeFontScale", karaokeFontScale.toFixed(2));
       }
 
       function increaseKaraokeFont() {
+        karaokeFontScale = Math.min(2.0, karaokeFontScale + 0.05);
 
-          karaokeFontScale = Math.min(
-              2.0,
-              karaokeFontScale + 0.05
-          );
-
-          updateKaraokeFontSize();
+        updateKaraokeFontSize();
       }
 
       function decreaseKaraokeFont() {
+        karaokeFontScale = Math.max(0.6, karaokeFontScale - 0.05);
 
-          karaokeFontScale = Math.max(
-              0.60,
-              karaokeFontScale - 0.05
-          );
-
-          updateKaraokeFontSize();
+        updateKaraokeFontSize();
       }
 
       const translations = {
@@ -1749,37 +1886,43 @@
           fileProtocolWarning:
             "MP3/FFmpeg 导出需要从 http://localhost 打开；直接 file:// 打开会被浏览器阻止。",
           mp3LiveHint: "MP3 导出会先使用浏览器实时捕获当前速度，再压缩为 MP3。",
-          mp3FfmpegHint: "MP3 导出会使用 FFmpeg atempo，并应用当前选择的播放速度。",
-          liveHint: "默认使用浏览器实时 PCM 捕获导出 WAV，使用当前选择的播放速度。",
+          mp3FfmpegHint:
+            "MP3 导出会使用 FFmpeg atempo，并应用当前选择的播放速度。",
+          liveHint:
+            "默认使用浏览器实时 PCM 捕获导出 WAV，使用当前选择的播放速度。",
           ffmpegHint: "FFmpeg atempo 导出 WAV，可靠保留音高并应用当前速度。",
           liveRendering: "浏览器 PCM 捕获正在按当前速度实时渲染 WAV...",
           liveProgress: "浏览器 PCM 捕获 {percent}% - 实时静音渲染",
           writingWav: "正在写入 WAV...",
-          liveDoneWav: "完成浏览器 PCM 捕获：{duration}，速度 {speed}x，格式 WAV",
-          liveDoneFormat: "完成浏览器 PCM 捕获：{duration}，速度 {speed}x，格式 {format}",
+          liveDoneWav:
+            "完成浏览器 PCM 捕获：{duration}，速度 {speed}x，格式 WAV",
+          liveDoneFormat:
+            "完成浏览器 PCM 捕获：{duration}，速度 {speed}x，格式 {format}",
           compressCaptured: "正在将实时捕获 WAV 压缩为 {format}...",
           ffmpegLoading: "正在加载 FFmpeg WASM，首次使用会比较慢...",
           ffmpegProgress: "FFmpeg atempo 导出 {percent}%",
           ffmpegExporting: "FFmpeg atempo={speed} 正在导出 {format}...",
           ffmpegDone: "完成 FFmpeg atempo 导出：速度 {speed}x，格式 {format}",
-          offlineRendering: "浏览器不支持实时捕获，正在使用 OfflineAudioContext 导出...",
-          offlineDone: "完成 OfflineAudioContext 导出；注意此备用模式可能不会保留音高。",
+          offlineRendering:
+            "浏览器不支持实时捕获，正在使用 OfflineAudioContext 导出...",
+          offlineDone:
+            "完成 OfflineAudioContext 导出；注意此备用模式可能不会保留音高。",
           skipBack: "后退5秒",
           skipForward: "前进5秒",
           exportToggleLabel: "导出",
           karaokeHint: "拖拽 JSON 对齐文件到这里，或",
           karaokeUploadBtn: "选择文件",
           karaokeFormat: "(格式：带单词时间戳的句子段)",
-          karaokeEmpty: "未加载对齐数据。请上传包含句子和单词时间戳的 JSON 文件。",
+          karaokeEmpty:
+            "未加载对齐数据。请上传包含句子和单词时间戳的 JSON 文件。",
           karaokeClear: "清除对齐",
           karaokeLoaded: "已加载对齐数据：{sentences} 个句子",
           karaokeVisibilityHide: "隐藏句子",
           karaokeVisibilityShow: "显示句子",
-          settingsToggle: "设置",   // for zh
+          settingsToggle: "设置", // for zh
           karaokeTranslationToggle: "切换翻译（即将推出）", // zh
           karaokeTranslationHide: "隐藏翻译",
           karaokeTranslationShow: "显示翻译",
-          
         },
         en: {
           appTitle: "Speech Player",
@@ -1793,12 +1936,14 @@
           toEnd: "Skip to end",
           nextTrack: "Next audio item",
           autoPlayNextLabel: "Auto next",
-          autoPlayNextTitle: "Automatically play the next audio item in the playlist when the current audio ends",
+          autoPlayNextTitle:
+            "Automatically play the next audio item in the playlist when the current audio ends",
           exportModeLabel: "Export mode",
           exportModeLive: "Browser PCM capture - live speed",
           exportModeFfmpeg: "FFmpeg atempo export - direct render",
           formatLabel: "Format",
-          batchExportTitle: "Use the current speed to export every selected playlist item",
+          batchExportTitle:
+            "Use the current speed to export every selected playlist item",
           batchExportLabel: "Export selected",
           downloadCurrent: "Download current speed audio",
           downloadSelected: "Batch export selected",
@@ -1811,7 +1956,8 @@
           selectAll: "Select all",
           selectedCount: "Selected {selected}/{total}",
           deleteSelectedTracks: "Delete selected audio",
-          playlistEmpty: "No audio files yet. Drag or upload multiple files to add them here.",
+          playlistEmpty:
+            "No audio files yet. Drag or upload multiple files to add them here.",
           selectTrack: "Select {name}",
           deleteTrack: "Delete {name}",
           chooseSelectedFirst: "Select audio files in the playlist first.",
@@ -1823,29 +1969,40 @@
           batchDone: "Finished batch export of {count} files at {speed}x.",
           fileProtocolWarning:
             "MP3/FFmpeg export must be opened from http://localhost. Browsers block it from file://.",
-          mp3LiveHint: "MP3 export first captures the current speed in the browser, then compresses to MP3.",
-          mp3FfmpegHint: "MP3 export uses FFmpeg atempo and applies the current playback speed.",
-          liveHint: "By default, browser real-time PCM capture exports WAV at the selected playback speed.",
-          ffmpegHint: "FFmpeg atempo exports WAV, preserves pitch reliably, and applies the current speed.",
-          liveRendering: "Browser PCM capture is rendering WAV at the current speed...",
-          liveProgress: "Browser PCM capture {percent}% - real-time silent render",
+          mp3LiveHint:
+            "MP3 export first captures the current speed in the browser, then compresses to MP3.",
+          mp3FfmpegHint:
+            "MP3 export uses FFmpeg atempo and applies the current playback speed.",
+          liveHint:
+            "By default, browser real-time PCM capture exports WAV at the selected playback speed.",
+          ffmpegHint:
+            "FFmpeg atempo exports WAV, preserves pitch reliably, and applies the current speed.",
+          liveRendering:
+            "Browser PCM capture is rendering WAV at the current speed...",
+          liveProgress:
+            "Browser PCM capture {percent}% - real-time silent render",
           writingWav: "Writing WAV...",
-          liveDoneWav: "Finished browser PCM capture: {duration} at {speed}x WAV",
-          liveDoneFormat: "Finished browser PCM capture: {duration} at {speed}x {format}",
+          liveDoneWav:
+            "Finished browser PCM capture: {duration} at {speed}x WAV",
+          liveDoneFormat:
+            "Finished browser PCM capture: {duration} at {speed}x {format}",
           compressCaptured: "Compressing captured WAV to {format}...",
           ffmpegLoading: "Loading FFmpeg WASM. First use may take a while...",
           ffmpegProgress: "FFmpeg atempo export {percent}%",
           ffmpegExporting: "FFmpeg atempo={speed} exporting {format}...",
           ffmpegDone: "Finished FFmpeg atempo export: {speed}x {format}",
-          offlineRendering: "Real-time capture is not supported. Exporting with OfflineAudioContext...",
-          offlineDone: "Finished OfflineAudioContext export. This fallback may not preserve pitch.",
+          offlineRendering:
+            "Real-time capture is not supported. Exporting with OfflineAudioContext...",
+          offlineDone:
+            "Finished OfflineAudioContext export. This fallback may not preserve pitch.",
           skipBack: "Skip back 5s",
           skipForward: "Skip forward 5s",
           exportToggleLabel: "Export",
           karaokeHint: "Drop a JSON alignment file here or",
           karaokeUploadBtn: "Browse JSON",
           karaokeFormat: "(format: sentence segments with word timings)",
-          karaokeEmpty: "No alignment data loaded. Upload a JSON file with sentence and word timings.",
+          karaokeEmpty:
+            "No alignment data loaded. Upload a JSON file with sentence and word timings.",
           karaokeClear: "Clear alignment",
           karaokeLoaded: "Alignment loaded: {sentences} sentences",
           karaokeVisibilityHide: "Hide sentences",
@@ -1863,7 +2020,9 @@
       const fileInput = document.getElementById("fileInput");
       const player = document.getElementById("player");
       const playBtn = document.getElementById("playBtn");
-      const autoPlayNextCheckbox = document.getElementById("autoPlayNextCheckbox");
+      const autoPlayNextCheckbox = document.getElementById(
+        "autoPlayNextCheckbox",
+      );
       const previousTrackBtn = document.getElementById("previousTrackBtn");
       const nextTrackBtn = document.getElementById("nextTrackBtn");
       const toBeginBtn = document.getElementById("toBeginBtn");
@@ -1878,7 +2037,9 @@
       const playlistEmpty = document.getElementById("playlistEmpty");
       const exportMode = document.getElementById("exportMode");
       const exportFormat = document.getElementById("exportFormat");
-      const batchExportSelected = document.getElementById("batchExportSelected");
+      const batchExportSelected = document.getElementById(
+        "batchExportSelected",
+      );
       const downloadBtn = document.getElementById("downloadBtn");
       const cancelExportBtn = document.getElementById("cancelExportBtn");
       const exportProgressBar = document.getElementById("exportProgressBar");
@@ -1887,16 +2048,18 @@
       const selectAllControl = document.getElementById("selectAllControl");
       const selectAllTracks = document.getElementById("selectAllTracks");
       const selectAllLabel = document.getElementById("selectAllLabel");
-      const deleteSelectedTracksBtn = document.getElementById("deleteSelectedTracksBtn");
+      const deleteSelectedTracksBtn = document.getElementById(
+        "deleteSelectedTracksBtn",
+      );
 
       //helper for finding ASR aligned result word in the original text
       function normalizeToken(text) {
-          return String(text || "")
-              .toLowerCase()
-              .normalize("NFKC")
-              .replace(/[●○◼◻]/g, "")
-              .replace(/[^\p{L}\p{N}]+/gu, "")
-              .trim();
+        return String(text || "")
+          .toLowerCase()
+          .normalize("NFKC")
+          .replace(/[●○◼◻]/g, "")
+          .replace(/[^\p{L}\p{N}]+/gu, "")
+          .trim();
       }
 
       // German umlaut → ASCII transliteration (ä→ae, ö→oe, ü→ue, ß→ss).
@@ -1905,7 +2068,7 @@
       const GERMAN_DIACRITIC_STRIP_MAP = { ä: "a", ö: "o", ü: "u", ß: "ss" };
 
       function foldGermanUmlauts(input, map) {
-          return input.replace(/[äöüß]/g, (ch) => map[ch]);
+        return input.replace(/[äöüß]/g, (ch) => map[ch]);
       }
 
       // Candidate forms for one token, in preference order: the exact
@@ -1914,40 +2077,46 @@
       // words ("Hassköter" → "Hasskoter"/"Hasskoeter") while the transcript keeps
       // the umlauts, so both sides are expanded and matched on any intersection.
       function getAlignmentTokenCandidates(token) {
-          const normalized = normalizeToken(token);
-          if (!normalized) return [];
+        const normalized = normalizeToken(token);
+        if (!normalized) return [];
 
-          const candidates = [normalized];
-          const asciiFolded = foldGermanUmlauts(normalized, GERMAN_ASCII_FOLD_MAP);
-          const diacriticStripped = foldGermanUmlauts(normalized, GERMAN_DIACRITIC_STRIP_MAP);
+        const candidates = [normalized];
+        const asciiFolded = foldGermanUmlauts(
+          normalized,
+          GERMAN_ASCII_FOLD_MAP,
+        );
+        const diacriticStripped = foldGermanUmlauts(
+          normalized,
+          GERMAN_DIACRITIC_STRIP_MAP,
+        );
 
-          for (const form of [asciiFolded, diacriticStripped]) {
-              if (form !== normalized && !candidates.includes(form)) {
-                  candidates.push(form);
-              }
+        for (const form of [asciiFolded, diacriticStripped]) {
+          if (form !== normalized && !candidates.includes(form)) {
+            candidates.push(form);
           }
+        }
 
-          return candidates;
+        return candidates;
       }
 
       // True when the token's candidate forms and the ASR word's candidate
       // forms share at least one form (works in either direction: transcript
       // has the umlaut, ASR is normalized, and vice versa).
       function alignmentFormsIntersect(tokenForms, segmentForms) {
-          return tokenForms.some((form) => segmentForms.includes(form));
+        return tokenForms.some((form) => segmentForms.includes(form));
       }
 
       const germanSpokenNumberMap = {
-        "1": ["eins"],
-        "2": ["zwei"],
-        "3": ["drei"],
-        "4": ["vier"],
-        "5": ["fünf"],
-        "6": ["sechs"],
-        "7": ["sieben"],
-        "8": ["acht"],
-        "9": ["neun"],
-        "10": ["zehn"]
+        1: ["eins"],
+        2: ["zwei"],
+        3: ["drei"],
+        4: ["vier"],
+        5: ["fünf"],
+        6: ["sechs"],
+        7: ["sieben"],
+        8: ["acht"],
+        9: ["neun"],
+        10: ["zehn"],
       };
 
       function getTokenMatchCandidates(text) {
@@ -1965,41 +2134,37 @@
       }
 
       function tokenizeSentence(sentenceText) {
+        const tokens = [];
 
-          const tokens = [];
+        // \p{M} keeps combining marks (decomposed umlauts like o + U+0308)
+        // attached to their base letter, so "Hassko\u0308ter" stays ONE
+        // token instead of being split into "Hassko" + "ter". The token text
+        // is NFKC-normalized later for the fuzzy umlaut match.
+        const regex = /[\p{L}\p{M}\p{N}’'`´-]+/gu;
 
-          // \p{M} keeps combining marks (decomposed umlauts like o + U+0308)
-          // attached to their base letter, so "Hassko\u0308ter" stays ONE
-          // token instead of being split into "Hassko" + "ter". The token text
-          // is NFKC-normalized later for the fuzzy umlaut match.
-          const regex = /[\p{L}\p{M}\p{N}’'`´-]+/gu;
+        let match;
 
-          let match;
+        while ((match = regex.exec(sentenceText)) !== null) {
+          tokens.push({
+            text: match[0],
 
-          while ((match = regex.exec(sentenceText)) !== null) {
+            normalized: normalizeToken(match[0]),
 
-              tokens.push({
+            startChar: match.index,
 
-                  text: match[0],
+            endChar: match.index + match[0].length,
+          });
+        }
 
-                  normalized: normalizeToken(match[0]),
-
-                  startChar: match.index,
-
-                  endChar: match.index + match[0].length
-
-              });
-
-          }
-
-          return tokens;
+        return tokens;
       }
-      
-
 
       function buildSentenceRenderMaps(transcript) {
-        if (!Array.isArray(transcript.sentenceAlignment) ||
-            !Array.isArray(transcript.wordAlignment)) return;
+        if (
+          !Array.isArray(transcript.sentenceAlignment) ||
+          !Array.isArray(transcript.wordAlignment)
+        )
+          return;
 
         // Align once from left to right so every ASR word belongs to at most
         // one sentence. Timing tolerances duplicate very short boundary words
@@ -2010,7 +2175,7 @@
         // project's findMatchingSegment.
         const words = transcript.wordAlignment.map((word) => ({
           word,
-          forms: getAlignmentTokenCandidates(word.word ?? word.text)
+          forms: getAlignmentTokenCandidates(word.word ?? word.text),
         }));
         let wordCursor = 0;
 
@@ -2018,7 +2183,10 @@
           const renderMap = [];
 
           for (const token of tokenizeSentence(sentence.text)) {
-            while (wordCursor < words.length && words[wordCursor].forms.length === 0) {
+            while (
+              wordCursor < words.length &&
+              words[wordCursor].forms.length === 0
+            ) {
               wordCursor += 1;
             }
             if (wordCursor >= words.length) break;
@@ -2046,7 +2214,7 @@
             renderMap.push({
               startChar: token.startChar,
               endChar: token.endChar,
-              word: matchedWord
+              word: matchedWord,
             });
             wordCursor = matchedIndex + 1;
           }
@@ -2054,8 +2222,8 @@
           sentence.renderMap = renderMap;
           sentence.alignedWords = renderMap.map((item) => item.word);
           sentence.playbackStart =
-            sentence.alignedWords.find((word) => Number.isFinite(word.start))?.start ??
-            sentence.start;
+            sentence.alignedWords.find((word) => Number.isFinite(word.start))
+              ?.start ?? sentence.start;
         }
       }
 
@@ -2074,20 +2242,21 @@
         if (!sentences.length) return 0;
 
         const foundIndex = sentences.findIndex(
-          (sentence) => currentTime >= sentence.start && currentTime <= sentence.end,
-        )
+          (sentence) =>
+            currentTime >= sentence.start && currentTime <= sentence.end,
+        );
 
         if (foundIndex >= 0) {
-          return foundIndex
+          return foundIndex;
         }
 
-        const lastSentenceEnd = sentences[sentences.length - 1]?.end ?? 0
+        const lastSentenceEnd = sentences[sentences.length - 1]?.end ?? 0;
 
         if (currentTime >= lastSentenceEnd) {
-          return sentences.length - 1
+          return sentences.length - 1;
         }
 
-        return null
+        return null;
       }
 
       // The last word in the flat wordAlignment list that has started
@@ -2095,23 +2264,22 @@
       // future word. Returns -1 before the first word starts, and keeps the
       // last word highlighted after the final word ends.
       function findActiveFlatWordIndex(words, currentTime) {
-        if (!words || words.length === 0) return -1
+        if (!words || words.length === 0) return -1;
 
-        let activeIndex = -1
+        let activeIndex = -1;
 
         for (let index = 0; index < words.length; index += 1) {
-          const word = words[index]
+          const word = words[index];
 
           if (word && currentTime >= word.start) {
-            activeIndex = index
+            activeIndex = index;
           } else {
-            break
+            break;
           }
         }
 
-        return activeIndex
+        return activeIndex;
       }
-
 
       let pendingSeek = null;
 
@@ -2120,7 +2288,7 @@
         const duration = sound.duration();
         if (!duration) return;
         const percent = (time / duration) * 100;
-        progress.style.width = percent + '%';
+        progress.style.width = percent + "%";
         updateKnobPosition(percent);
         currentTimeEl.textContent = formatTime(time);
         syncWaveformProgress(percent);
@@ -2129,46 +2297,48 @@
         }
       }
 
-
       // === WaveSurfer instance ===
       let wavesurfer = null;
       let isWaveformLoading = false;
 
       function initWaveSurfer() {
-        const container = document.getElementById('waveform');
+        const container = document.getElementById("waveform");
         if (!container) return;
-        
+
         if (wavesurfer) {
-          try { wavesurfer.destroy(); } catch(e) { /* ignore */ }
+          try {
+            wavesurfer.destroy();
+          } catch (e) {
+            /* ignore */
+          }
           wavesurfer = null;
         }
-        
+
         try {
           wavesurfer = WaveSurfer.create({
             container: container,
-            barWidth:2,
+            barWidth: 2,
             barGap: 1,
-            waveColor: '#4a5568',
-            progressColor: '#10b981',
-            cursorColor: 'transparent',
+            waveColor: "#4a5568",
+            progressColor: "#10b981",
+            cursorColor: "transparent",
             cursorWidth: 0,
             height: container.parentElement?.clientHeight || 50,
-            width: '100%',
+            width: "100%",
             interact: false,
             dragToSeek: false,
             autoScroll: false,
             normalize: true,
-            backend: 'MediaElement'  // 👈 avoids AudioContext conflicts with Howler
+            backend: "MediaElement", // 👈 avoids AudioContext conflicts with Howler
           });
-          
-          const canvas = container.querySelector('canvas');
-          if (canvas) canvas.style.pointerEvents = 'none';
-          
-          const cursorEl = container.querySelector('.cursor');
-          if (cursorEl) cursorEl.style.display = 'none';
-          
+
+          const canvas = container.querySelector("canvas");
+          if (canvas) canvas.style.pointerEvents = "none";
+
+          const cursorEl = container.querySelector(".cursor");
+          if (cursorEl) cursorEl.style.display = "none";
         } catch (e) {
-          console.warn('WaveSurfer init failed:', e);
+          console.warn("WaveSurfer init failed:", e);
           wavesurfer = null;
         }
       }
@@ -2179,16 +2349,16 @@
           initWaveSurfer();
           if (!wavesurfer) return; // still null? abort
         }
-        
+
         // Prevent multiple rapid loads
         if (isWaveformLoading) return;
-        
-        const container = document.getElementById('waveform');
+
+        const container = document.getElementById("waveform");
         if (!container) return;
-        
+
         // Ensure container is visible
-        container.style.display = 'block';
-        
+        container.style.display = "block";
+
         requestAnimationFrame(() => {
           // Safely update height only if wavesurfer and params exist
           const parentHeight = container.parentElement?.clientHeight || 60;
@@ -2197,28 +2367,27 @@
               wavesurfer.setHeight(parentHeight);
             }
           }
-          
+
           isWaveformLoading = true;
-          
+
           try {
             wavesurfer.load(url);
-            
-            wavesurfer.once('ready', () => {
+
+            wavesurfer.once("ready", () => {
               isWaveformLoading = false;
-              const cursorEl = container.querySelector('.cursor');
-              if (cursorEl) cursorEl.style.display = 'none';
-              const canvas = container.querySelector('canvas');
-              if (canvas) canvas.style.pointerEvents = 'none';
+              const cursorEl = container.querySelector(".cursor");
+              if (cursorEl) cursorEl.style.display = "none";
+              const canvas = container.querySelector("canvas");
+              if (canvas) canvas.style.pointerEvents = "none";
               syncWaveformProgress(0);
             });
-            
-            wavesurfer.once('error', (err) => {
-              console.warn('Waveform load error:', err);
+
+            wavesurfer.once("error", (err) => {
+              console.warn("Waveform load error:", err);
               isWaveformLoading = false;
             });
-            
           } catch (e) {
-            console.warn('Waveform load failed:', e);
+            console.warn("Waveform load failed:", e);
             isWaveformLoading = false;
           }
         });
@@ -2229,21 +2398,21 @@
         try {
           const duration = wavesurfer.getDuration();
           if (duration > 0) {
-            const clamped = Math.max(0, Math.min(1, (percent / 100)));
+            const clamped = Math.max(0, Math.min(1, percent / 100));
             wavesurfer.seekTo(clamped);
           }
-        } catch (e) { /* ignore */ }
+        } catch (e) {
+          /* ignore */
+        }
       }
 
       // Show/hide waveform container based on player visibility
       function updateWaveformVisibility(show) {
-        const container = document.getElementById('waveformContainer');
+        const container = document.getElementById("waveformContainer");
         if (container) {
-          container.style.display = show ? 'block' : 'none';
+          container.style.display = show ? "block" : "none";
         }
       }
-
-
 
       // === New state variables ===
       let alignmentData = null; // { sentences: [{text, start, end, words: [{word, start, end}]}] }
@@ -2255,9 +2424,9 @@
       // DOM, so every tick costs a couple of comparisons and innerHTML is only
       // written when the active sentence or word actually changes.
       const karaokeView = {
-        sentenceIndex: -1,       // last computed active sentence index (sticky in gaps)
-        sentenceRendered: -1,    // sentence index currently in the DOM
-        wordRendered: -1,        // flat wordAlignment index currently in the DOM
+        sentenceIndex: -1, // last computed active sentence index (sticky in gaps)
+        sentenceRendered: -1, // sentence index currently in the DOM
+        wordRendered: -1, // flat wordAlignment index currently in the DOM
       };
 
       function resetKaraokeView() {
@@ -2275,30 +2444,31 @@
       }
 
       // === DOM refs ===
-      const karaokeContainer = document.getElementById('karaokeContainer');
-      const karaokeDisplay = document.getElementById('karaokeDisplay');
-      const karaokeUploadHint = document.getElementById('karaokeUploadHint');
-      const karaokeEmpty = document.getElementById('karaokeEmpty');
-      const karaokePrev = document.getElementById('karaokePrev');
-      const karaokeCurrent = document.getElementById('karaokeCurrent');
-      const karaokeNext = document.getElementById('karaokeNext');
-      const karaokeUploadBtn = document.getElementById('karaokeUploadBtn');
+      const karaokeContainer = document.getElementById("karaokeContainer");
+      const karaokeDisplay = document.getElementById("karaokeDisplay");
+      const karaokeUploadHint = document.getElementById("karaokeUploadHint");
+      const karaokeEmpty = document.getElementById("karaokeEmpty");
+      const karaokePrev = document.getElementById("karaokePrev");
+      const karaokeCurrent = document.getElementById("karaokeCurrent");
+      const karaokeNext = document.getElementById("karaokeNext");
+      const karaokeUploadBtn = document.getElementById("karaokeUploadBtn");
 
       // === Create hidden file input for JSON ===
-      const karaokeFileInput = document.createElement('input');
-      karaokeFileInput.type = 'file';
-      karaokeFileInput.accept = '.json,application/json';
-      karaokeFileInput.style.display = 'none';
-      karaokeFileInput.id = 'karaokeFileInput';
+      const karaokeFileInput = document.createElement("input");
+      karaokeFileInput.type = "file";
+      karaokeFileInput.accept = ".json,application/json";
+      karaokeFileInput.style.display = "none";
+      karaokeFileInput.id = "karaokeFileInput";
       document.body.appendChild(karaokeFileInput);
 
-      
       // === Load alignment data from JSON ===
       function loadAlignmentData(jsonData) {
         try {
           // 1. Detect format: full transcript object (R/L Tools sesson) or array of segments (qwen asr result)
-          let segments = Array.isArray(jsonData) ? jsonData : (jsonData.segments || jsonData.sentences || []);
-          
+          let segments = Array.isArray(jsonData)
+            ? jsonData
+            : jsonData.segments || jsonData.sentences || [];
+
           // 2. If it's a full transcript (with sentenceAlignment & wordAlignment), use the existing builder
           if (jsonData.sentenceAlignment && jsonData.wordAlignment) {
             const result = buildAlignmentFromTranscript(jsonData);
@@ -2307,7 +2477,9 @@
             karaokeActive = true;
             updateKaraokeDisplay(0);
             showKaraokeUI(true);
-            setExportStatus(t('karaokeLoaded', { sentences: alignmentData.sentences.length }));
+            setExportStatus(
+              t("karaokeLoaded", { sentences: alignmentData.sentences.length }),
+            );
             // Store on current track
             const currentTrack = getCurrentTrack();
             if (currentTrack) {
@@ -2318,43 +2490,63 @@
 
           // 3. Otherwise, treat as simple array of sentence segments (like your segments.json)
           if (!Array.isArray(segments) || segments.length === 0) {
-            throw new Error('Invalid alignment format: expected array of segments.');
+            throw new Error(
+              "Invalid alignment format: expected array of segments.",
+            );
           }
 
           // Validate and normalize segments
           const sentences = segments
-            .filter(s => s.text && typeof s.start === 'number' && typeof s.end === 'number')
-            .map(s => ({
+            .filter(
+              (s) =>
+                s.text &&
+                typeof s.start === "number" &&
+                typeof s.end === "number",
+            )
+            .map((s) => ({
               text: s.text.trim(),
               start: s.start,
               end: s.end,
-              words: Array.isArray(s.words) ? s.words
-                .filter(w => (w.word || w.text) && typeof w.start === 'number' && typeof w.end === 'number')
-                .map(w => ({ word: String(w.word || w.text).trim(), start: w.start, end: w.end }))
+              words: Array.isArray(s.words)
+                ? s.words
+                    .filter(
+                      (w) =>
+                        (w.word || w.text) &&
+                        typeof w.start === "number" &&
+                        typeof w.end === "number",
+                    )
+                    .map((w) => ({
+                      word: String(w.word || w.text).trim(),
+                      start: w.start,
+                      end: w.end,
+                    }))
                 : [],
-              translation: s.translation || ''
+              translation: s.translation || "",
             }))
-            .filter(s => s.text.length > 0);
+            .filter((s) => s.text.length > 0);
 
           if (sentences.length === 0) {
-            throw new Error('No valid sentences found in the JSON data.');
+            throw new Error("No valid sentences found in the JSON data.");
           }
 
           // 4. Build renderMap for each sentence (for word highlighting) – same as zip import
           const transcript = {
             sentenceAlignment: sentences,
-            wordAlignment: sentences.flatMap(s => s.words)
+            wordAlignment: sentences.flatMap((s) => s.words),
           };
-          buildSentenceRenderMaps(transcript);  // mutates each sentence in place, adding .renderMap
+          buildSentenceRenderMaps(transcript); // mutates each sentence in place, adding .renderMap
 
-          alignmentData = { sentences, wordAlignment: transcript.wordAlignment };
+          alignmentData = {
+            sentences,
+            wordAlignment: transcript.wordAlignment,
+          };
           resetKaraokeView();
           karaokeActive = true;
 
           // Update UI
           updateKaraokeDisplay(0);
           showKaraokeUI(true);
-          setExportStatus(t('karaokeLoaded', { sentences: sentences.length }));
+          setExportStatus(t("karaokeLoaded", { sentences: sentences.length }));
 
           // Store alignment on the current track
           const currentTrack = getCurrentTrack();
@@ -2364,36 +2556,34 @@
 
           return true;
         } catch (error) {
-          console.error('Alignment load error:', error);
+          console.error("Alignment load error:", error);
           window.alert(`Failed to load alignment data:\n${error.message}`);
           return false;
         }
       }
 
-
-
       // === Show/hide karaoke UI ===
       function showKaraokeUI(show) {
         if (show && alignmentData && alignmentData.sentences.length > 0) {
-          karaokeContainer.classList.add('visible');
-          karaokeUploadHint.style.display = 'none';
-          karaokeDisplay.style.display = 'block';
-          karaokeEmpty.style.display = 'none';
+          karaokeContainer.classList.add("visible");
+          karaokeUploadHint.style.display = "none";
+          karaokeDisplay.style.display = "block";
+          karaokeEmpty.style.display = "none";
           // Also show alignment badge on the filename
-          const badge = document.querySelector('.alignment-badge');
-          if (badge) badge.classList.add('visible');
+          const badge = document.querySelector(".alignment-badge");
+          if (badge) badge.classList.add("visible");
         } else if (alignmentData && alignmentData.sentences.length === 0) {
-          karaokeContainer.classList.add('visible');
-          karaokeUploadHint.style.display = 'none';
-          karaokeDisplay.style.display = 'none';
-          karaokeEmpty.style.display = 'block';
+          karaokeContainer.classList.add("visible");
+          karaokeUploadHint.style.display = "none";
+          karaokeDisplay.style.display = "none";
+          karaokeEmpty.style.display = "block";
         } else {
-          karaokeContainer.classList.remove('visible');
-          karaokeUploadHint.style.display = 'flex';
-          karaokeDisplay.style.display = 'none';
-          karaokeEmpty.style.display = 'none';
-          const badge = document.querySelector('.alignment-badge');
-          if (badge) badge.classList.remove('visible');
+          karaokeContainer.classList.remove("visible");
+          karaokeUploadHint.style.display = "flex";
+          karaokeDisplay.style.display = "none";
+          karaokeEmpty.style.display = "none";
+          const badge = document.querySelector(".alignment-badge");
+          if (badge) badge.classList.remove("visible");
         }
       }
 
@@ -2413,9 +2603,9 @@
         }
         // visibility check
         if (!karaokeVisible) {
-          karaokePrev.innerHTML = '';
-          karaokeCurrent.innerHTML = '';
-          karaokeNext.innerHTML = '';
+          karaokePrev.innerHTML = "";
+          karaokeCurrent.innerHTML = "";
+          karaokeNext.innerHTML = "";
           // Keep the container visible but with empty lines
           showKaraokeUI(true);
           // Forget the render cache so the next visible update re-renders.
@@ -2429,7 +2619,10 @@
 
         // Sentence sync (reference updateActiveSentence): window rule with
         // sticky behaviour in gaps — the caller keeps its last index.
-        const foundIndex = findActiveSentenceWindowIndex(sentences, currentTime);
+        const foundIndex = findActiveSentenceWindowIndex(
+          sentences,
+          currentTime,
+        );
         let currentIndex = karaokeView.sentenceIndex;
 
         if (foundIndex !== null) {
@@ -2458,25 +2651,25 @@
           // Previous sentence (or empty placeholder)
           if (prevIndex >= 0) {
             const prev = sentences[prevIndex];
-            karaokePrev.innerHTML = renderSentencePlain(prev, 'prev');
-            karaokePrev.style.display = 'flex';
+            karaokePrev.innerHTML = renderSentencePlain(prev, "prev");
+            karaokePrev.style.display = "flex";
           } else {
             // Empty row – keep height stable
             karaokePrev.innerHTML = `<span class="karaoke-timestamp">&nbsp;</span><span class="karaoke-sentence-line">&nbsp;</span>`;
-            karaokePrev.style.display = 'flex';
+            karaokePrev.style.display = "flex";
           }
 
           karaokeCurrent.innerHTML = renderSentence(current, activeWord);
-          karaokeCurrent.style.display = 'flex';
+          karaokeCurrent.style.display = "flex";
 
           // Next sentence (or empty placeholder)
           if (nextIndex < sentences.length) {
             const next = sentences[nextIndex];
-            karaokeNext.innerHTML = renderSentencePlain(next, 'next');
-            karaokeNext.style.display = 'flex';
+            karaokeNext.innerHTML = renderSentencePlain(next, "next");
+            karaokeNext.style.display = "flex";
           } else {
             karaokeNext.innerHTML = `<span class="karaoke-timestamp">&nbsp;</span><span class="karaoke-sentence-line">&nbsp;</span>`;
-            karaokeNext.style.display = 'flex';
+            karaokeNext.style.display = "flex";
           }
 
           karaokeView.sentenceRendered = currentIndex;
@@ -2506,42 +2699,40 @@
         const renderMap = sentence.renderMap || [];
 
         if (renderMap.length === 0) {
-            html = escapeHtml(sentence.text);
+          html = escapeHtml(sentence.text);
         } else {
-            for (const item of renderMap) {
-                html += escapeHtml(
-                    sentence.text.slice(cursor, item.startChar)
-                );
+          for (const item of renderMap) {
+            html += escapeHtml(sentence.text.slice(cursor, item.startChar));
 
-                const text = sentence.text.slice(
-                    item.startChar,
-                    item.endChar
-                );
+            const text = sentence.text.slice(item.startChar, item.endChar);
 
-                // Match by identity first (fast path), then by identical start
-                // + end times — this stays correct even when the ASR word
-                // object was re-created or comes from another array.
-                if (activeWord && (item.word === activeWord ||
-                    (item.word && item.word.start === activeWord.start && item.word.end === activeWord.end))) {
-                    html += `<span class="karaoke-word active">${escapeHtml(text)}</span>`;
-                } else {
-                    html += `<span class="karaoke-word">${escapeHtml(text)}</span>`;
-                }
-
-                cursor = item.endChar;
+            // Match by identity first (fast path), then by identical start
+            // + end times — this stays correct even when the ASR word
+            // object was re-created or comes from another array.
+            if (
+              activeWord &&
+              (item.word === activeWord ||
+                (item.word &&
+                  item.word.start === activeWord.start &&
+                  item.word.end === activeWord.end))
+            ) {
+              html += `<span class="karaoke-word active">${escapeHtml(text)}</span>`;
+            } else {
+              html += `<span class="karaoke-word">${escapeHtml(text)}</span>`;
             }
 
-            html += escapeHtml(sentence.text.slice(cursor));
+            cursor = item.endChar;
+          }
+
+          html += escapeHtml(sentence.text.slice(cursor));
         }
 
         const timeStr = formatTime(sentence.start);
 
-        let textBlockHtml =
-            `<span class="karaoke-sentence-line">${html}</span>`;
+        let textBlockHtml = `<span class="karaoke-sentence-line">${html}</span>`;
 
         if (showTranslation && sentence.translation) {
-            textBlockHtml +=
-                `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
+          textBlockHtml += `<span class="karaoke-translation">${escapeHtml(sentence.translation)}</span>`;
         }
 
         return `
@@ -2549,8 +2740,7 @@
         <div class="karaoke-text-block">
         ${textBlockHtml}
         </div>`;
-     }
-
+      }
 
       // === Reset karaoke state ===
       function clearKaraokeData() {
@@ -2574,12 +2764,12 @@
             const json = JSON.parse(e.target.result);
             loadAlignmentData(json);
           } catch (error) {
-            console.error('JSON parse error:', error);
+            console.error("JSON parse error:", error);
             window.alert(`Failed to parse JSON file:\n${error.message}`);
           }
         };
         reader.onerror = () => {
-          window.alert('Failed to read the JSON file.');
+          window.alert("Failed to read the JSON file.");
         };
         reader.readAsText(file);
       }
@@ -2588,10 +2778,12 @@
         const sentenceAlignment = transcript.sentenceAlignment || [];
         const wordAlignment = transcript.wordAlignment || [];
         buildSentenceRenderMaps(transcript);
-        const translationText = transcript.translation || '';
+        const translationText = transcript.translation || "";
 
         // Split translation into lines, trim, and filter empty (keep empty lines as placeholders?)
-        const translationLines = translationText.split('\n').map(line => line.trim());
+        const translationLines = translationText
+          .split("\n")
+          .map((line) => line.trim());
         // We'll map each sentence to its translation line by index.
         // If there are fewer translation lines, we'll pad with empty strings.
 
@@ -2601,22 +2793,22 @@
           const words = s.alignedWords || [];
 
           // Get translation line if available
-          const translation = (index < translationLines.length) ? translationLines[index] : '';
+          const translation =
+            index < translationLines.length ? translationLines[index] : "";
 
           return {
-              text: s.text,
-              start: s.start,
-              end: s.end,
-              playbackStart: s.playbackStart,
-              words: words,
-              translation: translation,
-              renderMap: s.renderMap || []
+            text: s.text,
+            start: s.start,
+            end: s.end,
+            playbackStart: s.playbackStart,
+            words: words,
+            translation: translation,
+            renderMap: s.renderMap || [],
           };
         });
 
         return { sentences, wordAlignment: transcript.wordAlignment };
       }
-
 
       // import zip file - session with multiple audios/transcripts(translation)
       async function processZipFile(zipFile) {
@@ -2625,28 +2817,35 @@
           clearAllTracks();
 
           const zip = await JSZip.loadAsync(zipFile);
-          
+
           // Find session.json
-          const sessionFile = zip.file('session.json');
+          const sessionFile = zip.file("session.json");
           if (!sessionFile) {
-            showAlert('Invalid session zip: missing session.json', 'error');
-            console.error('session.json not found in zip.');
+            showAlert("Invalid session zip: missing session.json", "error");
+            console.error("session.json not found in zip.");
             return;
           }
 
-          const sessionContent = await sessionFile.async('string');
+          const sessionContent = await sessionFile.async("string");
           let sessionData;
           try {
             sessionData = JSON.parse(sessionContent);
           } catch (e) {
-            showAlert('Invalid session.json: not a valid JSON file.', 'error');
-            console.error('JSON parse error:', e);
+            showAlert("Invalid session.json: not a valid JSON file.", "error");
+            console.error("JSON parse error:", e);
             return;
           }
 
-          if (!sessionData.transcripts || !Array.isArray(sessionData.transcripts) || sessionData.transcripts.length === 0) {
-            showAlert('Invalid session.json: missing or empty "transcripts" array.', 'error');
-            console.error('No transcripts found.');
+          if (
+            !sessionData.transcripts ||
+            !Array.isArray(sessionData.transcripts) ||
+            sessionData.transcripts.length === 0
+          ) {
+            showAlert(
+              'Invalid session.json: missing or empty "transcripts" array.',
+              "error",
+            );
+            console.error("No transcripts found.");
             return;
           }
 
@@ -2655,15 +2854,24 @@
 
           for (const transcript of sessionData.transcripts) {
             // Validate required fields
-            if (!transcript.id || !transcript.name || !transcript.audioFileName) {
-              console.warn('Skipping transcript with missing id/name/audioFileName:', transcript);
+            if (
+              !transcript.id ||
+              !transcript.name ||
+              !transcript.audioFileName
+            ) {
+              console.warn(
+                "Skipping transcript with missing id/name/audioFileName:",
+                transcript,
+              );
               continue;
             }
 
             // Extract audio file from zip
             const audioFileEntry = zip.file(transcript.audioFileName);
             if (!audioFileEntry) {
-              console.warn(`Audio file not found in zip: ${transcript.audioFileName}`);
+              console.warn(
+                `Audio file not found in zip: ${transcript.audioFileName}`,
+              );
               hasErrors = true;
               continue;
             }
@@ -2673,30 +2881,29 @@
               const rawBlob = await audioFileEntry.async("blob");
 
               const ext = transcript.audioFileName
-                  .split(".")
-                  .pop()
-                  .toLowerCase();
+                .split(".")
+                .pop()
+                .toLowerCase();
 
               const mimeTypes = {
-                  mp3: "audio/mpeg",
-                  m4a: "audio/mp4",
-                  wav: "audio/wav",
-                  ogg: "audio/ogg",
-                  opus: "audio/ogg",
-                  aac: "audio/aac",
-                  flac: "audio/flac"
+                mp3: "audio/mpeg",
+                m4a: "audio/mp4",
+                wav: "audio/wav",
+                ogg: "audio/ogg",
+                opus: "audio/ogg",
+                aac: "audio/aac",
+                flac: "audio/flac",
               };
 
-              audioBlob = new Blob(
-                  [rawBlob],
-                  {
-                      type: mimeTypes[ext] || "application/octet-stream"
-                  }
-              );
+              audioBlob = new Blob([rawBlob], {
+                type: mimeTypes[ext] || "application/octet-stream",
+              });
               // console.log("loaded audio media type: ",audioBlob.type); // debug info log
-
             } catch (e) {
-              console.warn(`Failed to extract audio file: ${transcript.audioFileName}`, e);
+              console.warn(
+                `Failed to extract audio file: ${transcript.audioFileName}`,
+                e,
+              );
               hasErrors = true;
               continue;
             }
@@ -2718,8 +2925,11 @@
           }
 
           if (newTracks.length === 0) {
-            showAlert('No valid transcript-audio pairs found in the zip.', 'error');
-            console.error('No tracks imported.');
+            showAlert(
+              "No valid transcript-audio pairs found in the zip.",
+              "error",
+            );
+            console.error("No tracks imported.");
             return;
           }
 
@@ -2736,31 +2946,44 @@
           }
 
           // dirty fix with auto-play to force playback engine to init
-          togglePlayback()
+          togglePlayback();
 
-          showAlert(`Successfully imported ${newTracks.length} transcript(s) from session.`, 'success');
+          showAlert(
+            `Successfully imported ${newTracks.length} transcript(s) from session.`,
+            "success",
+          );
           if (hasErrors) {
-            console.warn('Some audio files were missing; see console for details.');
+            console.warn(
+              "Some audio files were missing; see console for details.",
+            );
           }
-
         } catch (error) {
-          console.error('Zip processing error:', error);
-          showAlert(`Failed to process zip: ${error.message}`, 'error');
+          console.error("Zip processing error:", error);
+          showAlert(`Failed to process zip: ${error.message}`, "error");
         }
       }
-
 
       // === Extend the file input handler to detect JSON / zip session file ===
       function addFiles(fileList) {
         const files = Array.from(fileList);
-        const audioFiles = files.filter((file) => file.type.startsWith('audio/'));
-        const jsonFiles = files.filter((file) => file.type === 'application/json' || file.name.endsWith('.json'));
-        const zipFiles = files.filter((file) => file.type === 'application/zip' || file.name.endsWith('.zip'));
+        const audioFiles = files.filter((file) =>
+          file.type.startsWith("audio/"),
+        );
+        const jsonFiles = files.filter(
+          (file) =>
+            file.type === "application/json" || file.name.endsWith(".json"),
+        );
+        const zipFiles = files.filter(
+          (file) =>
+            file.type === "application/zip" || file.name.endsWith(".zip"),
+        );
 
         // Handle zip files – only the first one is processed
         if (zipFiles.length > 0) {
           if (zipFiles.length > 1) {
-            console.warn('Multiple zip files dropped. Only the first one will be imported.');
+            console.warn(
+              "Multiple zip files dropped. Only the first one will be imported.",
+            );
           }
           processZipFile(zipFiles[0]);
           return; // After processing zip, we don't process other files in the same batch
@@ -2776,12 +2999,12 @@
               const json = JSON.parse(e.target.result);
               loadAlignmentData(json);
             } catch (error) {
-              console.error('JSON parse error:', error);
+              console.error("JSON parse error:", error);
               window.alert(`Failed to parse JSON file:\n${error.message}`);
             }
           };
           reader.onerror = () => {
-            window.alert('Failed to read the JSON file.');
+            window.alert("Failed to read the JSON file.");
           };
           reader.readAsText(jsonFile);
         }
@@ -2810,7 +3033,7 @@
           }
 
           // dirty fix with auto-play to force playback engine to init
-          togglePlayback()
+          togglePlayback();
         }
 
         // If no audio files but we have JSON, and there's a current track, attach to it
@@ -2860,7 +3083,6 @@
         setUploadExpanded(false);
       }
 
-
       // Find the updateProgress function and add:
       function updateProgress() {
         if (!sound || !isPlaying) return;
@@ -2868,7 +3090,7 @@
         const cur = sound.seek();
         if (!dur) return;
         const percent = (cur / dur) * 100;
-        progress.style.width = percent + '%';
+        progress.style.width = percent + "%";
         currentTimeEl.textContent = formatTime(cur);
         updateKnobPosition(percent);
 
@@ -2880,18 +3102,20 @@
         progressFrame = requestAnimationFrame(updateProgress);
       }
 
-
-      document.addEventListener('pointermove', (e) => {
+      document.addEventListener("pointermove", (e) => {
         if (!isDraggingKnob || !sound) return;
         const rect = progressBar.getBoundingClientRect();
         const deltaX = e.clientX - knobDragStartX;
         const deltaPercent = (deltaX / rect.width) * 100;
-        let newPercent = Math.max(0, Math.min(100, knobDragStartPercent + deltaPercent));
+        let newPercent = Math.max(
+          0,
+          Math.min(100, knobDragStartPercent + deltaPercent),
+        );
         const duration = sound.duration();
         if (duration > 0) {
           const seek = (newPercent / 100) * duration;
           sound.seek(seek);
-          progress.style.width = newPercent + '%';
+          progress.style.width = newPercent + "%";
           currentTimeEl.textContent = formatTime(seek);
           updateKnobPosition(newPercent);
 
@@ -2952,7 +3176,8 @@
       function setLanguage(language) {
         currentLanguage = translations[language] ? language : "zh";
         languageSelect.value = currentLanguage;
-        document.documentElement.lang = currentLanguage === "zh" ? "zh-CN" : "en";
+        document.documentElement.lang =
+          currentLanguage === "zh" ? "zh-CN" : "en";
         document.title = t("documentTitle");
 
         document.querySelectorAll("[data-i18n]").forEach((element) => {
@@ -2961,9 +3186,14 @@
         document.querySelectorAll("[data-i18n-title]").forEach((element) => {
           element.title = t(element.dataset.i18nTitle);
         });
-        document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
-          element.setAttribute("aria-label", t(element.dataset.i18nAriaLabel));
-        });
+        document
+          .querySelectorAll("[data-i18n-aria-label]")
+          .forEach((element) => {
+            element.setAttribute(
+              "aria-label",
+              t(element.dataset.i18nAriaLabel),
+            );
+          });
 
         updateExportHint();
         updateSelectionUi();
@@ -2974,15 +3204,17 @@
         const template =
           translations[currentLanguage]?.[key] || translations.zh[key] || key;
         return template.replace(/\{(\w+)\}/g, (_, name) =>
-          Object.prototype.hasOwnProperty.call(params, name) ? params[name] : "",
+          Object.prototype.hasOwnProperty.call(params, name)
+            ? params[name]
+            : "",
         );
       }
 
       function createHowlForTrack(track) {
         const howl = new Howl({
           src: [track.url],
-          html5: true, 
-          // html5: false,  //maybe the cause - ios ipad os, not loading audio 
+          html5: true,
+          // html5: false,  //maybe the cause - ios ipad os, not loading audio
           rate: currentSpeed,
           onplay: function () {
             if (currentTrackId !== track.id) return;
@@ -3013,9 +3245,9 @@
             // 如果 autoPlay 时还没播放，可以在这里调用 play，但我们在 selectTrack 里已经调用了，所以这里不用重复
           },
           onloaderror: function (id, error) {
-            console.error('Howl load error for track', track.id, error);
+            console.error("Howl load error for track", track.id, error);
             // 可添加用户提示
-          }
+          },
         });
         return howl;
       }
@@ -3035,14 +3267,13 @@
       }
 
       function getAdjacentTrack(fromTrackId, offset) {
-        const currentIndex = tracks.findIndex((item) => item.id === fromTrackId);
+        const currentIndex = tracks.findIndex(
+          (item) => item.id === fromTrackId,
+        );
         if (currentIndex === -1) return null;
         return tracks[currentIndex + offset] || null;
       }
 
-
-
-      
       function selectTrack(trackId, autoPlay = true) {
         const track = tracks.find((item) => item.id === trackId);
         if (!track) return;
@@ -3099,7 +3330,7 @@
         currentTimeEl.textContent = "0:00";
 
         // 如果音频已加载，立即更新时长
-        if (howl.state() === 'loaded') {
+        if (howl.state() === "loaded") {
           durationEl.textContent = formatTime(howl.duration());
         } else {
           durationEl.textContent = "0:00";
@@ -3137,9 +3368,6 @@
         syncUploadAreaState();
       }
 
-
-
-
       playBtn.addEventListener("click", () => {
         togglePlayback();
       });
@@ -3155,7 +3383,11 @@
       });
 
       document.addEventListener("keydown", (event) => {
-        if (event.code !== "Space" || event.repeat || shouldIgnoreShortcut(event)) {
+        if (
+          event.code !== "Space" ||
+          event.repeat ||
+          shouldIgnoreShortcut(event)
+        ) {
           return;
         }
 
@@ -3178,14 +3410,14 @@
         );
       }
 
-      document.getElementById('skipBackBtn').addEventListener('click', () => {
+      document.getElementById("skipBackBtn").addEventListener("click", () => {
         if (!sound) return;
         const currentTime = sound.seek() || 0;
         const newTime = Math.max(0, currentTime - 5);
         sound.seek(newTime);
         const dur = sound.duration();
         const percent = dur > 0 ? (newTime / dur) * 100 : 0;
-        progress.style.width = percent + '%';
+        progress.style.width = percent + "%";
         updateKnobPosition(percent);
         currentTimeEl.textContent = formatTime(newTime);
 
@@ -3201,28 +3433,29 @@
         }
       });
 
-      document.getElementById('skipForwardBtn').addEventListener('click', () => {
-        if (!sound) return;
-        const currentTime = sound.seek() || 0;
-        const duration = sound.duration();
-        const newTime = Math.min(duration, currentTime + 5);
-        sound.seek(newTime);
-        const percent = duration > 0 ? (newTime / duration) * 100 : 0;
-        progress.style.width = percent + '%';
-        updateKnobPosition(percent);
-        currentTimeEl.textContent = formatTime(newTime);
+      document
+        .getElementById("skipForwardBtn")
+        .addEventListener("click", () => {
+          if (!sound) return;
+          const currentTime = sound.seek() || 0;
+          const duration = sound.duration();
+          const newTime = Math.min(duration, currentTime + 5);
+          sound.seek(newTime);
+          const percent = duration > 0 ? (newTime / duration) * 100 : 0;
+          progress.style.width = percent + "%";
+          updateKnobPosition(percent);
+          currentTimeEl.textContent = formatTime(newTime);
 
-        syncWaveformProgress(percent);
-        if (alignmentData && alignmentData.sentences.length > 0) {
-          updateKaraokeDisplay(newTime);
-        }
+          syncWaveformProgress(percent);
+          if (alignmentData && alignmentData.sentences.length > 0) {
+            updateKaraokeDisplay(newTime);
+          }
 
-        if (isPlaying) {
-          stopProgressLoop();
-          startProgressLoop();
-        }
-      });
-
+          if (isPlaying) {
+            stopProgressLoop();
+            startProgressLoop();
+          }
+        });
 
       toBeginBtn.addEventListener("click", () => {
         if (!sound) return;
@@ -3261,26 +3494,29 @@
         }
       });
 
-    progressBar.addEventListener("click", (e) => {
-      if (e.target.closest('.progress-knob')) return;
-      if (!sound) return;
-      const rect = progressBar.getBoundingClientRect();
-      const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      const seek = sound.duration() * percent;
-      sound.seek(seek);
-      progress.style.width = percent * 100 + "%";
-      updateKnobPosition(percent * 100);
-      currentTimeEl.textContent = formatTime(seek);
-      syncWaveformProgress(percent * 100);
-      if (alignmentData && alignmentData.sentences.length > 0) {
-        updateKaraokeDisplay(seek);
-      }
-    });
+      progressBar.addEventListener("click", (e) => {
+        if (e.target.closest(".progress-knob")) return;
+        if (!sound) return;
+        const rect = progressBar.getBoundingClientRect();
+        const percent = Math.max(
+          0,
+          Math.min(1, (e.clientX - rect.left) / rect.width),
+        );
+        const seek = sound.duration() * percent;
+        sound.seek(seek);
+        progress.style.width = percent * 100 + "%";
+        updateKnobPosition(percent * 100);
+        currentTimeEl.textContent = formatTime(seek);
+        syncWaveformProgress(percent * 100);
+        if (alignmentData && alignmentData.sentences.length > 0) {
+          updateKaraokeDisplay(seek);
+        }
+      });
 
       // === Draggable knob ===
-      const knob = document.getElementById('progressKnob');
+      const knob = document.getElementById("progressKnob");
 
-      knob.addEventListener('pointerdown', (e) => {
+      knob.addEventListener("pointerdown", (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (!sound) return;
@@ -3290,24 +3526,27 @@
         knobDragStartX = e.clientX;
         const currentPercent = parseFloat(progress.style.width) || 0;
         knobDragStartPercent = currentPercent;
-        document.body.style.userSelect = 'none';
+        document.body.style.userSelect = "none";
       });
 
       // In pointermove handler:
-      document.addEventListener('pointermove', (e) => {
+      document.addEventListener("pointermove", (e) => {
         if (!isDraggingKnob || !sound) return;
         const rect = progressBar.getBoundingClientRect();
         const deltaX = e.clientX - knobDragStartX;
         const deltaPercent = (deltaX / rect.width) * 100;
-        let newPercent = Math.max(0, Math.min(100, knobDragStartPercent + deltaPercent));
+        let newPercent = Math.max(
+          0,
+          Math.min(100, knobDragStartPercent + deltaPercent),
+        );
         const duration = sound.duration();
         if (duration > 0) {
           const seek = (newPercent / 100) * duration;
           sound.seek(seek);
-          progress.style.width = newPercent + '%';
+          progress.style.width = newPercent + "%";
           currentTimeEl.textContent = formatTime(seek);
           updateKnobPosition(newPercent);
-          
+
           // Sync waveform
           syncWaveformProgress(newPercent);
 
@@ -3317,10 +3556,10 @@
         }
       });
 
-      document.addEventListener('pointerup', (e) => {
+      document.addEventListener("pointerup", (e) => {
         if (isDraggingKnob) {
           isDraggingKnob = false;
-          document.body.style.userSelect = '';
+          document.body.style.userSelect = "";
           // Resume progress loop if playing
           if (isPlaying) {
             stopProgressLoop();
@@ -3329,18 +3568,16 @@
         }
       });
 
-
-
       function updateProgress() {
         if (!sound || !isPlaying) return;
         const dur = sound.duration();
         const cur = sound.seek();
         if (!dur) return;
         const percent = (cur / dur) * 100;
-        progress.style.width = percent + '%';
+        progress.style.width = percent + "%";
         currentTimeEl.textContent = formatTime(cur);
         updateKnobPosition(percent);
-        
+
         // Sync waveform progress
         syncWaveformProgress(percent);
 
@@ -3444,7 +3681,9 @@
             setExportStatus(t("cancelled"));
           } else {
             console.error(error);
-            setExportStatus(t("exportFailed", { message: error.message || error }));
+            setExportStatus(
+              t("exportFailed", { message: error.message || error }),
+            );
           }
         } finally {
           setExportBusy(false);
@@ -3496,19 +3735,16 @@
       function updateExportHint() {
         if (
           window.location.protocol === "file:" &&
-          (exportFormat.value.startsWith("mp3") || exportMode.value === "ffmpeg")
+          (exportFormat.value.startsWith("mp3") ||
+            exportMode.value === "ffmpeg")
         ) {
-          setExportStatus(
-            t("fileProtocolWarning"),
-          );
+          setExportStatus(t("fileProtocolWarning"));
           return;
         }
 
         if (exportFormat.value.startsWith("mp3")) {
           setExportStatus(
-            exportMode.value === "live"
-              ? t("mp3LiveHint")
-              : t("mp3FfmpegHint"),
+            exportMode.value === "live" ? t("mp3LiveHint") : t("mp3FfmpegHint"),
           );
           return;
         }
@@ -3522,7 +3758,8 @@
       }
 
       async function exportWithLivePlayback(track) {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        const AudioContextClass =
+          window.AudioContext || window.webkitAudioContext;
         if (!AudioContextClass) {
           throw new Error("This browser does not support Web Audio.");
         }
@@ -3590,7 +3827,8 @@
           silence.gain.value = 0;
           const channelChunks = [];
           let sampleCount = 0;
-          const expectedSeconds = Math.max(0.1, audio.duration || 0) / currentSpeed;
+          const expectedSeconds =
+            Math.max(0.1, audio.duration || 0) / currentSpeed;
 
           processor.onaudioprocess = (event) => {
             if (cancelExportRequested) {
@@ -3625,7 +3863,7 @@
             }
             const percent = Math.min(
               95,
-              ((audio.currentTime / Math.max(audio.duration, 0.1)) * 100) || 0,
+              (audio.currentTime / Math.max(audio.duration, 0.1)) * 100 || 0,
             );
             setExportProgress(percent);
             setExportStatus(
@@ -3670,7 +3908,10 @@
 
           throwIfExportCancelled();
           if (exportFormat.value === "wav") {
-            downloadBlob(wavBlob, buildOutputName(track.name, currentSpeed, "wav", "live"));
+            downloadBlob(
+              wavBlob,
+              buildOutputName(track.name, currentSpeed, "wav", "live"),
+            );
             setExportStatus(
               t("liveDoneWav", {
                 duration: formatTime(expectedSeconds),
@@ -3748,7 +3989,10 @@
         const outputName = `output-${Date.now()}.${settings.extension}`;
 
         ffmpeg.on("progress", ({ progress }) => {
-          const percent = Math.max(0, Math.min(100, Math.round(progress * 100)));
+          const percent = Math.max(
+            0,
+            Math.min(100, Math.round(progress * 100)),
+          );
           setExportProgress(percent);
           setExportStatus(t("ffmpegProgress", { percent }));
         });
@@ -3776,7 +4020,9 @@
           await deleteFfmpegFileQuietly(ffmpeg, inputName);
           await deleteFfmpegFileQuietly(ffmpeg, outputName);
 
-          const outputBlob = new Blob([data.buffer], { type: settings.mimeType });
+          const outputBlob = new Blob([data.buffer], {
+            type: settings.mimeType,
+          });
           downloadBlob(
             outputBlob,
             buildOutputName(
@@ -3805,7 +4051,8 @@
 
       async function exportWithOfflinePlaybackRate(track) {
         throwIfExportCancelled();
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        const AudioContextClass =
+          window.AudioContext || window.webkitAudioContext;
         const OfflineAudioContextClass =
           window.OfflineAudioContext || window.webkitOfflineAudioContext;
         if (!AudioContextClass || !OfflineAudioContextClass) {
@@ -3833,11 +4080,12 @@
         const rendered = await offlineContext.startRendering();
         throwIfExportCancelled();
         const wavBlob = encodeWav(rendered);
-        downloadBlob(wavBlob, buildOutputName(track.name, currentSpeed, "wav", "offline"));
-        setExportProgress(100);
-        setExportStatus(
-          t("offlineDone"),
+        downloadBlob(
+          wavBlob,
+          buildOutputName(track.name, currentSpeed, "wav", "offline"),
         );
+        setExportProgress(100);
+        setExportStatus(t("offlineDone"));
       }
 
       async function getFfmpeg() {
@@ -3891,7 +4139,9 @@
           "audio/webm",
           "audio/mp4",
         ];
-        return candidates.find((type) => MediaRecorder.isTypeSupported(type)) || "";
+        return (
+          candidates.find((type) => MediaRecorder.isTypeSupported(type)) || ""
+        );
       }
 
       function waitForMediaReady(audio) {
@@ -3899,9 +4149,13 @@
         audio.load();
         return new Promise((resolve, reject) => {
           audio.addEventListener("loadedmetadata", resolve, { once: true });
-          audio.addEventListener("error", () => {
-            reject(new Error("Cannot load audio for export."));
-          }, { once: true });
+          audio.addEventListener(
+            "error",
+            () => {
+              reject(new Error("Cannot load audio for export."));
+            },
+            { once: true },
+          );
         });
       }
 
@@ -3914,7 +4168,10 @@
           audio.addEventListener("canplaythrough", resolve, { once: true });
           audio.addEventListener(
             "error",
-            () => reject(new Error("Could not load audio for speed-adjusted export.")),
+            () =>
+              reject(
+                new Error("Could not load audio for speed-adjusted export."),
+              ),
             { once: true },
           );
         });
@@ -4099,7 +4356,10 @@
         let offset = 44;
         for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex += 1) {
           for (let channel = 0; channel < channels; channel += 1) {
-            const sample = Math.max(-1, Math.min(1, samples[channel]?.[sampleIndex] || 0));
+            const sample = Math.max(
+              -1,
+              Math.min(1, samples[channel]?.[sampleIndex] || 0),
+            );
             view.setInt16(
               offset,
               sample < 0 ? sample * 0x8000 : sample * 0x7fff,
@@ -4165,12 +4425,11 @@
         playlistEmpty.style.display = tracks.length ? "none" : "block";
         cleanupSelectedTrackIds();
         trackList.innerHTML = tracks
-          .map(
-            (track) => {
-              const durationLabel = Number.isFinite(track.duration)
-                ? formatTime(track.duration)
-                : "--:--";
-              return `
+          .map((track) => {
+            const durationLabel = Number.isFinite(track.duration)
+              ? formatTime(track.duration)
+              : "--:--";
+            return `
               <div
                 class="track-item ${track.id === currentTrackId ? "active" : ""}"
                 data-track-id="${escapeHtml(track.id)}"
@@ -4205,8 +4464,7 @@
                 </span>
               </div>
             `;
-            },
-          )
+          })
           .join("");
 
         trackList.querySelectorAll(".track-item").forEach((button) => {
@@ -4256,24 +4514,29 @@
           audio.preload = "metadata";
           audio.src = track.url;
 
-          audio.addEventListener("loadedmetadata", () => {
-            if (!Number.isFinite(audio.duration)) return;
-            const existingTrack = tracks.find((item) => item.id === track.id);
-            if (!existingTrack) return;
-            existingTrack.duration = audio.duration;
-            renderPlaylist();
-          }, { once: true });
+          audio.addEventListener(
+            "loadedmetadata",
+            () => {
+              if (!Number.isFinite(audio.duration)) return;
+              const existingTrack = tracks.find((item) => item.id === track.id);
+              if (!existingTrack) return;
+              existingTrack.duration = audio.duration;
+              renderPlaylist();
+            },
+            { once: true },
+          );
 
-          audio.addEventListener("error", () => {
-            const existingTrack = tracks.find((item) => item.id === track.id);
-            if (!existingTrack) return;
-            existingTrack.duration = null;
-          }, { once: true });
+          audio.addEventListener(
+            "error",
+            () => {
+              const existingTrack = tracks.find((item) => item.id === track.id);
+              if (!existingTrack) return;
+              existingTrack.duration = null;
+            },
+            { once: true },
+          );
         });
       }
-
-      
-
 
       function deleteTrack(trackId) {
         const trackIndex = tracks.findIndex((track) => track.id === trackId);
@@ -4309,8 +4572,11 @@
         if (!selectedTracks.length || isExporting) return;
 
         const deletedIds = new Set(selectedTracks.map((track) => track.id));
-        const firstDeletedIndex = tracks.findIndex((track) => deletedIds.has(track.id));
-        const deletingCurrentTrack = currentTrackId && deletedIds.has(currentTrackId);
+        const firstDeletedIndex = tracks.findIndex((track) =>
+          deletedIds.has(track.id),
+        );
+        const deletingCurrentTrack =
+          currentTrackId && deletedIds.has(currentTrackId);
 
         selectedTracks.forEach(disposeTrack);
         tracks = tracks.filter((track) => !deletedIds.has(track.id));
@@ -4318,7 +4584,8 @@
 
         if (deletingCurrentTrack) {
           resetCurrentPlayback();
-          const fallbackTrack = tracks[firstDeletedIndex] || tracks[firstDeletedIndex - 1];
+          const fallbackTrack =
+            tracks[firstDeletedIndex] || tracks[firstDeletedIndex - 1];
           if (fallbackTrack) {
             selectTrack(fallbackTrack.id, false);
             syncUploadAreaState();
@@ -4349,7 +4616,9 @@
         }
         updateWaveformVisibility(false);
         if (wavesurfer) {
-          try { wavesurfer.destroy(); } catch(e) {}
+          try {
+            wavesurfer.destroy();
+          } catch (e) {}
           wavesurfer = null;
         }
         isPlaying = false;
@@ -4364,7 +4633,6 @@
         updateSelectionUi();
       }
 
-
       function clearAllTracks() {
         // 卸载当前播放
         if (sound) {
@@ -4376,7 +4644,7 @@
         setPlayButton(false);
 
         // 撤销所有 URL 并清理 Howl 实例
-        tracks.forEach(track => {
+        tracks.forEach((track) => {
           URL.revokeObjectURL(track.url);
         });
         for (const [_, cachedHowl] of howlMap) {
@@ -4390,7 +4658,9 @@
 
         updateWaveformVisibility(false);
         if (wavesurfer) {
-          try { wavesurfer.destroy(); } catch(e) {}
+          try {
+            wavesurfer.destroy();
+          } catch (e) {}
           wavesurfer = null;
         }
         progress.style.width = "0%";
@@ -4408,8 +4678,6 @@
         lucide.createIcons();
         syncUploadAreaState();
       }
-
-
 
       function cleanupSelectedTrackIds() {
         const existingIds = new Set(tracks.map((track) => track.id));
@@ -4436,7 +4704,10 @@
           selectedCount > 0 && selectedCount < tracks.length;
         selectAllTracks.disabled = isExporting || !hasTracks;
         selectAllLabel.textContent = selectedCount
-          ? t("selectedCount", { selected: selectedCount, total: tracks.length })
+          ? t("selectedCount", {
+              selected: selectedCount,
+              total: tracks.length,
+            })
           : t("selectAll");
 
         if (!isExporting) {
@@ -4485,59 +4756,59 @@
       lucide.createIcons();
       syncUploadAreaState();
 
-      const exportToggleBtn = document.getElementById('exportToggleBtn');
-      const exportBody = document.getElementById('exportBody');
+      const exportToggleBtn = document.getElementById("exportToggleBtn");
+      const exportBody = document.getElementById("exportBody");
 
-      exportToggleBtn.addEventListener('click', () => {
-        const isExpanded = exportToggleBtn.getAttribute('aria-expanded') === 'true';
+      exportToggleBtn.addEventListener("click", () => {
+        const isExpanded =
+          exportToggleBtn.getAttribute("aria-expanded") === "true";
         const newState = !isExpanded;
-        exportToggleBtn.setAttribute('aria-expanded', newState);
-        exportBody.style.display = newState ? 'block' : 'none';
+        exportToggleBtn.setAttribute("aria-expanded", newState);
+        exportBody.style.display = newState ? "block" : "none";
         // 更新图标（由 lucide 重新渲染）
         lucide.createIcons();
       });
-
 
       // ===== 9. Final initialization and event binding =====
       // Add these to the script at the end
 
       // === Wire up the karaoke upload button ===
-      karaokeUploadBtn.addEventListener('click', () => {
+      karaokeUploadBtn.addEventListener("click", () => {
         karaokeFileInput.click();
       });
 
-      karaokeFileInput.addEventListener('change', (e) => {
+      karaokeFileInput.addEventListener("change", (e) => {
         const file = e.target.files?.[0];
         if (file) {
           handleKaraokeFileUpload(file);
         }
-        karaokeFileInput.value = '';
+        karaokeFileInput.value = "";
       });
 
       // === Add drag-and-drop for JSON on the karaoke container ===
-      karaokeContainer.addEventListener('dragover', (e) => {
+      karaokeContainer.addEventListener("dragover", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        karaokeContainer.style.borderColor = 'var(--emerald)';
-        karaokeContainer.style.background = 'var(--emerald-soft)';
+        karaokeContainer.style.borderColor = "var(--emerald)";
+        karaokeContainer.style.background = "var(--emerald-soft)";
       });
 
-      karaokeContainer.addEventListener('dragleave', (e) => {
+      karaokeContainer.addEventListener("dragleave", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        karaokeContainer.style.borderColor = 'var(--border)';
-        karaokeContainer.style.background = 'var(--panel)';
+        karaokeContainer.style.borderColor = "var(--border)";
+        karaokeContainer.style.background = "var(--panel)";
       });
 
-      karaokeContainer.addEventListener('drop', (e) => {
+      karaokeContainer.addEventListener("drop", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        karaokeContainer.style.borderColor = 'var(--border)';
-        karaokeContainer.style.background = 'var(--panel)';
+        karaokeContainer.style.borderColor = "var(--border)";
+        karaokeContainer.style.background = "var(--panel)";
 
         const files = e.dataTransfer.files;
         for (const file of files) {
-          if (file.type === 'application/json' || file.name.endsWith('.json')) {
+          if (file.type === "application/json" || file.name.endsWith(".json")) {
             handleKaraokeFileUpload(file);
             break;
           }
@@ -4558,41 +4829,48 @@
       // that also handles JSON files
 
       // Add a separate drop handler for JSON files on the upload area
-      uploadArea.addEventListener('drop', (e) => {
-        // This runs in addition to the existing handler via bubbling
-        // But we need to handle JSON files specially
-        const files = e.dataTransfer.files;
-        let hasJson = false;
-        for (const file of files) {
-          if (file.type === 'application/json' || file.name.endsWith('.json')) {
-            hasJson = true;
-            handleKaraokeFileUpload(file);
-            break;
+      uploadArea.addEventListener(
+        "drop",
+        (e) => {
+          // This runs in addition to the existing handler via bubbling
+          // But we need to handle JSON files specially
+          const files = e.dataTransfer.files;
+          let hasJson = false;
+          for (const file of files) {
+            if (
+              file.type === "application/json" ||
+              file.name.endsWith(".json")
+            ) {
+              hasJson = true;
+              handleKaraokeFileUpload(file);
+              break;
+            }
           }
-        }
-        // If there's JSON and no audio, prevent the default audio handler from
-        // trying to process JSON as audio
-        if (hasJson) {
-          // The audio handler will also run, but it will filter out non-audio files
-          // so this is safe
-        }
-      }, true); // Use capture phase to run before the existing handler
+          // If there's JSON and no audio, prevent the default audio handler from
+          // trying to process JSON as audio
+          if (hasJson) {
+            // The audio handler will also run, but it will filter out non-audio files
+            // so this is safe
+          }
+        },
+        true,
+      ); // Use capture phase to run before the existing handler
 
       // ===== 10. Initialize karaoke state =====
       showKaraokeUI(false);
 
       // ===== 11. Add clear alignment button to the karaoke UI =====
       // Add a small clear button in the karaoke header
-      const clearBtn = document.createElement('button');
-      clearBtn.className = 'ctrl-btn';
-      clearBtn.style.width = 'auto';
-      clearBtn.style.padding = '4px 12px';
-      clearBtn.style.borderRadius = '20px';
-      clearBtn.style.fontSize = '11px';
-      clearBtn.style.marginLeft = '12px';
-      clearBtn.textContent = '✕ Clear';
-      clearBtn.title = 'Clear alignment data';
-      clearBtn.addEventListener('click', (e) => {
+      const clearBtn = document.createElement("button");
+      clearBtn.className = "ctrl-btn";
+      clearBtn.style.width = "auto";
+      clearBtn.style.padding = "4px 12px";
+      clearBtn.style.borderRadius = "20px";
+      clearBtn.style.fontSize = "11px";
+      clearBtn.style.marginLeft = "12px";
+      clearBtn.textContent = "✕ Clear";
+      clearBtn.title = "Clear alignment data";
+      clearBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         clearKaraokeData();
         const currentTrack = getCurrentTrack();
@@ -4602,12 +4880,12 @@
       });
 
       // Add it to the karaoke container header area
-      const headerArea = document.createElement('div');
-      headerArea.style.display = 'flex';
-      headerArea.style.alignItems = 'center';
-      headerArea.style.justifyContent = 'space-between';
-      headerArea.style.marginBottom = '4px';
-      headerArea.style.width = '100%';
+      const headerArea = document.createElement("div");
+      headerArea.style.display = "flex";
+      headerArea.style.alignItems = "center";
+      headerArea.style.justifyContent = "space-between";
+      headerArea.style.marginBottom = "4px";
+      headerArea.style.width = "100%";
 
       // const titleSpan = document.createElement('span');
       // titleSpan.style.fontSize = '10px';
@@ -4621,24 +4899,25 @@
       // Insert at the top of the karaoke container
       karaokeContainer.insertBefore(headerArea, karaokeContainer.firstChild);
 
-      console.log('Karaoke feature initialized!');
+      console.log("Karaoke feature initialized!");
 
-
-      const settingsToggleBtn = document.getElementById('settingsToggleBtn');
-      const settingsContainer = document.getElementById('settingsContainer');
+      const settingsToggleBtn = document.getElementById("settingsToggleBtn");
+      const settingsContainer = document.getElementById("settingsContainer");
       let settingsVisible = false;
 
-      settingsToggleBtn.addEventListener('click', () => {
+      settingsToggleBtn.addEventListener("click", () => {
         settingsVisible = !settingsVisible;
-        settingsContainer.classList.toggle('visible', settingsVisible);
-        settingsToggleBtn.classList.toggle('active', settingsVisible);
+        settingsContainer.classList.toggle("visible", settingsVisible);
+        settingsToggleBtn.classList.toggle("active", settingsVisible);
         lucide.createIcons();
       });
 
       // 同步语言切换（如果使用移动端下拉菜单）
-      const languageSelectMobile = document.getElementById('languageSelectMobile');
+      const languageSelectMobile = document.getElementById(
+        "languageSelectMobile",
+      );
       if (languageSelectMobile) {
-        languageSelectMobile.addEventListener('change', () => {
+        languageSelectMobile.addEventListener("change", () => {
           setLanguage(languageSelectMobile.value);
         });
       }
@@ -4647,29 +4926,41 @@
       updateWaveformVisibility(false);
 
       // Karaoke visibility toggle
-      const visibilityBtn = document.getElementById('karaokeVisibilityToggle');
+      const visibilityBtn = document.getElementById("karaokeVisibilityToggle");
 
       // Set initial aria-label
-      visibilityBtn.setAttribute('aria-label', karaokeVisible ? t('karaokeVisibilityHide') : t('karaokeVisibilityShow'));
+      visibilityBtn.setAttribute(
+        "aria-label",
+        karaokeVisible
+          ? t("karaokeVisibilityHide")
+          : t("karaokeVisibilityShow"),
+      );
 
-      visibilityBtn.addEventListener('click', () => {
+      visibilityBtn.addEventListener("click", () => {
         // Toggle state
         karaokeVisible = !karaokeVisible;
-        
+
         // Update icon using innerHTML (replaces the <i> element with a new one)
-        const iconName = karaokeVisible ? 'eye-closed' : 'eye';
+        const iconName = karaokeVisible ? "eye-closed" : "eye";
         visibilityBtn.innerHTML = `<i data-lucide="${iconName}"></i>`;
         lucide.createIcons();
-        
+
         // Update aria-label
-        visibilityBtn.setAttribute('aria-label', karaokeVisible ? '隐藏句子' : '显示句子');
-        
+        visibilityBtn.setAttribute(
+          "aria-label",
+          karaokeVisible ? "隐藏句子" : "显示句子",
+        );
+
         // Get current playback time safely
         let time = 0;
         if (sound) {
           try {
             const seekVal = sound.seek();
-            if (typeof seekVal === 'number' && !isNaN(seekVal) && seekVal >= 0) {
+            if (
+              typeof seekVal === "number" &&
+              !isNaN(seekVal) &&
+              seekVal >= 0
+            ) {
               time = seekVal;
             }
           } catch (e) {
@@ -4677,20 +4968,20 @@
             time = 0;
           }
         }
-  
+
         // Update the karaoke display immediately
         updateKaraokeDisplay(time);
       });
 
-
-
       // Translation toggle – placeholder (no functionality)
-      const transBtn = document.getElementById('karaokeTranslationToggle');
-      transBtn.addEventListener('click', () => {
+      const transBtn = document.getElementById("karaokeTranslationToggle");
+      transBtn.addEventListener("click", () => {
         showTranslation = !showTranslation;
-        transBtn.classList.toggle('active', showTranslation);
-        const labelKey = showTranslation ? 'karaokeTranslationHide' : 'karaokeTranslationShow';
-        transBtn.setAttribute('aria-label', t(labelKey));
+        transBtn.classList.toggle("active", showTranslation);
+        const labelKey = showTranslation
+          ? "karaokeTranslationHide"
+          : "karaokeTranslationShow";
+        transBtn.setAttribute("aria-label", t(labelKey));
         transBtn.title = t(labelKey);
         // Refresh karaoke display (force re-render so the translation lines
         // appear/disappear despite the DOM cache)
@@ -4698,33 +4989,37 @@
         if (sound) {
           try {
             const seekVal = sound.seek();
-            if (typeof seekVal === 'number' && !isNaN(seekVal) && seekVal >= 0) {
+            if (
+              typeof seekVal === "number" &&
+              !isNaN(seekVal) &&
+              seekVal >= 0
+            ) {
               time = seekVal;
             }
           } catch (_) {}
         }
         forceKaraokeRerender();
         updateKaraokeDisplay(time);
-        console.log(`Translation ${showTranslation ? 'on' : 'off'}`);
+        console.log(`Translation ${showTranslation ? "on" : "off"}`);
       });
 
-      function showAlert(message, type = 'info') {
+      function showAlert(message, type = "info") {
         // Use a custom dark theme alert (simple modal)
-        const existing = document.querySelector('.custom-alert');
+        const existing = document.querySelector(".custom-alert");
         if (existing) existing.remove();
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'custom-alert';
+        const alertDiv = document.createElement("div");
+        alertDiv.className = "custom-alert";
         alertDiv.style.cssText = `
           position: fixed;
           opacity: 0.9;
           top: 20px;
           left: 50%;
           transform: translateX(-50%);
-          background: ${type === 'error' ? '#7f1d1d' : type === 'success' ? '#064e3b' : '#1e293b'};
+          background: ${type === "error" ? "#7f1d1d" : type === "success" ? "#064e3b" : "#1e293b"};
           color: #e5e7eb;
           padding: 12px 24px;
           border-radius: 8px;
-          border: 1px solid ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#475569'};
+          border: 1px solid ${type === "error" ? "#ef4444" : type === "success" ? "#10b981" : "#475569"};
           font-size: 14px;
           z-index: 9999;
           box-shadow: 0 10px 25px rgba(0,0,0,0.5);
@@ -4735,22 +5030,17 @@
         alertDiv.textContent = message;
         document.body.appendChild(alertDiv);
         setTimeout(() => {
-          alertDiv.style.opacity = '0';
-          alertDiv.style.transition = 'opacity 0.5s';
+          alertDiv.style.opacity = "0";
+          alertDiv.style.transition = "opacity 0.5s";
           setTimeout(() => alertDiv.remove(), 600);
         }, 1000);
       }
 
+      const savedScale = parseFloat(localStorage.getItem("karaokeFontScale"));
 
-      const savedScale = parseFloat(
-          localStorage.getItem("karaokeFontScale")
-      );
-
-      if (!Number.isNaN(savedScale))
-          karaokeFontScale = savedScale;
+      if (!Number.isNaN(savedScale)) karaokeFontScale = savedScale;
 
       updateKaraokeFontSize();
-
     </script>
   </body>
 </html>
