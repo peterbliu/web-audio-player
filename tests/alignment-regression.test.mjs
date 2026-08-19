@@ -50,10 +50,27 @@ assert.equal(transcript.sentenceAlignment[1].renderMap.length, 7)
 assert.equal(transcript.sentenceAlignment[1].playbackStart, 23.18)
 
 context.sentences = transcript.sentenceAlignment
-assert.equal(vm.runInContext('findActiveSentenceIndex(sentences, 23.179)', context), 0)
-assert.equal(vm.runInContext('findActiveSentenceIndex(sentences, 23.18)', context), 1)
-assert.equal(vm.runInContext('findActiveSentenceIndex(sentences, 27)', context), 1)
-assert.equal(vm.runInContext('findActiveSentenceIndex(sentences, 28.38)', context), 2)
+// Reference (reading-listening-tools) sentence sync: the sentence whose
+// [start, end] window contains the time; shared boundary favours the earlier
+// sentence; gaps return null (sticky — caller keeps its last index); after
+// the last sentence ends the last sentence stays.
+assert.equal(vm.runInContext('findActiveSentenceWindowIndex(sentences, 23.179)', context), 0)
+assert.equal(vm.runInContext('findActiveSentenceWindowIndex(sentences, 23.18)', context), 0)
+assert.equal(vm.runInContext('findActiveSentenceWindowIndex(sentences, 24.76)', context), 1)
+assert.equal(vm.runInContext('findActiveSentenceWindowIndex(sentences, 27)', context), null)
+assert.equal(vm.runInContext('findActiveSentenceWindowIndex(sentences, 28.38)', context), 2)
+assert.equal(vm.runInContext('findActiveSentenceWindowIndex(sentences, 30)', context), 2)
+assert.equal(vm.runInContext('findActiveSentenceWindowIndex(sentences, 35)', context), 2)
+assert.equal(vm.runInContext('findActiveSentenceWindowIndex(sentences, 21)', context), null)
+
+context.wordAlignment = transcript.wordAlignment
+// Reference word sync: the last flat wordAlignment word that has started;
+// -1 before the first word, last word stays after the final word.
+assert.equal(vm.runInContext('findActiveFlatWordIndex(wordAlignment, 22.4)', context), -1)
+assert.equal(vm.runInContext('findActiveFlatWordIndex(wordAlignment, 23.0)', context), 1)
+assert.equal(vm.runInContext('findActiveFlatWordIndex(wordAlignment, 23.17)', context), 2)
+assert.equal(vm.runInContext('findActiveFlatWordIndex(wordAlignment, 24.76)', context), 9)
+assert.equal(vm.runInContext('findActiveFlatWordIndex(wordAlignment, 30)', context), 13)
 
 const imperfectAsr = {
   sentenceAlignment: [
@@ -72,6 +89,34 @@ assert.equal(
   'Sehr|völlig|gerne',
 )
 assert.equal(imperfectAsr.sentenceAlignment[0].renderMap.length, 3)
+
+// German umlaut fuzzy match — user case: transcript keeps "Hassköter", the
+// force-aligner emits the diacritic-stripped "Hasskoter". Both the precomposed
+// ö (U+00F6) and the decomposed form (o + U+0308, emitted by some editors)
+// must map the FULL word, with no trailing text left over.
+for (const umlaut of ['\u00F6', 'o\u0308']) {
+  const umlautCase = {
+    sentenceAlignment: [
+      { text: `Guten Tag Frau von Hassk${umlaut}ter.`, start: 35.76, end: 36.96 },
+    ],
+    wordAlignment: [
+      { word: 'Guten', start: 35.76, end: 35.92 },
+      { word: 'Tag', start: 35.92, end: 36.16 },
+      { word: 'Frau', start: 36.16, end: 36.32 },
+      { word: 'von', start: 36.32, end: 36.48 },
+      { word: 'Hasskoter', start: 36.48, end: 36.96 },
+    ],
+  }
+  context.umlautCase = umlautCase
+  vm.runInContext('buildSentenceRenderMaps(umlautCase)', context)
+  const sentence = umlautCase.sentenceAlignment[0]
+  assert.equal(sentence.renderMap.length, 5)
+  assert.equal(sentence.alignedWords.at(-1).word, 'Hasskoter')
+  const lastItem = sentence.renderMap.at(-1)
+  const lastTokenText = sentence.text.slice(lastItem.startChar, lastItem.endChar)
+  assert.equal(lastTokenText, `Hassk${umlaut}ter`)
+  assert.equal(sentence.text.slice(lastItem.endChar), '.')
+}
 
 const renderStart = html.indexOf('function renderSentence(sentence, activeWord)')
 const renderEnd = html.indexOf('// === Reset karaoke state', renderStart)

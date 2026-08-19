@@ -1892,10 +1892,49 @@
       //helper for finding ASR aligned result word in the original text
       function normalizeToken(text) {
           return String(text || "")
+              .toLowerCase()
               .normalize("NFKC")
               .replace(/[●○◼◻]/g, "")
               .replace(/[^\p{L}\p{N}]+/gu, "")
-              .toLowerCase();
+              .trim();
+      }
+
+      // German umlaut → ASCII transliteration (ä→ae, ö→oe, ü→ue, ß→ss).
+      const GERMAN_ASCII_FOLD_MAP = { ä: "ae", ö: "oe", ü: "ue", ß: "ss" };
+      // German umlaut → plain-letter strip (ä→a, ö→o, ü→u, ß→ss).
+      const GERMAN_DIACRITIC_STRIP_MAP = { ä: "a", ö: "o", ü: "u", ß: "ss" };
+
+      function foldGermanUmlauts(input, map) {
+          return input.replace(/[äöüß]/g, (ch) => map[ch]);
+      }
+
+      // Candidate forms for one token, in preference order: the exact
+      // normalized form first, then the German ASCII transliteration, then the
+      // plain diacritic-stripped form. Force-aligners typically emit umlaut-free
+      // words ("Hassköter" → "Hasskoter"/"Hasskoeter") while the transcript keeps
+      // the umlauts, so both sides are expanded and matched on any intersection.
+      function getAlignmentTokenCandidates(token) {
+          const normalized = normalizeToken(token);
+          if (!normalized) return [];
+
+          const candidates = [normalized];
+          const asciiFolded = foldGermanUmlauts(normalized, GERMAN_ASCII_FOLD_MAP);
+          const diacriticStripped = foldGermanUmlauts(normalized, GERMAN_DIACRITIC_STRIP_MAP);
+
+          for (const form of [asciiFolded, diacriticStripped]) {
+              if (form !== normalized && !candidates.includes(form)) {
+                  candidates.push(form);
+              }
+          }
+
+          return candidates;
+      }
+
+      // True when the token's candidate forms and the ASR word's candidate
+      // forms share at least one form (works in either direction: transcript
+      // has the umlaut, ASR is normalized, and vice versa).
+      function alignmentFormsIntersect(tokenForms, segmentForms) {
+          return tokenForms.some((form) => segmentForms.includes(form));
       }
 
       const germanSpokenNumberMap = {
@@ -1912,12 +1951,15 @@
       };
 
       function getTokenMatchCandidates(text) {
+        // Base + German umlaut fuzzy forms (ä/ö/ü/ß normalized by the
+        // force-aligner) + spoken-number expansions.
+        const candidates = new Set(getAlignmentTokenCandidates(text));
         const normalized = normalizeToken(text);
-        if (!normalized) return [];
 
-        const candidates = new Set([normalized]);
         for (const spokenNumber of germanSpokenNumberMap[normalized] || []) {
-          candidates.add(normalizeToken(spokenNumber));
+          for (const form of getAlignmentTokenCandidates(spokenNumber)) {
+            candidates.add(form);
+          }
         }
         return [...candidates];
       }
@@ -1926,7 +1968,11 @@
 
           const tokens = [];
 
-          const regex = /[\p{L}\p{N}’'`´-]+/gu;
+          // \p{M} keeps combining marks (decomposed umlauts like o + U+0308)
+          // attached to their base letter, so "Hassko\u0308ter" stays ONE
+          // token instead of being split into "Hassko" + "ter". The token text
+          // is NFKC-normalized later for the fuzzy umlaut match.
+          const regex = /[\p{L}\p{M}\p{N}’'`´-]+/gu;
 
           let match;
 
@@ -1958,18 +2004,21 @@
         // Align once from left to right so every ASR word belongs to at most
         // one sentence. Timing tolerances duplicate very short boundary words
         // when speakers overlap or adjacent sentences share an exact boundary.
+        // Candidate forms are precomputed once per ASR word so the fuzzy
+        // umlaut match (ä/ö/ü/ß) stays cheap. The fallback searches from the
+        // cursor to the END of the word list, exactly like the reference
+        // project's findMatchingSegment.
         const words = transcript.wordAlignment.map((word) => ({
           word,
-          normalized: normalizeToken(word.word ?? word.text)
+          forms: getAlignmentTokenCandidates(word.word ?? word.text)
         }));
-        const MAX_LOOKAHEAD = 8;
         let wordCursor = 0;
 
         for (const sentence of transcript.sentenceAlignment) {
           const renderMap = [];
 
           for (const token of tokenizeSentence(sentence.text)) {
-            while (wordCursor < words.length && !words[wordCursor].normalized) {
+            while (wordCursor < words.length && words[wordCursor].forms.length === 0) {
               wordCursor += 1;
             }
             if (wordCursor >= words.length) break;
@@ -1977,16 +2026,19 @@
             const candidates = getTokenMatchCandidates(token.text);
             let matchedIndex = wordCursor;
 
-            if (!candidates.includes(words[wordCursor].normalized)) {
-              const searchEnd = Math.min(words.length, wordCursor + MAX_LOOKAHEAD + 1);
-              const exactIndex = words.findIndex((entry, index) =>
-                index > wordCursor &&
-                index < searchEnd &&
-                candidates.includes(entry.normalized)
-              );
+            if (!alignmentFormsIntersect(candidates, words[wordCursor].forms)) {
+              let exactIndex = -1;
 
-              // Force inaccurate ASR text onto the current timing if no nearby
-              // exact match exists. This preserves all later token mappings.
+              for (let i = wordCursor + 1; i < words.length; i++) {
+                if (alignmentFormsIntersect(candidates, words[i].forms)) {
+                  exactIndex = i;
+                  break;
+                }
+              }
+
+              // Force inaccurate ASR text onto the current timing if no
+              // match exists anywhere. This preserves all later token
+              // mappings (identical to the reference behaviour).
               if (exactIndex >= 0) matchedIndex = exactIndex;
             }
 
@@ -2007,23 +2059,57 @@
         }
       }
 
-      function findActiveSentenceIndex(sentences, currentTime) {
-        if (!sentences.length) return -1;
-        let currentIndex = 0;
+      // === Playback-sync helpers (ported from reading-listening-tools) ===
+      // The reference project drives the karaoke highlight from the raw
+      // sentence [start, end] windows plus the FLAT wordAlignment array — see
+      // HomeView.vue updateActiveSentence / updateActiveWord. These two
+      // functions reproduce that behaviour exactly.
 
-        // The latest sentence that has started owns playback. This treats a
-        // shared boundary as [start, nextStart), switches to a newly-started
-        // overlapping speaker, and keeps the previous sentence during pauses.
-        for (let i = 0; i < sentences.length; i++) {
-          const sentenceStart = Number.isFinite(sentences[i].playbackStart)
-            ? sentences[i].playbackStart
-            : sentences[i].start;
-          if (Number.isFinite(sentenceStart) && currentTime >= sentenceStart) {
-            currentIndex = i;
+      // The sentence whose [start, end] window contains the current time owns
+      // the highlight (shared boundaries favour the earlier sentence). While
+      // the time sits in a gap between sentences the previous sentence stays
+      // active (sticky: returns null so the caller keeps its last index), and
+      // after the last sentence ends the last sentence stays active.
+      function findActiveSentenceWindowIndex(sentences, currentTime) {
+        if (!sentences.length) return 0;
+
+        const foundIndex = sentences.findIndex(
+          (sentence) => currentTime >= sentence.start && currentTime <= sentence.end,
+        )
+
+        if (foundIndex >= 0) {
+          return foundIndex
+        }
+
+        const lastSentenceEnd = sentences[sentences.length - 1]?.end ?? 0
+
+        if (currentTime >= lastSentenceEnd) {
+          return sentences.length - 1
+        }
+
+        return null
+      }
+
+      // The last word in the flat wordAlignment list that has started
+      // (start <= currentTime), scanning in order and stopping at the first
+      // future word. Returns -1 before the first word starts, and keeps the
+      // last word highlighted after the final word ends.
+      function findActiveFlatWordIndex(words, currentTime) {
+        if (!words || words.length === 0) return -1
+
+        let activeIndex = -1
+
+        for (let index = 0; index < words.length; index += 1) {
+          const word = words[index]
+
+          if (word && currentTime >= word.start) {
+            activeIndex = index
+          } else {
+            break
           }
         }
 
-        return Math.max(0, Math.min(sentences.length - 1, currentIndex));
+        return activeIndex
       }
 
 
@@ -2164,6 +2250,30 @@
       let karaokeActive = false;
       let karaokeJsonInput = null;
 
+      // === Karaoke view cursor (fast catching-up) ===
+      // Remembers the last targeted sentence/word and the rows currently in the
+      // DOM, so every tick costs a couple of comparisons and innerHTML is only
+      // written when the active sentence or word actually changes.
+      const karaokeView = {
+        sentenceIndex: -1,       // last computed active sentence index (sticky in gaps)
+        sentenceRendered: -1,    // sentence index currently in the DOM
+        wordRendered: -1,        // flat wordAlignment index currently in the DOM
+      };
+
+      function resetKaraokeView() {
+        karaokeView.sentenceIndex = -1;
+        karaokeView.sentenceRendered = -1;
+        karaokeView.wordRendered = -1;
+      }
+
+      // Force the next updateKaraokeDisplay call to re-render every row (used
+      // when the display options change, e.g. toggling translations), while
+      // keeping the fast catch-up cursor intact.
+      function forceKaraokeRerender() {
+        karaokeView.sentenceRendered = -1;
+        karaokeView.wordRendered = -1;
+      }
+
       // === DOM refs ===
       const karaokeContainer = document.getElementById('karaokeContainer');
       const karaokeDisplay = document.getElementById('karaokeDisplay');
@@ -2193,6 +2303,7 @@
           if (jsonData.sentenceAlignment && jsonData.wordAlignment) {
             const result = buildAlignmentFromTranscript(jsonData);
             alignmentData = result;
+            resetKaraokeView();
             karaokeActive = true;
             updateKaraokeDisplay(0);
             showKaraokeUI(true);
@@ -2236,7 +2347,8 @@
           };
           buildSentenceRenderMaps(transcript);  // mutates each sentence in place, adding .renderMap
 
-          alignmentData = { sentences };
+          alignmentData = { sentences, wordAlignment: transcript.wordAlignment };
+          resetKaraokeView();
           karaokeActive = true;
 
           // Update UI
@@ -2286,6 +2398,14 @@
       }
 
       // === Update karaoke display – always shows three rows (prev, current, next) with stable height ===
+      // Playback sync is a direct port of reading-listening-tools
+      // (HomeView.vue updateActiveSentence / updateActiveWord):
+      //   - sentence: the one whose [start, end] window contains the time;
+      //     sticky in gaps, last sentence stays after the end;
+      //   - word: the last word of the FLAT wordAlignment list that started;
+      //     -1 before the first word, last word stays after the end.
+      // innerHTML is only written when the active sentence or word actually
+      // changes, so steady playback never rebuilds the DOM.
       function updateKaraokeDisplay(currentTime) {
         if (!alignmentData || !alignmentData.sentences.length) {
           showKaraokeUI(false);
@@ -2298,63 +2418,76 @@
           karaokeNext.innerHTML = '';
           // Keep the container visible but with empty lines
           showKaraokeUI(true);
+          // Forget the render cache so the next visible update re-renders.
+          karaokeView.sentenceRendered = -1;
+          karaokeView.wordRendered = -1;
           return;
         }
 
         const sentences = alignmentData.sentences;
-        const currentIndex = findActiveSentenceIndex(sentences, currentTime);
+        const words = alignmentData.wordAlignment || [];
 
-        // Determine indices for prev, current, next
-        const prevIndex = currentIndex - 1;
-        const nextIndex = currentIndex + 1;
+        // Sentence sync (reference updateActiveSentence): window rule with
+        // sticky behaviour in gaps — the caller keeps its last index.
+        const foundIndex = findActiveSentenceWindowIndex(sentences, currentTime);
+        let currentIndex = karaokeView.sentenceIndex;
 
-        // Previous sentence (or empty placeholder)
-        if (prevIndex >= 0) {
-          const prev = sentences[prevIndex];
-          karaokePrev.innerHTML = renderSentencePlain(prev, 'prev');
-          karaokePrev.style.display = 'flex';
-        } else {
-          // Empty row – keep height stable
-          karaokePrev.innerHTML = `<span class="karaoke-timestamp">&nbsp;</span><span class="karaoke-sentence-line">&nbsp;</span>`;
-          karaokePrev.style.display = 'flex';
+        if (foundIndex !== null) {
+          currentIndex = foundIndex;
+        } else if (currentIndex < 0) {
+          // No window yet (before the first sentence) — reference starts at 0.
+          currentIndex = 0;
         }
+        karaokeView.sentenceIndex = currentIndex;
 
-        // Current sentence with word highlights
+        // Current sentence with word highlights.
         const current = sentences[currentIndex];
-        const activeWordIndex = findActiveWord(current, currentTime);
-        const activeWord = activeWordIndex >= 0 ? current.words[activeWordIndex] : null;
-        karaokeCurrent.innerHTML = renderSentence(current, activeWord);
 
-        karaokeCurrent.style.display = 'flex';
+        // Word sync (reference updateActiveWord): flat wordAlignment scan.
+        const activeWordIndex = findActiveFlatWordIndex(words, currentTime);
+        const activeWord = activeWordIndex >= 0 ? words[activeWordIndex] : null;
 
-        // Next sentence (or empty placeholder)
-        if (nextIndex < sentences.length) {
-          const next = sentences[nextIndex];
-          karaokeNext.innerHTML = renderSentencePlain(next, 'next');
-          karaokeNext.style.display = 'flex';
-        } else {
-          karaokeNext.innerHTML = `<span class="karaoke-timestamp">&nbsp;</span><span class="karaoke-sentence-line">&nbsp;</span>`;
-          karaokeNext.style.display = 'flex';
+        const sentenceChanged = currentIndex !== karaokeView.sentenceRendered;
+        const wordChanged = activeWordIndex !== karaokeView.wordRendered;
+
+        if (sentenceChanged) {
+          // Determine indices for prev, current, next
+          const prevIndex = currentIndex - 1;
+          const nextIndex = currentIndex + 1;
+
+          // Previous sentence (or empty placeholder)
+          if (prevIndex >= 0) {
+            const prev = sentences[prevIndex];
+            karaokePrev.innerHTML = renderSentencePlain(prev, 'prev');
+            karaokePrev.style.display = 'flex';
+          } else {
+            // Empty row – keep height stable
+            karaokePrev.innerHTML = `<span class="karaoke-timestamp">&nbsp;</span><span class="karaoke-sentence-line">&nbsp;</span>`;
+            karaokePrev.style.display = 'flex';
+          }
+
+          karaokeCurrent.innerHTML = renderSentence(current, activeWord);
+          karaokeCurrent.style.display = 'flex';
+
+          // Next sentence (or empty placeholder)
+          if (nextIndex < sentences.length) {
+            const next = sentences[nextIndex];
+            karaokeNext.innerHTML = renderSentencePlain(next, 'next');
+            karaokeNext.style.display = 'flex';
+          } else {
+            karaokeNext.innerHTML = `<span class="karaoke-timestamp">&nbsp;</span><span class="karaoke-sentence-line">&nbsp;</span>`;
+            karaokeNext.style.display = 'flex';
+          }
+
+          karaokeView.sentenceRendered = currentIndex;
+          karaokeView.wordRendered = activeWordIndex;
+        } else if (wordChanged) {
+          // Only the current row changed — re-render just it.
+          karaokeCurrent.innerHTML = renderSentence(current, activeWord);
+          karaokeView.wordRendered = activeWordIndex;
         }
 
         showKaraokeUI(true);
-      }
-
-
-      // === Find which word is active at the current time ===
-      // 播放至最后一个单词结束后，高亮会停留在最后一个单词上，不会消失。 这样用户视线始终能追踪到最后一个被读到的词，避免了快速说话时高亮消失又出现的闪烁感。
-      function findActiveWord(sentence, currentTime) {
-          const words = sentence.words || [];
-          if (words.length === 0) return -1;
-          let activeIndex = -1;
-          for (let i = 0; i < words.length; i++) {
-              if (words[i].start <= currentTime) {
-                  activeIndex = i;
-              } else {
-                  break;
-              }
-          }
-          return activeIndex;
       }
 
       // === Render a sentence without word highlights (for prev/next) – includes timestamp ===
@@ -2385,7 +2518,11 @@
                     item.endChar
                 );
 
-                if (item.word === activeWord) {
+                // Match by identity first (fast path), then by identical start
+                // + end times — this stays correct even when the ASR word
+                // object was re-created or comes from another array.
+                if (activeWord && (item.word === activeWord ||
+                    (item.word && item.word.start === activeWord.start && item.word.end === activeWord.end))) {
                     html += `<span class="karaoke-word active">${escapeHtml(text)}</span>`;
                 } else {
                     html += `<span class="karaoke-word">${escapeHtml(text)}</span>`;
@@ -2419,6 +2556,7 @@
       function clearKaraokeData() {
         alignmentData = null;
         karaokeActive = false;
+        resetKaraokeView();
         showKaraokeUI(false);
         const currentTrack = getCurrentTrack();
         if (currentTrack) {
@@ -2476,7 +2614,7 @@
           };
         });
 
-        return { sentences };
+        return { sentences, wordAlignment: transcript.wordAlignment };
       }
 
 
@@ -2923,6 +3061,7 @@
           if (track.alignmentData) {
             alignmentData = track.alignmentData;
             karaokeActive = true;
+            resetKaraokeView();
             updateKaraokeDisplay(0);
             showKaraokeUI(true);
           } else {
@@ -2986,6 +3125,7 @@
         if (track.alignmentData) {
           alignmentData = track.alignmentData;
           karaokeActive = true;
+          resetKaraokeView();
           updateKaraokeDisplay(0);
           showKaraokeUI(true);
         } else {
@@ -4260,6 +4400,7 @@
         player.style.display = "none";
         alignmentData = null;
         karaokeActive = false;
+        resetKaraokeView();
         showKaraokeUI(false);
 
         renderPlaylist();
@@ -4551,7 +4692,8 @@
         const labelKey = showTranslation ? 'karaokeTranslationHide' : 'karaokeTranslationShow';
         transBtn.setAttribute('aria-label', t(labelKey));
         transBtn.title = t(labelKey);
-        // Refresh karaoke display
+        // Refresh karaoke display (force re-render so the translation lines
+        // appear/disappear despite the DOM cache)
         let time = 0;
         if (sound) {
           try {
@@ -4561,6 +4703,7 @@
             }
           } catch (_) {}
         }
+        forceKaraokeRerender();
         updateKaraokeDisplay(time);
         console.log(`Translation ${showTranslation ? 'on' : 'off'}`);
       });
