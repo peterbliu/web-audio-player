@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" sizes="256x256" href="icons/yy_player_favicon_256.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="256x256"
+      href="icons/yy_player_favicon_256.png"
+    />
     <title>变速音频工具 | Vario-Speed Audio Tools</title>
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
@@ -31,6 +36,8 @@
         --text-faint: #6b7280;
         --emerald: #10b981;
         --emerald-strong: #059669;
+        --emerald-700-soft: rgba(4, 120, 87, 0.5);
+        --emerald-800: #065f46;
         --emerald-soft: rgba(16, 185, 129, 0.14);
         --indigo: #4f46e5;
         --indigo-hover: #6366f1;
@@ -572,8 +579,8 @@
       .ctrl-btn:focus-visible,
       .play-btn:focus-visible,
       .track-item:focus-visible {
-        outline: 2px solid var(--emerald);
-        outline-offset: 2px;
+        outline: 1px solid var(--emerald);
+        outline-offset: 1px;
       }
 
       .download-btn:focus-visible {
@@ -802,12 +809,12 @@
       }
 
       .track-item:hover {
-        border-color: var(--emerald);
+        border-color: var(--emerald-700-soft);
         background: #202823;
       }
 
       .track-item.active {
-        border-color: var(--emerald);
+        border-color: var(--emerald-700-soft);
         background: var(--emerald-soft);
         box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.08);
       }
@@ -1631,6 +1638,7 @@
         </button>
       </div>
 
+      <!-- Playlist 播放列表 -->
       <div class="playlist">
         <div class="playlist-header">
           <div class="playlist-title" data-i18n="playlistTitle">播放列表</div>
@@ -2321,7 +2329,7 @@
             barWidth: 2,
             barGap: 1,
             waveColor: "#4a5568",
-            progressColor: "#10b981",
+            progressColor: "#047857", //emerald-700
             cursorColor: "transparent",
             cursorWidth: 0,
             height: container.parentElement?.clientHeight || 50,
