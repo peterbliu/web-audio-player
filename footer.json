@@ -1,6 +1,7 @@
 {
   "info": "语音播放器 - 听力Pro",
-  "version": "v0.1.28",
-  "author": "PIU工作室 2026",
-  "copyright": "todo test"
+  "version": "v0.1.28-rc.1",
+  "author": "PIU工作室",
+  "copyright": "© 2026 All rights reserved.",
+  "debug": "test"
 }

@@ -1245,6 +1245,12 @@
         padding: 0 4px;
       }
 
+      .copyright-label {
+        margin: 0;
+        font-size: 11px;
+        color: var(--text-faint);
+        text-align: left;
+      }
       .author-label {
         margin: 0;
         font-size: 11px;
@@ -1617,6 +1623,7 @@
         <div class="info-label"></div>
         <div class="version-label"></div>
         <div class="author-label"></div>
+        <div class="copyright-label"></div>
         <label
           class="playback-option icon-option"
           title="自动播放播放列表中的下一条音频"
@@ -1816,6 +1823,7 @@
             info: document.querySelector(".info-label"),
             version: document.querySelector(".version-label"),
             author: document.querySelector(".author-label"),
+            copyright: document.querySelector(".copyright-label"),
           };
 
           for (const [key, element] of Object.entries(labels)) {
